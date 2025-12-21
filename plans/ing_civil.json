@@ -1,0 +1,62 @@
+{
+  "slug": "civil",
+  "nombre": "Ingeniería Civil",
+  "storageKey": "estadosMaterias_v2_civil",
+  "materias": [
+    { "id": "ambientacion", "nombre": "Ambientación Universitaria", "semestre": 1, "requisitos": [] },
+    { "id": "fyq", "nombre": "Física y Química", "semestre": 1, "requisitos": [] },
+    { "id": "matematica", "nombre": "Matemática", "semestre": 1, "requisitos": [] },
+
+    { "id": "am1", "nombre": "Análisis Matemático I", "semestre": 2, "requisitos": ["matematica"] },
+    { "id": "introIng", "nombre": "Introducción a la Ingeniería", "semestre": 2, "requisitos": ["ambientacion"] },
+    { "id": "quimica", "nombre": "Química", "semestre": 2, "requisitos": ["matematica","fyq"] },
+    { "id": "economia", "nombre": "Economía", "semestre": 2, "requisitos": ["matematica"] },
+
+    { "id": "algebra", "nombre": "Álgebra Lineal", "semestre": 3, "requisitos": ["matematica"] },
+    { "id": "fisica1", "nombre": "Física I", "semestre": 3, "requisitos": ["fyq","am1"] },
+    { "id": "sistRep", "nombre": "Sistemas de Representación", "semestre": 3, "requisitos": [] },
+    { "id": "ingles", "nombre": "Módulo de Inglés", "semestre": 3, "requisitos": [], "requiereAprobadas": 5 },
+
+    { "id": "am2", "nombre": "Análisis Matemático II", "semestre": 4, "requisitos": ["am1","algebra"] },
+    { "id": "pyestad", "nombre": "Probabilidad y Estadística", "semestre": 4, "requisitos": ["am1"] },
+    { "id": "estatica", "nombre": "Estática", "semestre": 4, "requisitos": ["fisica1"] },
+    { "id": "topo1", "nombre": "Topografía Básica", "semestre": 4, "requisitos": ["matematica","sistRep"] },
+
+    { "id": "fisica2", "nombre": "Física II", "semestre": 5, "requisitos": ["fisica1","algebra"] },
+    { "id": "compu", "nombre": "Computación y Cálculo Numérico", "semestre": 5, "requisitos": ["am1","algebra"] },
+    { "id": "mecEstruct", "nombre": "Mecánica de las Estructuras", "semestre": 5, "requisitos": ["estatica","am2"] },
+    { "id": "topo2", "nombre": "Topografía Aplicada", "semestre": 5, "requisitos": ["topo1"] },
+
+    { "id": "geologia", "nombre": "Ingeniería Geológica y Geotécnica", "semestre": 6, "requisitos": ["fyq"] },
+    { "id": "transporte1", "nombre": "Planificación y Operación del Transporte", "semestre": 6, "requisitos": ["pyestad","economia"] },
+    { "id": "matConst", "nombre": "Tecnología de los Materiales", "semestre": 6, "requisitos": ["estatica","quimica"] },
+    { "id": "fluido", "nombre": "Mecánica de los Fluidos", "semestre": 6, "requisitos": ["fisica1","am2"] },
+
+    { "id": "tecConst", "nombre": "Tecnología de la Construcción", "semestre": 7, "requisitos": ["sistRep","matConst"] },
+    { "id": "analisisEstruc", "nombre": "Análisis Estructural", "semestre": 7, "requisitos": ["mecEstruct"] },
+    { "id": "suelos", "nombre": "Mecánica de Suelos y Rocas", "semestre": 7, "requisitos": ["estatica","geologia"] },
+    { "id": "instSanit", "nombre": "Instalaciones Sanitarias y Eléctricas", "semestre": 7, "requisitos": ["fisica2"] },
+
+    { "id": "hidro", "nombre": "Hidrología y Procesos Hidráulicos", "semestre": 8, "requisitos": ["fluido","geologia"] },
+    { "id": "instGas", "nombre": "Instalaciones de Gas y Termomecánicas", "semestre": 8, "requisitos": ["quimica","instSanit"] },
+    { "id": "gestionAmb", "nombre": "Ingeniería y Gestión Ambiental", "semestre": 8, "requisitos": ["fluido","quimica"] },
+    { "id": "disArq", "nombre": "Diseño Arquitectónico", "semestre": 8, "requisitos": ["tecConst"] },
+    { "id": "elasticidad", "nombre": "Elasticidad y Estructuras Laminares", "semestre": 8, "requisitos": ["analisisEstruc"] },
+
+    { "id": "infraTransp", "nombre": "Diseño de Infraestructura del Transporte", "semestre": 9, "requisitos": ["transporte1","hidro","topo2"] },
+    { "id": "hormigon", "nombre": "Hormigón Armado y Pretensado", "semestre": 9, "requisitos": ["mecEstruct","matConst"] },
+    { "id": "estructMet", "nombre": "Estructuras Metálicas y de Madera", "semestre": 9, "requisitos": ["analisisEstruc"] },
+    { "id": "legalEtica", "nombre": "Ingeniería Legal y Ética", "semestre": 9, "requisitos": ["topo2","disArq","introIng"] },
+
+    { "id": "infraConstruccion", "nombre": "Construcción de Infraestructura del Transporte", "semestre": 10, "requisitos": ["suelos","infraTransp"] },
+    { "id": "sanitaria", "nombre": "Ingeniería Sanitaria", "semestre": 10, "requisitos": ["hidro","quimica"] },
+    { "id": "cimentaciones", "nombre": "Cimentaciones y Obras Geotécnicas", "semestre": 10, "requisitos": ["suelos","hormigon"] },
+    { "id": "proyectoDir", "nombre": "Proyecto, Dirección de Obras y Valuaciones", "semestre": 10, "requisitos": ["economia","legalEtica"] },
+
+    { "id": "disEstruc", "nombre": "Diseño de Estructuras", "semestre": 11, "requisitos": ["analisisEstruc","hormigon"] },
+    { "id": "hidraulicas", "nombre": "Obras Hidráulicas", "semestre": 11, "requisitos": ["hidro","suelos"] },
+    { "id": "higiene", "nombre": "Higiene y Seguridad", "semestre": 11, "requisitos": ["tecConst","legalEtica"] },
+    { "id": "urbanismo", "nombre": "Planeamiento y Urbanismo", "semestre": 11, "requisitos": ["disArq","transporte1"] },
+    { "id": "practica", "nombre": "Práctica Supervisada", "semestre": 11, "requisitos": [], "requierePorcentaje": 85 }
+  ]
+}

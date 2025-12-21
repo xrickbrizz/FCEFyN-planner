@@ -1,0 +1,59 @@
+{
+  "slug": "mecanica",
+  "nombre": "Ingeniería Mecánica",
+  "storageKey": "estadosMaterias_v2_mecanica",
+  "materias": [
+    { "id": "matematica", "nombre": "Matemática", "semestre": 1, "requisitos": [] },
+    { "id": "fisica", "nombre": "Física", "semestre": 1, "requisitos": [] },
+    { "id": "ambientacion", "nombre": "Ambientación Universitaria", "semestre": 1, "requisitos": [] },
+
+    { "id": "am1", "nombre": "Análisis Matemático I", "semestre": 2, "requisitos": ["matematica"] },
+    { "id": "introIng", "nombre": "Introducción a la Ingeniería", "semestre": 2, "requisitos": ["ambientacion"] },
+    { "id": "quimica", "nombre": "Química", "semestre": 2, "requisitos": ["fisica"] },
+    { "id": "sistRep", "nombre": "Sistemas de Representación", "semestre": 2, "requisitos": [] },
+
+    { "id": "algebra", "nombre": "Álgebra Lineal", "semestre": 3, "requisitos": ["matematica"] },
+    { "id": "dibujoTec", "nombre": "Dibujo Técnico", "semestre": 3, "requisitos": ["sistRep"] },
+    { "id": "fisica1", "nombre": "Física I", "semestre": 3, "requisitos": ["fisica","am1"] },
+    { "id": "ingEcoLegal", "nombre": "Ingeniería Económica y Legal", "semestre": 3, "requisitos": ["introIng"] },
+
+    { "id": "am2", "nombre": "Análisis Matemático II", "semestre": 4, "requisitos": ["am1","algebra"] },
+    { "id": "fisica2", "nombre": "Física II", "semestre": 4, "requisitos": ["fisica1","am2"] },
+    { "id": "estrIsost", "nombre": "Estructuras Isostáticas", "semestre": 4, "requisitos": ["fisica1"] },
+    { "id": "ingles", "nombre": "Módulo de Inglés", "semestre": 4, "requisitos": [], "requiereAprobadas": 5 },
+
+    { "id": "am3", "nombre": "Análisis Matemático III", "semestre": 5, "requisitos": ["am2"] },
+    { "id": "compu", "nombre": "Computación y Cálculo Numérico", "semestre": 5, "requisitos": ["algebra","am1"] },
+    { "id": "electrotecnia", "nombre": "Electrotecnia Gral. y Máquinas Eléctricas", "semestre": 5, "requisitos": ["fisica2"] },
+    { "id": "mecEstruct", "nombre": "Mecánica de las Estructuras", "semestre": 5, "requisitos": ["estrIsost"] },
+
+    { "id": "cienciaMat", "nombre": "Ciencia de los Materiales", "semestre": 6, "requisitos": ["quimica","fisica2"] },
+    { "id": "electronicaAp", "nombre": "Electrónica Aplicada", "semestre": 6, "requisitos": ["electrotecnia"] },
+    { "id": "mecRacional", "nombre": "Mecánica Racional", "semestre": 6, "requisitos": ["fisica1","am2"] },
+    { "id": "termodinamica", "nombre": "Termodinámica", "semestre": 6, "requisitos": ["fisica2"] },
+
+    { "id": "mecFluidos", "nombre": "Mecánica de los Fluidos", "semestre": 7, "requisitos": ["mecRacional"] },
+    { "id": "mecanismos", "nombre": "Mecanismos y Elementos de Máquinas", "semestre": 7, "requisitos": ["mecRacional","dibujoTec"] },
+    { "id": "procManuf1", "nombre": "Procesos de Manufactura I", "semestre": 7, "requisitos": ["cienciaMat"] },
+    { "id": "teoriaControl", "nombre": "Teoría de Control", "semestre": 7, "requisitos": ["am3"] },
+
+    { "id": "calcEstruct1", "nombre": "Cálculo Estructural I", "semestre": 8, "requisitos": ["mecEstruct"] },
+    { "id": "procManuf2", "nombre": "Procesos de Manufactura II", "semestre": 8, "requisitos": ["procManuf1"] },
+    { "id": "orgIndustrial", "nombre": "Organización Industrial", "semestre": 8, "requisitos": ["ingEcoLegal"] },
+    { "id": "sistControl", "nombre": "Sistemas de Control", "semestre": 8, "requisitos": ["teoriaControl"] },
+
+    { "id": "calcEstruct2", "nombre": "Cálculo Estructural II", "semestre": 9, "requisitos": ["calcEstruct1"] },
+    { "id": "instalacionesElec", "nombre": "Instalaciones Eléctricas", "semestre": 9, "requisitos": ["electrotecnia"] },
+    { "id": "sistNeumHid", "nombre": "Sistemas Neumáticos e Hidráulicos", "semestre": 9, "requisitos": ["mecFluidos"] },
+    { "id": "transCalMasa", "nombre": "Transferencia de Calor y Masa", "semestre": 9, "requisitos": ["termodinamica"] },
+
+    { "id": "disProyMec1", "nombre": "Diseño y Proyecto Mecánico I", "semestre": 10, "requisitos": ["mecanismos","calcEstruct2"] },
+    { "id": "maqTermHid", "nombre": "Máquinas Térmicas e Hidráulicas", "semestre": 10, "requisitos": ["termodinamica","mecFluidos"] },
+    { "id": "higieneSeg", "nombre": "Higiene y Seguridad", "semestre": 10, "requisitos": ["orgIndustrial"] },
+    { "id": "vibraciones", "nombre": "Vibraciones Mecánicas", "semestre": 10, "requisitos": ["mecRacional"] },
+
+    { "id": "disProyMec2", "nombre": "Diseño y Proyecto Mecánico II", "semestre": 11, "requisitos": ["disProyMec1"] },
+    { "id": "gestionCalidad", "nombre": "Gestión de Calidad", "semestre": 11, "requisitos": ["orgIndustrial"] },
+    { "id": "pps", "nombre": "Práctica Profesional Supervisada", "semestre": 11, "requisitos": [], "requierePorcentaje": 85 }
+  ]
+}

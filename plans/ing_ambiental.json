@@ -1,0 +1,60 @@
+{
+  "slug": "ambiental",
+  "nombre": "Ingeniería Ambiental",
+  "storageKey": "estadosMaterias_v2_ambiental",
+  "materias": [
+    { "id": "ambientacion", "nombre": "Ambientación Universitaria", "semestre": 1, "requisitos": [] },
+    { "id": "fyq", "nombre": "Física y Química", "semestre": 1, "requisitos": [] },
+    { "id": "matematica", "nombre": "Matemática", "semestre": 1, "requisitos": [] },
+
+    { "id": "am1", "nombre": "Análisis Matemático I", "semestre": 2, "requisitos": ["matematica"] },
+    { "id": "introAmb", "nombre": "Introducción a la Ingeniería Ambiental", "semestre": 2, "requisitos": ["ambientacion"] },
+    { "id": "quimica", "nombre": "Química", "semestre": 2, "requisitos": ["matematica"] },
+    { "id": "economia", "nombre": "Economía", "semestre": 2, "requisitos": ["matematica"] },
+
+    { "id": "algebra", "nombre": "Álgebra Lineal", "semestre": 3, "requisitos": ["matematica"] },
+    { "id": "fisica1", "nombre": "Física I", "semestre": 3, "requisitos": ["fyq","am1"] },
+    { "id": "sistRep", "nombre": "Sistemas de Representación", "semestre": 3, "requisitos": [] },
+    { "id": "ingles", "nombre": "Módulo de Inglés", "semestre": 3, "requisitos": [], "requiereAprobadas": 5 },
+
+    { "id": "am2", "nombre": "Análisis Matemático II", "semestre": 4, "requisitos": ["am1","algebra"] },
+    { "id": "pyestad", "nombre": "Probabilidad y Estadística", "semestre": 4, "requisitos": ["am1"] },
+    { "id": "estatica", "nombre": "Estática", "semestre": 4, "requisitos": ["fisica1"] },
+    { "id": "biolAmb", "nombre": "Biología y Ambiente", "semestre": 4, "requisitos": ["quimica"] },
+
+    { "id": "fisica2", "nombre": "Física II", "semestre": 5, "requisitos": ["fisica1","algebra"] },
+    { "id": "compu", "nombre": "Computación y Cálculo Numérico", "semestre": 5, "requisitos": ["am1","algebra"] },
+    { "id": "quimOrg", "nombre": "Química Orgánica", "semestre": 5, "requisitos": ["quimica"] },
+    { "id": "geologia", "nombre": "Ingeniería Geológica y Geotécnica", "semestre": 5, "requisitos": ["fyq"] },
+
+    { "id": "mecEstruct", "nombre": "Mecánica de las Estructuras", "semestre": 6, "requisitos": ["estatica","am1"] },
+    { "id": "suelos", "nombre": "Mecánica de Suelos y Rocas", "semestre": 6, "requisitos": ["estatica","geologia"] },
+    { "id": "microbio", "nombre": "Microbiología Ambiental", "semestre": 6, "requisitos": ["quimOrg","biolAmb"] },
+    { "id": "fundAmbiental", "nombre": "Fundamentos de Ingeniería Ambiental", "semestre": 6, "requisitos": ["quimOrg","biolAmb"] },
+
+    { "id": "procAmb", "nombre": "Química y Física de los Procesos Ambientales", "semestre": 7, "requisitos": ["fisica2","quimica"] },
+    { "id": "topo1", "nombre": "Topografía Básica", "semestre": 7, "requisitos": ["matematica"] },
+    { "id": "fluido", "nombre": "Mecánica de los Fluidos", "semestre": 7, "requisitos": ["fisica1","am2"] },
+    { "id": "termoq", "nombre": "Termodinámica Química", "semestre": 7, "requisitos": ["quimica","am2","fisica2"] },
+
+    { "id": "hidro", "nombre": "Hidrología y Procesos Hidráulicos", "semestre": 8, "requisitos": ["fluido","geologia"] },
+    { "id": "ecologia", "nombre": "Ecología", "semestre": 8, "requisitos": ["microbio"] },
+    { "id": "topo2", "nombre": "Topografía Aplicada", "semestre": 8, "requisitos": ["topo1"] },
+    { "id": "hormigon", "nombre": "Hormigón Armado", "semestre": 8, "requisitos": ["mecEstruct"] },
+
+    { "id": "higiene", "nombre": "Higiene y Seguridad", "semestre": 9, "requisitos": ["procAmb","termoq"] },
+    { "id": "atmosfera", "nombre": "Atmósfera y Energías Renovables", "semestre": 9, "requisitos": ["hidro","fundAmbiental"] },
+    { "id": "legalEtica", "nombre": "Ingeniería Legal y Ética", "semestre": 9, "requisitos": ["fundAmbiental","introAmb"] },
+    { "id": "geomorfologia", "nombre": "Geomorfología", "semestre": 9, "requisitos": ["geologia","topo2"] },
+
+    { "id": "tecAmbSoc", "nombre": "Tecnología, Ambiente y Sociedad", "semestre": 10, "requisitos": ["fundAmbiental"] },
+    { "id": "sanitaria", "nombre": "Ingeniería Sanitaria", "semestre": 10, "requisitos": ["fundAmbiental","hidro"] },
+    { "id": "gestionAmbiental", "nombre": "Gestión y Tecnologías Ambientales", "semestre": 10, "requisitos": ["atmosfera","procAmb"] },
+    { "id": "proyectoDir", "nombre": "Proyecto, Dirección de Obras y Valuaciones", "semestre": 10, "requisitos": ["economia","legalEtica"] },
+
+    { "id": "obrasHid", "nombre": "Obras Hidráulicas", "semestre": 11, "requisitos": ["hidro","suelos"] },
+    { "id": "geoambiental", "nombre": "Ingeniería Geoambiental", "semestre": 11, "requisitos": ["fundAmbiental","suelos"] },
+    { "id": "suelosAmb", "nombre": "Suelos y Ambiente", "semestre": 11, "requisitos": ["suelos","geomorfologia"] },
+    { "id": "practica", "nombre": "Práctica Supervisada", "semestre": 11, "requisitos": [], "requierePorcentaje": 85 }
+  ]
+}

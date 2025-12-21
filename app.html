@@ -1,0 +1,328 @@
+<!-- app.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FCEFyN Planner — Acceso</title>
+  <link rel="stylesheet" href="style/standar.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo"></div>
+      <div class="brand-txt">
+        <div class="brand-title">FCEFyN Planner</div>
+        <div class="brand-sub">Ingresá para usar Agenda, Estudio, Académico y Presets</div>
+      </div>
+    </div>
+
+    <div class="hdr-right">
+      <a class="btn btn-outline" href="plans.html?career=ing_civil" title="Abrir Plan de Estudios">
+        Plan de estudios
+      </a>
+      <div class="pill" id="pillFirebase"><span class="dot warn" id="dotFirebase"></span><span id="firebaseLabel">Firebase Auth + Firestore</span></div>
+      <div class="pill" id="pillClock">—</div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <div class="hero-grid">
+      <section class="card">
+        <h1 class="hero-title">Planificá el cuatri sin sufrir.</h1>
+        <p class="hero-sub">
+          Armá horarios por comisión, guardá presets, registrá estudio y mantené tus parciales/TPs/tareas ordenados.
+          Todo con estética oscura, rápida y pensada para la FCEFyN.
+        </p>
+
+        <div class="feature-grid">
+          <div class="feat">
+            <div class="feat-ico">A</div>
+            <div>
+              <b>Académico</b>
+              <span>Parciales, TPs, tareas, informes y recordatorios.</span>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="feat-ico">E</div>
+            <div>
+              <b>Estudio</b>
+              <span>Registrá horas, tema y materia por día.</span>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="feat-ico">H</div>
+            <div>
+              <b>Horario</b>
+              <span>Agenda semanal 08:00–23:00 con bloques.</span>
+            </div>
+          </div>
+          <div class="feat">
+            <div class="feat-ico">P</div>
+            <div>
+              <b>Presets</b>
+              <span>Simulá comisiones y pasalas a tu agenda.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="notice">
+          <strong>Registro:</strong> se permite crear cuenta solo con correo <strong>@mi.unc.edu.ar</strong>.
+          <br/>El <strong>inicio de sesión</strong> funciona para cuentas existentes (incluidas las de test).
+        </div>
+
+        <div class="footer-note">
+          <div>Tip: si sos admin, tu cuenta te redirige al panel automáticamente.</div>
+          <div>Proyecto: fcefyn-planner</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="auth-top">
+          <div>
+            <h2 class="auth-title">Acceso</h2>
+            <p class="auth-sub">Entrá con tu cuenta. Si no tenés, podés crear una (Auth).</p>
+          </div>
+
+          <div class="segmented">
+            <button id="btnModeLogin" class="active" type="button">Iniciar sesión</button>
+            <button id="btnModeSignup" type="button">Crear cuenta</button>
+          </div>
+        </div>
+
+        <div id="authForm">
+          <label>Email</label>
+          <input id="inpEmail" type="email" placeholder="tuusuario@mi.unc.edu.ar" autocomplete="email" />
+
+          <label>Contraseña</label>
+          <div class="pwd-wrap">
+            <input id="inpPass" type="password" placeholder="••••••••" autocomplete="current-password" />
+            <button id="btnTogglePass" class="pwd-toggle" type="button">ver</button>
+          </div>
+
+          <div id="signupExtra" style="display:none;">
+            <label>Confirmar contraseña</label>
+            <div class="pwd-wrap">
+              <input id="inpPass2" type="password" placeholder="••••••••" autocomplete="new-password" />
+              <button id="btnTogglePass2" class="pwd-toggle" type="button">ver</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="left">
+              <button id="btnSubmit" class="btn btn-primary" type="button">Entrar</button>
+              <button id="btnForgot" class="btn btn-ghost" type="button">Olvidé mi contraseña</button>
+            </div>
+            <div class="small" id="authHint">Al entrar se redirige a student.html o admin.html.</div>
+          </div>
+
+          <div class="notice" id="msgBox" style="display:none;"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      sendPasswordResetEmail
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA0i7hkXi5C-x3UwAEsh6FzRFqrFE5jpd8",
+      authDomain: "fcefyn-planner.firebaseapp.com",
+      projectId: "fcefyn-planner",
+      storageBucket: "fcefyn-planner.firebasestorage.app",
+      messagingSenderId: "713668406730",
+      appId: "1:713668406730:web:f41c459641bfdce0cd7333"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const pillClock = document.getElementById("pillClock");
+    const dotFirebase = document.getElementById("dotFirebase");
+    const msgBox = document.getElementById("msgBox");
+
+    function setMsg(html, isError=false){
+      msgBox.style.display = "block";
+      msgBox.style.borderStyle = "solid";
+      msgBox.style.borderColor = isError ? "rgba(239,68,68,.55)" : "rgba(34,197,94,.45)";
+      msgBox.style.background = isError ? "rgba(239,68,68,.08)" : "rgba(34,197,94,.08)";
+      msgBox.innerHTML = html;
+    }
+    function clearMsg(){
+      msgBox.style.display = "none";
+      msgBox.innerHTML = "";
+    }
+
+    function tickClock(){
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2,"0");
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const yy = d.getFullYear();
+      const hh = String(d.getHours()).padStart(2,"0");
+      const mi = String(d.getMinutes()).padStart(2,"0");
+      const ss = String(d.getSeconds()).padStart(2,"0");
+      pillClock.textContent = dd + "/" + mm + "/" + yy + " " + hh + ":" + mi + ":" + ss;
+    }
+    tickClock();
+    setInterval(tickClock, 1000);
+
+    // --------- MODO LOGIN / SIGNUP ----------
+    let mode = "login";
+    const btnModeLogin = document.getElementById("btnModeLogin");
+    const btnModeSignup = document.getElementById("btnModeSignup");
+    const signupExtra = document.getElementById("signupExtra");
+    const btnSubmit = document.getElementById("btnSubmit");
+
+    function setMode(m){
+      mode = m;
+      clearMsg();
+      btnModeLogin.classList.toggle("active", mode === "login");
+      btnModeSignup.classList.toggle("active", mode === "signup");
+      signupExtra.style.display = (mode === "signup") ? "block" : "none";
+      btnSubmit.textContent = (mode === "signup") ? "Crear cuenta" : "Entrar";
+      document.getElementById("inpPass").setAttribute("autocomplete", mode === "signup" ? "new-password" : "current-password");
+    }
+    btnModeLogin.addEventListener("click", ()=> setMode("login"));
+    btnModeSignup.addEventListener("click", ()=> setMode("signup"));
+
+    // --------- TOGGLE PASSWORD ----------
+    function wireToggle(btnId, inputId){
+      const b = document.getElementById(btnId);
+      const i = document.getElementById(inputId);
+      if (!b || !i) return;
+      b.addEventListener("click", ()=>{
+        const isPass = i.type === "password";
+        i.type = isPass ? "text" : "password";
+        b.textContent = isPass ? "ocultar" : "ver";
+      });
+    }
+    wireToggle("btnTogglePass", "inpPass");
+    wireToggle("btnTogglePass2", "inpPass2");
+
+    function isMiUnc(email){
+      const e = (email || "").trim().toLowerCase();
+      return e.endsWith("@mi.unc.edu.ar");
+    }
+
+    async function ensurePlannerDoc(uid){
+      const ref = doc(db, "planner", uid);
+      const snap = await getDoc(ref);
+      if (snap.exists()) return;
+      await setDoc(ref, {
+        estudios:{},
+        subjects:[],
+        agenda:{},
+        schedulePresets:[],
+        activePresetId:"",
+        academico:{}
+      }, { merge:true });
+    }
+
+    async function getRoleOrStudent(uid){
+      try{
+        const ref = doc(db, "users", uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()){
+          const role = snap.data()?.role;
+          if (role === "admin") return "admin";
+        }
+      }catch(_e){}
+      return "student";
+    }
+
+    async function routeUser(user){
+      const role = await getRoleOrStudent(user.uid);
+      if (role === "admin") window.location.href = "admin.html";
+      else window.location.href = "student.html";
+    }
+
+    // --------- AUTH ----------
+    btnSubmit.addEventListener("click", async ()=>{
+      clearMsg();
+      const email = (document.getElementById("inpEmail").value || "").trim();
+      const pass  = (document.getElementById("inpPass").value || "").trim();
+      const pass2 = (document.getElementById("inpPass2").value || "").trim();
+
+      if (!email || !pass){
+        setMsg("Completá email y contraseña.", true);
+        return;
+      }
+
+      try{
+        if (mode === "login"){
+          await signInWithEmailAndPassword(auth, email, pass);
+          return;
+        }
+
+        // signup
+        if (!isMiUnc(email)){
+          setMsg("Para crear cuenta usá tu correo <strong>@mi.unc.edu.ar</strong>.", true);
+          return;
+        }
+        if (pass.length < 6){
+          setMsg("La contraseña debe tener al menos <strong>6 caracteres</strong>.", true);
+          return;
+        }
+        if (pass !== pass2){
+          setMsg("Las contraseñas no coinciden.", true);
+          return;
+        }
+
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        await ensurePlannerDoc(cred.user.uid);
+        setMsg("Cuenta creada. Entrando…", false);
+        await routeUser(cred.user);
+      }catch(e){
+        const msg = (e && e.message) ? e.message : String(e);
+        setMsg("Error: " + msg, true);
+      }
+    });
+
+    document.getElementById("btnForgot").addEventListener("click", async ()=>{
+      clearMsg();
+      const email = (document.getElementById("inpEmail").value || "").trim();
+      if (!email){
+        setMsg("Escribí tu email para enviarte el enlace de recuperación.", true);
+        return;
+      }
+      try{
+        await sendPasswordResetEmail(auth, email);
+        setMsg("Listo: te envié un mail para recuperar la contraseña (revisá spam).", false);
+      }catch(e){
+        setMsg("Error: " + ((e && e.message) ? e.message : String(e)), true);
+      }
+    });
+
+    // status pill
+    try{
+      dotFirebase.classList.remove("warn");
+    }catch(_e){}
+
+    // redirect if logged in
+    onAuthStateChanged(auth, async (user)=>{
+      if (!user) return;
+      try{
+        await ensurePlannerDoc(user.uid);
+      }catch(_e){}
+      await routeUser(user);
+    });
+
+    // default mode
+    setMode("login");
+  </script>
+</body>
+</html>

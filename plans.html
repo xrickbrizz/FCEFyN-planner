@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Plan de Estudios</title>
+<style>
+  :root{
+    --bg1:#000000; --bg2:#161616;
+    --accent:#d4af37;
+    --card:#111111;
+    --muted:#9aa6b2;
+    --glass: rgba(255,255,255,0.04);
+    --shadow: 0 10px 28px rgba(2,6,23,0.68);
+    --line: rgba(255,255,255,0.08);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; min-height:100%;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: radial-gradient(1200px 700px at 20% 0%, rgba(212,175,55,0.08), transparent 60%),
+                linear-gradient(135deg, var(--bg1), var(--bg2));
+    color:#e6eef6;
+    display:flex; flex-direction:column; align-items:center;
+    gap:14px;
+    padding:14px;
+  }
+  header{
+    width:100%;
+    max-width:1600px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px 14px;
+    background: rgba(255,255,255,0.02);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow: var(--shadow);
+  }
+  h1{
+    margin:0;
+    font-size:1.2rem;
+    color:var(--accent);
+    text-shadow:0 0 10px rgba(212,175,55,0.25);
+  }
+  .right{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .btn{
+    background:var(--glass);
+    color:#d9e6f2;
+    border:1px solid rgba(255,255,255,0.06);
+    padding:10px 12px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:700;
+    transition:transform .12s, background .12s, border-color .12s;
+    user-select:none;
+  }
+  .btn:hover{ transform:translateY(-2px); background:rgba(255,255,255,0.06); border-color:rgba(212,175,55,0.30); }
+  select{
+    background:rgba(0,0,0,0.35);
+    color:#e6eef6;
+    border:1px solid rgba(255,255,255,0.10);
+    padding:10px 12px;
+    border-radius:12px;
+    outline:none;
+    min-width:260px;
+  }
+
+  .msg{
+    width:100%;
+    max-width:1600px;
+    padding:14px 16px;
+    border-radius:14px;
+    border:1px solid rgba(212,175,55,0.22);
+    background: rgba(212,175,55,0.06);
+    box-shadow: var(--shadow);
+    color:#f3e7c3;
+    display:none;
+  }
+
+  /* GRID 3x4 */
+  .grid-wrap{
+    width:100%;
+    max-width:1600px;
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:1rem;
+  }
+  .cell{
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:14px;
+    padding:0.9rem;
+    min-height:320px;
+    box-shadow: var(--shadow);
+    border:1px solid rgba(255,255,255,0.06);
+    display:flex;
+    flex-direction:column;
+  }
+  .cell h2{
+    margin:0 0 .6rem 0;
+    color:var(--accent);
+    font-size:1rem;
+    text-align:center;
+    padding-bottom:0.35rem;
+    border-bottom:2px solid rgba(212,175,55,0.18);
+  }
+  .subjects{
+    display:flex;
+    flex-direction:column;
+    gap:0.35rem;
+    margin-top:0.45rem;
+    overflow:auto;
+    padding-right:6px;
+  }
+  .subject{
+    background:rgba(255,255,255,0.02);
+    padding:0.55rem;
+    border-radius:10px;
+    font-weight:700;
+    font-size:0.92rem;
+    text-align:center;
+    cursor:pointer;
+    transition: transform .12s, background .18s, border-color .12s;
+    color: #d9e6f2;
+    user-select:none;
+    border:1px solid transparent;
+  }
+  .subject:hover{ transform:translateY(-4px); background:rgba(255,255,255,0.04); border-color:rgba(212,175,55,0.25); }
+  .subject.locked{
+    cursor:not-allowed;
+    opacity:0.62;
+    transform:none;
+    background:rgba(255,255,255,0.015);
+    color:#8a96a1;
+    border-color:transparent;
+  }
+  .promocion{ background:#2e7d32 !important; color:#fff; }
+  .regular{ background:#fdd835 !important; color:#111; }
+  .libre{ background:#d32f2f !important; color:#fff; }
+  .curso{ background:#0288d1 !important; color:#fff; }
+
+  .subjects::-webkit-scrollbar{ width:8px }
+  .subjects::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.12); border-radius:8px }
+
+  .stats{ display:flex; flex-direction:column; gap:0.8rem; }
+  .stat-row{ display:flex; gap:1rem; }
+  .stat-card{
+    background: rgba(255,255,255,0.02);
+    padding:0.6rem;
+    border-radius:10px;
+    flex:1;
+    text-align:center;
+    border:1px solid rgba(255,255,255,0.06);
+  }
+  .stat-card strong{ display:block; font-size:1.05rem; color:#fff; }
+  .stat-label{ color:var(--muted); font-size:0.85rem; margin-top:0.3rem; }
+
+  .progress-wrap{
+    background: rgba(255,255,255,0.03);
+    border-radius:12px;
+    padding:0.5rem;
+    border:1px solid rgba(255,255,255,0.06);
+  }
+  .progress{
+    height:18px;
+    background:rgba(0,0,0,0.25);
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .progress > .fill{
+    height:100%;
+    width:0%;
+    background: linear-gradient(90deg, #4caf50, #82c91e);
+    border-radius:12px;
+    transition: width .6s ease-in-out;
+  }
+  .progress-caption{ display:flex; justify-content:space-between; font-size:0.85rem; color:var(--muted); margin-top:0.35rem; }
+
+  footer{
+    width:100%;
+    max-width:1600px;
+    display:flex;
+    justify-content:space-between;
+    gap:0.8rem;
+    color:var(--muted);
+    font-size:0.85rem;
+  }
+
+  @media (max-width:1200px){
+    .grid-wrap{ grid-template-columns: repeat(2, 1fr); }
+    .cell{ min-height:260px }
+  }
+  @media (max-width:900px){
+    header{ flex-direction:column; align-items:stretch; }
+    .right{ justify-content:space-between; }
+    select{ min-width: 100%; }
+    .grid-wrap{ grid-template-columns:1fr; width:100%; }
+    .cell{ min-height:auto; padding:0.7rem }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="title">Planes de Estudio</h1>
+  <div class="right">
+    <button class="btn" id="btnBack" type="button">← Volver</button>
+    <select id="planSelect">
+      <option value="">Elegí plan…</option>
+    </select>
+    <button class="btn" id="btnReset" type="button">Reiniciar malla</button>
+  </div>
+</header>
+
+<div class="msg" id="msg"></div>
+
+<main class="grid-wrap" id="gridWrap" style="display:none;"></main>
+
+<footer>
+  <div>Diseño responsive • Vista PC: 3x4 • Mobile: columna única</div>
+  <div>FCEFyN • UNC</div>
+</footer>
+
+<div id="menu" style="display:none; position:fixed; z-index:9999;"></div>
+
+<script>
+(function(){
+  const INDEX_URL = "./plans/plans_index.json";
+  const STORAGE_KEY = "estadosMaterias_v2";
+
+  const title = document.getElementById("title");
+  const msg = document.getElementById("msg");
+  const gridWrap = document.getElementById("gridWrap");
+  const menu = document.getElementById("menu");
+
+  const btnBack = document.getElementById("btnBack");
+  const btnReset = document.getElementById("btnReset");
+  const planSelect = document.getElementById("planSelect");
+
+  const labels = [
+    "Ingreso","1º Semestre","2º Semestre","3º Semestre",
+    "4º Semestre","5º Semestre","6º Semestre","7º Semestre",
+    "8º Semestre","9º Semestre","10º Semestre"
+  ];
+
+  function normalize(s){
+    return (s || "")
+      .toString()
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function showMsg(text){
+    msg.style.display = "block";
+    msg.textContent = text;
+  }
+  function hideMsg(){
+    msg.style.display = "none";
+    msg.textContent = "";
+  }
+
+  function getBackUrl(){
+    const from = localStorage.getItem("plans_from_url");
+    return from && typeof from === "string" ? from : "plans_index.html";
+  }
+
+  function getEstados(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+    catch{ return {}; }
+  }
+  function setEstados(obj){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+  }
+
+  let indexPlans = [];
+  let materias = [];
+
+  function buildGrid(){
+    gridWrap.innerHTML = "";
+    for(let i=0;i<12;i++){
+      const cell = document.createElement("section");
+      cell.className = "cell";
+      if(i < labels.length){
+        cell.innerHTML = `<h2>${labels[i]}</h2><div class="subjects" data-sem="${i+1}"></div>`;
+      }else{
+        cell.innerHTML = `<h2>Panel de estadísticas</h2>
+          <div class="stats" id="panelStats">
+            <div class="stat-row">
+              <div class="stat-card"><strong id="countProm">0</strong><div class="stat-label">Promocionadas</div></div>
+              <div class="stat-card"><strong id="countReg">0</strong><div class="stat-label">Regulares</div></div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-card"><strong id="countLib">0</strong><div class="stat-label">Libres</div></div>
+              <div class="stat-card"><strong id="countCur">0</strong><div class="stat-label">En curso</div></div>
+            </div>
+
+            <div class="progress-wrap">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div style="color:var(--muted); font-size:0.85rem;">Progreso de la carrera</div>
+                <div style="color:var(--muted); font-size:0.85rem;" id="pctText">0,00%</div>
+              </div>
+              <div class="progress" aria-hidden="true" style="margin-top:8px;">
+                <div class="fill" id="progressFill" style="width:0%"></div>
+              </div>
+              <div class="progress-caption">
+                <div id="captionLeft">0 materias promocionadas</div>
+                <div id="totalMateriasText"></div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:8px; justify-content:space-between; align-items:center;">
+              <button class="btn" id="btnResetPanel" type="button" title="Borrar todos los estados">Resetear estados</button>
+              <div style="color:var(--muted); font-size:0.85rem;">Cambios guardados automáticamente</div>
+            </div>
+          </div>`;
+      }
+      gridWrap.appendChild(cell);
+    }
+
+    const btnResetPanel = document.getElementById("btnResetPanel");
+    if(btnResetPanel){
+      btnResetPanel.addEventListener("click", ()=>{
+        if(!confirm("¿Borrar todos los estados?")) return;
+        localStorage.removeItem(STORAGE_KEY);
+        updateUI();
+      });
+    }
+  }
+
+  function placeSubjects(){
+    document.querySelectorAll(".subjects").forEach(s => s.innerHTML = "");
+    materias.forEach(m=>{
+      const container = document.querySelector(`.subjects[data-sem='${m.semestre}']`);
+      if(!container) return;
+      const d = document.createElement("div");
+      d.className = "subject";
+      d.textContent = m.nombre;
+      d.dataset.id = m.id;
+      container.appendChild(d);
+    });
+  }
+
+  function porcentajePromocionadas(){
+    const estados = getEstados();
+    const total = materias.filter(m => m.id !== "practica").length || 1;
+    const promo = Object.values(estados).filter(e => e === "promocion").length;
+    return (promo / total) * 100;
+  }
+
+  function updateStatsUI(){
+    const estados = getEstados();
+    const counts = { promocion:0, regular:0, libre:0, curso:0 };
+    Object.values(estados).forEach(v => { if(counts[v] !== undefined) counts[v]++; });
+
+    const total = materias.filter(m => m.id !== "practica").length || 1;
+    const promo = counts.promocion;
+    const pct = (promo / total) * 100;
+
+    const elProm = document.getElementById("countProm");
+    const elReg  = document.getElementById("countReg");
+    const elLib  = document.getElementById("countLib");
+    const elCur  = document.getElementById("countCur");
+    if(elProm) elProm.textContent = counts.promocion;
+    if(elReg)  elReg.textContent  = counts.regular;
+    if(elLib)  elLib.textContent  = counts.libre;
+    if(elCur)  elCur.textContent  = counts.curso;
+
+    const pctText = document.getElementById("pctText");
+    const fill = document.getElementById("progressFill");
+    const captionLeft = document.getElementById("captionLeft");
+    const totalText = document.getElementById("totalMateriasText");
+
+    if(pctText) pctText.textContent = pct.toFixed(2).replace(".", ",") + "%";
+    if(fill) fill.style.width = Math.min(pct, 100) + "%";
+    if(captionLeft) captionLeft.textContent = promo + " materias promocionadas";
+    if(totalText) totalText.textContent = total + " materias totales";
+  }
+
+  function updateUI(){
+    const estados = getEstados();
+    document.querySelectorAll(".subject").forEach(el=>{
+      const id = el.dataset.id;
+      el.className = "subject";
+      const mat = materias.find(x=>x.id===id);
+      const estado = estados[id];
+      let bloqueada = false;
+
+      if(mat && mat.requierePorcentaje){
+        if(porcentajePromocionadas() < mat.requierePorcentaje) bloqueada = true;
+      }else if(mat && mat.requiereAprobadas){
+        const aprobadas = Object.values(estados).filter(e => e === "promocion" || e === "regular").length;
+        if(aprobadas < mat.requiereAprobadas) bloqueada = true;
+      }else if(mat && Array.isArray(mat.requisitos) && mat.requisitos.length){
+        const faltan = mat.requisitos.filter(r=>{
+          const est = estados[r];
+          return !(est === "promocion" || est === "regular");
+        });
+        if(faltan.length) bloqueada = true;
+      }
+
+      if(bloqueada && !estado) el.classList.add("locked");
+      if(estado) el.classList.add(estado);
+    });
+
+    updateStatsUI();
+  }
+
+  function openMenuFor(element, clientX, clientY){
+    const id = element.dataset.id;
+    menu.style.display = "block";
+    menu.innerHTML = `
+      <div style="background:transparent; padding:0;">
+        <div style="background:var(--card); border-radius:12px; padding:8px; min-width:190px; box-shadow:var(--shadow); border:1px solid rgba(255,255,255,0.06);">
+          <div data-estado="promocion" class="btn" style="display:block; width:100%; margin-bottom:8px; text-align:left;">Promoción</div>
+          <div data-estado="regular" class="btn" style="display:block; width:100%; margin-bottom:8px; text-align:left;">Regular</div>
+          <div data-estado="libre" class="btn" style="display:block; width:100%; margin-bottom:8px; text-align:left;">Libre</div>
+          <div data-estado="curso" class="btn" style="display:block; width:100%; margin-bottom:8px; text-align:left;">En curso</div>
+          <div data-estado="ninguno" class="btn" style="display:block; width:100%; text-align:left;">Quitar estado</div>
+        </div>
+      </div>
+    `;
+
+    const pad = 10, mw = 240;
+    let left = clientX, top = clientY;
+    if(left + mw > window.innerWidth - pad) left = window.innerWidth - mw - pad;
+    if(top + 240 > window.innerHeight - pad) top = window.innerHeight - 240 - pad;
+    menu.style.left = left + "px";
+    menu.style.top = top + "px";
+    menu.style.position = "fixed";
+
+    menu.querySelectorAll("[data-estado]").forEach(item=>{
+      item.addEventListener("click", ()=>{
+        const estado = item.dataset.estado;
+        const estados = getEstados();
+        if(estado === "ninguno") delete estados[id];
+        else estados[id] = estado;
+        setEstados(estados);
+        closeMenu();
+        updateUI();
+      });
+    });
+
+    setTimeout(()=> window.addEventListener("click", outClick), 0);
+    window.addEventListener("keydown", onEsc);
+
+    function outClick(ev){
+      if(!menu.contains(ev.target) && ev.target !== element) closeMenu();
+    }
+    function onEsc(e){
+      if(e.key === "Escape") closeMenu();
+    }
+    function closeMenu(){
+      menu.style.display = "none";
+      menu.innerHTML = "";
+      window.removeEventListener("click", outClick);
+      window.removeEventListener("keydown", onEsc);
+    }
+  }
+
+  function attachEventsToSubjects(){
+    document.querySelectorAll(".subject").forEach(el=>{
+      el.onclick = (e)=>{
+        const estados = getEstados();
+        if(el.classList.contains("locked") && !estados[el.dataset.id]) return;
+        openMenuFor(el, e.clientX + 4, e.clientY + 4);
+      };
+    });
+  }
+
+  function detectMaterias(data){
+    if(Array.isArray(data)) return data;
+    if(data && Array.isArray(data.materias)) return data.materias;
+    if(data && Array.isArray(data.subjects)) return data.subjects;
+    return [];
+  }
+
+  async function loadIndex(){
+    const res = await fetch(INDEX_URL, { cache: "no-store" });
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+
+    const arr = Array.isArray(data.plans) ? data.plans
+             : Array.isArray(data.carreras) ? data.carreras
+             : Array.isArray(data) ? data
+             : [];
+
+    indexPlans = arr.slice().sort((a,b)=>{
+      return normalize(a.nombre).localeCompare(normalize(b.nombre), "es");
+    });
+
+    planSelect.innerHTML = `<option value="">Elegí plan…</option>`;
+    indexPlans.forEach(p=>{
+      const opt = document.createElement("option");
+      opt.value = p.slug || "";
+      opt.textContent = p.nombre || p.slug || "Sin nombre";
+      planSelect.appendChild(opt);
+    });
+  }
+
+  async function loadPlanBySlug(slug){
+    const plan = indexPlans.find(p=> (p.slug || "") === slug);
+    if(!plan){
+      gridWrap.style.display = "none";
+      showMsg("No se encontró ese plan en plans/plans_index.json.");
+      return;
+    }
+
+    hideMsg();
+
+    const res = await fetch(plan.json, { cache: "no-store" });
+    if(!res.ok) throw new Error("No pude leer " + plan.json + " (HTTP " + res.status + ").");
+    const data = await res.json();
+
+    materias = detectMaterias(data);
+    if(!materias.length){
+      gridWrap.style.display = "none";
+      showMsg("El JSON del plan no tiene 'materias' (o está vacío).");
+      return;
+    }
+
+    title.textContent = plan.nombre || "Plan de Estudios";
+    gridWrap.style.display = "grid";
+
+    buildGrid();
+    placeSubjects();
+    attachEventsToSubjects();
+    updateUI();
+
+    // guardo selección para que no se vea query string
+    sessionStorage.setItem("selectedPlanSlug", plan.slug || "");
+    sessionStorage.setItem("selectedPlanJson", plan.json || "");
+    sessionStorage.setItem("selectedPlanNombre", plan.nombre || "");
+    planSelect.value = plan.slug || "";
+  }
+
+  btnBack.addEventListener("click", ()=> window.location.href = getBackUrl());
+
+  btnReset.addEventListener("click", ()=>{
+    if(!confirm("¿Querés reiniciar todos los estados? Esta acción no se puede deshacer.")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    updateUI();
+  });
+
+  planSelect.addEventListener("change", ()=>{
+    const slug = planSelect.value;
+    if(!slug){
+      gridWrap.style.display = "none";
+      title.textContent = "Planes de Estudio";
+      showMsg("Elegí una carrera para abrir su plan.");
+      return;
+    }
+    loadPlanBySlug(slug).catch(e=>{
+      gridWrap.style.display = "none";
+      showMsg("Error al cargar el plan: " + (e && e.message ? e.message : e));
+    });
+  });
+
+  window.addEventListener("storage", (e)=>{ if(e.key === STORAGE_KEY) updateUI(); });
+
+  (async function init(){
+    try{
+      await loadIndex();
+
+      // 1) si venís desde plans_index.html o app.html sin query string, uso sessionStorage
+      const saved = sessionStorage.getItem("selectedPlanSlug") || "";
+      if(saved){
+        await loadPlanBySlug(saved);
+        return;
+      }
+
+      // 2) si no hay nada seleccionado, muestro mensaje
+      gridWrap.style.display = "none";
+      title.textContent = "Planes de Estudio";
+      showMsg("Elegí una carrera para abrir su plan.");
+    }catch(e){
+      gridWrap.style.display = "none";
+      showMsg("Error al cargar el índice: " + (e && e.message ? e.message : e));
+    }
+  })();
+})();
+</script>
+</body>
+</html>

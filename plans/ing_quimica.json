@@ -1,0 +1,57 @@
+{
+  "slug": "quimica",
+  "nombre": "Ingeniería Química",
+  "storageKey": "estadosMaterias_v2_quimica",
+  "materias": [
+    { "id": "matematica", "nombre": "Matemática", "semestre": 1, "requisitos": [] },
+    { "id": "fisica", "nombre": "Física", "semestre": 1, "requisitos": [] },
+    { "id": "ambientacion", "nombre": "Ambientación Universitaria", "semestre": 1, "requisitos": [] },
+
+    { "id": "introIng", "nombre": "Introducción a la Ingeniería", "semestre": 2, "requisitos": ["ambientacion"] },
+    { "id": "quimicaGral", "nombre": "Química General", "semestre": 2, "requisitos": ["fisica"] },
+    { "id": "am1", "nombre": "Análisis Matemático I", "semestre": 2, "requisitos": ["matematica"] },
+    { "id": "sistRep", "nombre": "Sistemas de Representación", "semestre": 2, "requisitos": [] },
+
+    { "id": "fundProcQuim", "nombre": "Fundamentos de Proc. Químicos", "semestre": 3, "requisitos": ["quimicaGral"] },
+    { "id": "algebra", "nombre": "Álgebra Lineal", "semestre": 3, "requisitos": ["matematica"] },
+    { "id": "fisica1", "nombre": "Física I", "semestre": 3, "requisitos": ["fisica","am1"] },
+    { "id": "pyestad", "nombre": "Probabilidad y Estadística", "semestre": 3, "requisitos": ["am1"] },
+
+    { "id": "quimInorg", "nombre": "Química Inorgánica", "semestre": 4, "requisitos": ["quimicaGral"] },
+    { "id": "compu", "nombre": "Computación y Cálculo Numérico", "semestre": 4, "requisitos": ["algebra","am1"] },
+    { "id": "fisica2", "nombre": "Física II", "semestre": 4, "requisitos": ["fisica1"] },
+    { "id": "am2", "nombre": "Análisis Matemático II", "semestre": 4, "requisitos": ["am1"] },
+
+    { "id": "quimAnalitica", "nombre": "Química Analítica", "semestre": 5, "requisitos": ["quimInorg"] },
+    { "id": "fenTransp", "nombre": "Fenómenos de Transporte", "semestre": 5, "requisitos": ["fisica2","am2"] },
+    { "id": "fisicoquimica", "nombre": "Fisicoquímica", "semestre": 5, "requisitos": ["am2","fenTransp"] },
+    { "id": "balanceME", "nombre": "Balance de Materia y Energía", "semestre": 5, "requisitos": ["fundProcQuim"] },
+
+    { "id": "matInd", "nombre": "Materiales de la Industria", "semestre": 6, "requisitos": ["quimicaGral"] },
+    { "id": "quimOrg", "nombre": "Química Orgánica", "semestre": 6, "requisitos": ["quimicaGral"] },
+    { "id": "opUnit1", "nombre": "Operaciones Unitarias I", "semestre": 6, "requisitos": ["fenTransp"] },
+    { "id": "gestionInst", "nombre": "Gestión Institucional", "semestre": 6, "requisitos": ["introIng"] },
+    { "id": "microbioInd", "nombre": "Microbiología Industrial", "semestre": 6, "requisitos": ["quimOrg"] },
+
+    { "id": "bromaToxo", "nombre": "Bromatología y Toxicología", "semestre": 7, "requisitos": ["quimAnalitica"] },
+    { "id": "quimOrgProdNat", "nombre": "Química Orgánica de Productos Naturales", "semestre": 7, "requisitos": ["quimOrg"] },
+    { "id": "opUnit2", "nombre": "Operaciones Unitarias II", "semestre": 7, "requisitos": ["opUnit1"] },
+    { "id": "higieneSeg", "nombre": "Higiene y Seguridad Industrial", "semestre": 7, "requisitos": ["quimicaGral"] },
+
+    { "id": "instrControl", "nombre": "Instrumental y Control", "semestre": 8, "requisitos": ["fisica2"] },
+    { "id": "gestionCalidad", "nombre": "Gestión de Calidad", "semestre": 8, "requisitos": ["pyestad"] },
+    { "id": "ingReacciones", "nombre": "Ingeniería de las Reacciones Químicas", "semestre": 8, "requisitos": ["fenTransp"] },
+    { "id": "mineralogia", "nombre": "Mineralogía e Industrias Extractivas", "semestre": 8, "requisitos": ["quimInorg"] },
+
+    { "id": "procBiotec", "nombre": "Procesos Biotecnológicos", "semestre": 9, "requisitos": ["microbioInd"] },
+    { "id": "ingProcInd1", "nombre": "Ingeniería de Procesos Industriales I", "semestre": 9, "requisitos": ["opUnit2"] },
+    { "id": "gestionEmp", "nombre": "Gestión Empresarial", "semestre": 9, "requisitos": ["gestionInst"] },
+    { "id": "pps", "nombre": "Práctica Profesional Supervisada", "semestre": 9, "requisitos": [], "requierePorcentaje": 85 },
+
+    { "id": "tecAlimentos", "nombre": "Tecnología de los Alimentos", "semestre": 10, "requisitos": ["bromaToxo"] },
+    { "id": "gestionAmb", "nombre": "Gestión Ambiental", "semestre": 10, "requisitos": ["quimicaGral"] },
+    { "id": "ingProcInd2", "nombre": "Ingeniería de Procesos Industriales II", "semestre": 10, "requisitos": ["ingProcInd1"] },
+
+    { "id": "proyIntegrador", "nombre": "Proyecto Integrador", "semestre": 11, "requisitos": [], "requierePorcentaje": 85 }
+  ]
+}

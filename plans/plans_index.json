@@ -1,0 +1,13 @@
+{
+  "plans": [
+    { "slug": "ambiental", "nombre": "Ingeniería Ambiental", "json": "./plans/ing_ambiental.json" },
+    { "slug": "aeroespacial", "nombre": "Ingeniería Aeroespacial", "json": "./plans/ing_aeroespacial.json" },
+    { "slug": "biomedica", "nombre": "Ingeniería Biomédica", "json": "./plans/ing_biomedica.json" },
+    { "slug": "civil", "nombre": "Ingeniería Civil", "json": "./plans/ing_civil.json" },
+    { "slug": "computacion", "nombre": "Ingeniería en Computación", "json": "./plans/ing_computacion.json" },
+    { "slug": "electronica", "nombre": "Ingeniería Electrónica", "json": "./plans/ing_electronica.json" },
+    { "slug": "industrial", "nombre": "Ingeniería Industrial", "json": "./plans/ing_industrial.json" },
+    { "slug": "mecanica", "nombre": "Ingeniería Mecánica", "json": "./plans/ing_mecanica.json" },
+    { "slug": "quimica", "nombre": "Ingeniería Química", "json": "./plans/ing_quimica.json" }
+  ]
+}

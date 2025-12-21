@@ -1,0 +1,60 @@
+{
+  "slug": "aeroespacial",
+  "nombre": "Ingeniería Aeroespacial",
+  "storageKey": "estadosMaterias_v2_aeroespacial",
+  "materias": [
+    { "id": "matematica", "nombre": "Matemática", "semestre": 1, "requisitos": [] },
+    { "id": "fisica", "nombre": "Física", "semestre": 1, "requisitos": [] },
+    { "id": "ambientacion", "nombre": "Ambientación Universitaria", "semestre": 1, "requisitos": [] },
+
+    { "id": "sistRep", "nombre": "Sistemas de Representación", "semestre": 2, "requisitos": [] },
+    { "id": "am1", "nombre": "Análisis Matemático I", "semestre": 2, "requisitos": ["matematica"] },
+    { "id": "introIng", "nombre": "Introducción a la Ingeniería", "semestre": 2, "requisitos": ["ambientacion"] },
+    { "id": "quimica", "nombre": "Química", "semestre": 2, "requisitos": ["fisica"] },
+
+    { "id": "cienciaMat", "nombre": "Ciencia de los Materiales", "semestre": 3, "requisitos": ["quimica"] },
+    { "id": "algebra", "nombre": "Álgebra Lineal", "semestre": 3, "requisitos": ["matematica"] },
+    { "id": "fisica1", "nombre": "Física I", "semestre": 3, "requisitos": ["fisica"] },
+    { "id": "pyestad", "nombre": "Probabilidad y Estadística", "semestre": 3, "requisitos": ["am1"] },
+
+    { "id": "estrIsost", "nombre": "Estructuras Isostáticas", "semestre": 4, "requisitos": ["fisica1"] },
+    { "id": "am2", "nombre": "Análisis Matemático II", "semestre": 4, "requisitos": ["am1"] },
+    { "id": "fisica2", "nombre": "Física II", "semestre": 4, "requisitos": ["fisica1","am2"] },
+    { "id": "ingles", "nombre": "Módulo de Inglés", "semestre": 4, "requisitos": [], "requiereAprobadas": 5 },
+
+    { "id": "termodinamica", "nombre": "Termodinámica", "semestre": 5, "requisitos": ["fisica2"] },
+    { "id": "am3", "nombre": "Análisis Matemático III", "semestre": 5, "requisitos": ["am2"] },
+    { "id": "mecEstruct", "nombre": "Mecánica de las Estructuras", "semestre": 5, "requisitos": ["estrIsost"] },
+    { "id": "tecnologiaMec", "nombre": "Tecnología Mecánica", "semestre": 5, "requisitos": ["cienciaMat"] },
+
+    { "id": "aeronauticaGral", "nombre": "Aeronáutica General", "semestre": 6, "requisitos": ["introIng"] },
+    { "id": "electrotecnia", "nombre": "Electrotecnia y Electricidad", "semestre": 6, "requisitos": ["fisica2"] },
+    { "id": "mecRacional", "nombre": "Mecánica Racional", "semestre": 6, "requisitos": ["fisica1"] },
+    { "id": "compu", "nombre": "Computación y Cálculo Numérico", "semestre": 6, "requisitos": ["algebra"] },
+
+    { "id": "teoriaControl", "nombre": "Teoría del Control", "semestre": 7, "requisitos": ["am3"] },
+    { "id": "mecFluidos", "nombre": "Mecánica de los Fluidos", "semestre": 7, "requisitos": ["mecRacional"] },
+    { "id": "mecanismos", "nombre": "Mecanismos y Elementos de Máquinas", "semestre": 7, "requisitos": ["mecRacional"] },
+    { "id": "selectiva1", "nombre": "Materia Selectiva I", "semestre": 7, "requisitos": [] },
+
+    { "id": "calcEstruct1", "nombre": "Cálculo Estructural I", "semestre": 8, "requisitos": ["mecEstruct"] },
+    { "id": "dinamGases1", "nombre": "Dinámica de los Gases I", "semestre": 8, "requisitos": ["mecFluidos"] },
+    { "id": "orgIndustrial", "nombre": "Organización Industrial", "semestre": 8, "requisitos": ["introIng"] },
+    { "id": "selectiva2", "nombre": "Materia Selectiva II", "semestre": 8, "requisitos": [] },
+
+    { "id": "propulsion", "nombre": "Propulsión", "semestre": 9, "requisitos": ["termodinamica","mecFluidos"] },
+    { "id": "instrumentos", "nombre": "Instrumentos y Aviónica", "semestre": 9, "requisitos": ["electrotecnia"] },
+    { "id": "calcEstruct2", "nombre": "Cálculo Estructural II", "semestre": 9, "requisitos": ["calcEstruct1"] },
+    { "id": "mecVuelo", "nombre": "Mecánica del Vuelo", "semestre": 9, "requisitos": ["dinamGases1"] },
+
+    { "id": "calcEstruct3", "nombre": "Cálculo Estructural III", "semestre": 10, "requisitos": ["calcEstruct2"] },
+    { "id": "sistEquipAvion", "nombre": "Sistemas y Equipos del Avión", "semestre": 10, "requisitos": ["instrumentos"] },
+    { "id": "disAsistido", "nombre": "Ingeniería de Diseño Asistido", "semestre": 10, "requisitos": ["sistRep"] },
+    { "id": "selectiva3", "nombre": "Materia Selectiva III", "semestre": 10, "requisitos": [] },
+
+    { "id": "proyAviones", "nombre": "Proyecto y Construcción de Aviones", "semestre": 11, "requisitos": [], "requierePorcentaje": 85 },
+    { "id": "ingEcoLegal", "nombre": "Ingeniería Económica y Legal", "semestre": 11, "requisitos": ["orgIndustrial"] },
+    { "id": "higieneSeg", "nombre": "Higiene y Seguridad", "semestre": 11, "requisitos": ["orgIndustrial"] },
+    { "id": "mantAeron", "nombre": "Mantenimiento de Aeronaves", "semestre": 11, "requisitos": ["orgIndustrial"] }
+  ]
+}

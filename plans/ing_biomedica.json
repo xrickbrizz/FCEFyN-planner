@@ -1,0 +1,64 @@
+{
+  "slug": "biomedica",
+  "nombre": "Ingeniería Biomédica",
+  "storageKey": "estadosMaterias_v2_biomedica",
+  "materias": [
+    { "id": "matematica", "nombre": "Matemática", "semestre": 1, "requisitos": [] },
+    { "id": "fisica", "nombre": "Física", "semestre": 1, "requisitos": [] },
+    { "id": "ambientacion", "nombre": "Ambientación Universitaria", "semestre": 1, "requisitos": [] },
+
+    { "id": "am1", "nombre": "Análisis Matemático I", "semestre": 2, "requisitos": ["matematica"] },
+    { "id": "quimica", "nombre": "Química", "semestre": 2, "requisitos": ["fisica"] },
+    { "id": "tallerLab", "nombre": "Taller y Laboratorio", "semestre": 2, "requisitos": ["ambientacion"] },
+    { "id": "sistRep", "nombre": "Sistemas de Representación", "semestre": 2, "requisitos": [] },
+
+    { "id": "algebra", "nombre": "Álgebra Lineal", "semestre": 3, "requisitos": ["matematica"] },
+    { "id": "fisica1", "nombre": "Física I", "semestre": 3, "requisitos": ["fisica"] },
+    { "id": "quimOrgBio", "nombre": "Química Orgánica y Biológica", "semestre": 3, "requisitos": ["quimica"] },
+    { "id": "ingles", "nombre": "Módulo de Inglés", "semestre": 3, "requisitos": [], "requiereAprobadas": 5 },
+
+    { "id": "am2", "nombre": "Análisis Matemático II", "semestre": 4, "requisitos": ["am1"] },
+    { "id": "anatomia", "nombre": "Anatomía para Ingenieros", "semestre": 4, "requisitos": ["quimOrgBio"] },
+    { "id": "estaticaResMat", "nombre": "Estática y Resistencia de Materiales", "semestre": 4, "requisitos": ["fisica1"] },
+    { "id": "fisica2", "nombre": "Física II", "semestre": 4, "requisitos": ["fisica1"] },
+
+    { "id": "am3", "nombre": "Análisis Matemático III", "semestre": 5, "requisitos": ["am2"] },
+    { "id": "electronica", "nombre": "Electrónica", "semestre": 5, "requisitos": ["fisica2"] },
+    { "id": "histologia", "nombre": "Histología para Ingenieros", "semestre": 5, "requisitos": ["anatomia"] },
+    { "id": "informaticaCalNum", "nombre": "Informática y Cálculo Numérico", "semestre": 5, "requisitos": ["algebra"] },
+    { "id": "pyestad", "nombre": "Probabilidad y Estadística", "semestre": 5, "requisitos": ["am1"] },
+
+    { "id": "ed1", "nombre": "Electrónica Digital I", "semestre": 6, "requisitos": ["electronica"] },
+    { "id": "electrotecnia", "nombre": "Electrotecnia Gral. y Máquinas", "semestre": 6, "requisitos": ["fisica2"] },
+    { "id": "fisiologia", "nombre": "Fisiología Humana", "semestre": 6, "requisitos": ["anatomia","histologia"] },
+    { "id": "senySis", "nombre": "Señales y Sistemas", "semestre": 6, "requisitos": ["am3"] },
+
+    { "id": "biomateriales", "nombre": "Biomateriales", "semestre": 7, "requisitos": ["quimOrgBio"] },
+    { "id": "ed2", "nombre": "Electrónica Digital II", "semestre": 7, "requisitos": ["ed1"] },
+    { "id": "fisicaBiomed", "nombre": "Física Biomédica", "semestre": 7, "requisitos": ["fisica2","fisiologia"] },
+    { "id": "ingEcoLegal", "nombre": "Ingeniería Económica y Legal", "semestre": 7, "requisitos": ["tallerLab"] },
+    { "id": "teoriaRedesControl", "nombre": "Teoría de Redes y Control", "semestre": 7, "requisitos": ["electrotecnia"] },
+
+    { "id": "electronicaAnalog", "nombre": "Electrónica Analógica", "semestre": 8, "requisitos": ["electronica"] },
+    { "id": "fisiopatologia", "nombre": "Fisiopatología", "semestre": 8, "requisitos": ["fisiologia"] },
+    { "id": "instHosp", "nombre": "Instalaciones Hospitalarias", "semestre": 8, "requisitos": ["electrotecnia"] },
+    { "id": "procSen", "nombre": "Procesamiento de Señales", "semestre": 8, "requisitos": ["senySis"] },
+    { "id": "transductores", "nombre": "Transductores y Sensores", "semestre": 8, "requisitos": ["fisicaBiomed"] },
+
+    { "id": "biomecanica", "nombre": "Biomecánica", "semestre": 9, "requisitos": ["estaticaResMat","fisiologia"] },
+    { "id": "imagenesMed", "nombre": "Imágenes en Medicina", "semestre": 9, "requisitos": ["fisicaBiomed"] },
+    { "id": "instrBiomed", "nombre": "Instrumentación Biomédica", "semestre": 9, "requisitos": ["transductores"] },
+    { "id": "pps", "nombre": "Práctica Profesional Supervisada", "semestre": 9, "requisitos": [], "requierePorcentaje": 85 },
+
+    { "id": "ingRehab", "nombre": "Ingeniería en Rehabilitación", "semestre": 10, "requisitos": ["biomecanica"] },
+    { "id": "ingHosp", "nombre": "Ingeniería Hospitalaria", "semestre": 10, "requisitos": ["instHosp"] },
+    { "id": "modelosSim", "nombre": "Modelos y Simulaciones", "semestre": 10, "requisitos": ["fisiologia"] },
+    { "id": "selectiva1", "nombre": "Selectiva I", "semestre": 10, "requisitos": [] },
+    { "id": "radiaciones", "nombre": "Radiaciones Ionizantes en Medicina", "semestre": 10, "requisitos": ["fisicaBiomed"] },
+
+    { "id": "higieneSeg", "nombre": "Higiene y Seguridad", "semestre": 11, "requisitos": ["ingEcoLegal"] },
+    { "id": "segNorm", "nombre": "Seguridad y Normalización Biomédica", "semestre": 11, "requisitos": ["ingHosp"] },
+    { "id": "selectiva2", "nombre": "Selectiva II", "semestre": 11, "requisitos": [] },
+    { "id": "proyIntegrador", "nombre": "Proyecto Integrador", "semestre": 11, "requisitos": ["pps"] }
+  ]
+}

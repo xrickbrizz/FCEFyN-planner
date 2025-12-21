@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Panel del Estudiante</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style/student.css">
+</head>
+
+<body>
+  <header>
+    <div class="header-left">
+      <div class="header-title">Panel del Estudiante</div>
+      <div class="header-sub">Calendario de estudio — FCEFyN</div>
+    </div>
+    <div class="header-right">
+      <div class="account-box">
+        <div class="account-label">Cuenta</div>
+        <div id="userEmailLabel" class="account-email">-</div>
+      </div>
+      <button class="btn-gray" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="main-shell">
+    <div class="tabs-bar">
+      <button id="tabBtnEstudio" class="tab-btn tab-active" onclick="showTab('estudio')">Estudio</button>
+      <button id="tabBtnAcademico" class="tab-btn" onclick="showTab('academico')">Académico</button>
+      <button id="tabBtnAgenda" class="tab-btn" onclick="showTab('agenda')">Agenda</button>
+      <button id="tabBtnMaterias" class="tab-btn" onclick="showTab('materias')">Materias</button>
+      <button id="tabBtnPlanificador" class="tab-btn" onclick="showTab('planificador')">Planificador</button>
+    </div>
+
+    <!-- TAB ESTUDIO -->
+    <div id="tab-estudio" class="tab-card">
+      <div class="tab-estudio-layout">
+        <div class="calendar-container">
+          <div class="calendar-header">
+            <div class="cal-left">
+              <button class="cal-nav-btn" id="btnStudyPrev">◀</button>
+              <button class="cal-nav-btn" id="btnStudyToday">Hoy</button>
+              <button class="cal-nav-btn" id="btnStudyNext">▶</button>
+              <h2 id="monthTitle" style="margin:0;"></h2>
+            </div>
+            <div class="cal-right small-muted" id="studyHint">Click en un día para registrar estudio</div>
+          </div>
+
+          <div class="grid" id="studyDow">
+            <div class="dow">Lun</div><div class="dow">Mar</div><div class="dow">Mié</div><div class="dow">Jue</div><div class="dow">Vie</div><div class="dow">Sáb</div><div class="dow">Dom</div>
+          </div>
+          <div class="grid" id="calendarGrid" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-title">Estadísticas (próximamente)</div>
+          <div class="stats-item">• Total de horas este mes: <strong>—</strong></div>
+          <div class="stats-item">• Materia más estudiada: <strong>—</strong></div>
+          <div class="stats-item">• Días con estudio registrado: <strong>—</strong></div>
+          <div class="stats-item" style="margin-top:.6rem; font-size:.8rem; color:#6b7280;">
+            Más adelante estas métricas se calcularán automáticamente a partir de tus registros en Firebase.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB ACADEMICO -->
+    <div id="tab-academico" class="tab-card" style="display:none;">
+      <div class="acad-layout">
+        <div class="acad-shell">
+          <div class="calendar-header" style="margin-bottom:.25rem;">
+            <div class="cal-left">
+              <button class="cal-nav-btn" id="btnAcadPrev">◀</button>
+              <button class="cal-nav-btn" id="btnAcadToday">Hoy</button>
+              <button class="cal-nav-btn" id="btnAcadNext">▶</button>
+              <h2 id="acadMonthTitle" style="margin:0;"></h2>
+            </div>
+            <div class="cal-right">
+              <button class="btn-blue btn-small" id="btnAcadAddGlobal">Añadir</button>
+            </div>
+          </div>
+
+          <div class="acad-help">
+            Parciales, TPs, Tareas, Informes y Recordatorios (se guardan en tu planner de Firebase).
+            <br/>Tip: tocá un día para ver el detalle a la derecha (no se buguea adentro del recuadro).
+          </div>
+
+          <div class="grid" id="acadDow">
+            <div class="dow">Lun</div><div class="dow">Mar</div><div class="dow">Mié</div><div class="dow">Jue</div><div class="dow">Vie</div><div class="dow">Sáb</div><div class="dow">Dom</div>
+          </div>
+          <div class="grid" id="acadGrid" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="acad-widgets">
+          <div class="widgets-title">Widgets Académico</div>
+          <div class="widgets-list" id="acadWidgets">
+            • Próximo vencimiento: <strong>—</strong><br/>
+            • Pendientes (30 días): <strong>—</strong><br/>
+            • Hechos (30 días): <strong>—</strong>
+          </div>
+          <hr class="widgets-hr" />
+          <div class="widgets-title">Próximos 7 días</div>
+          <div class="widgets-list" id="acadNext7">—</div>
+
+          <div class="acad-detail" id="acadDetailBox" style="display:none;">
+            <div class="acad-detail-top">
+              <div>
+                <div class="acad-detail-title" id="acadDetailTitle">Detalle del día</div>
+                <div class="acad-detail-sub" id="acadDetailSub">—</div>
+              </div>
+              <div style="display:flex;gap:.45rem;flex-wrap:wrap;justify-content:flex-end;">
+                <span class="badge-soft" id="acadDetailCount">0</span>
+                <button class="btn-blue btn-small" id="btnAcadAddFromDetail">Añadir</button>
+              </div>
+            </div>
+            <div class="acad-detail-list" id="acadDetailList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB AGENDA -->
+    <div id="tab-agenda" class="tab-card" style="display:none;">
+      <div class="agenda-header">
+        <div><strong>Agenda semanal</strong> (08:00 – 23:00)</div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button class="btn-outline btn-small" id="btnAgendaFromPreset">Pasar preset a agenda</button>
+          <button class="btn-blue" id="btnAddClass">Añadir clase</button>
+        </div>
+      </div>
+      <div class="agenda-shell">
+        <div class="agenda-grid" id="agendaGrid"></div>
+      </div>
+      <div class="small-muted" style="margin-top:.6rem;">
+        Tip: el Planificador sirve para armar presets con horarios del admin. Después, si te cierra, podés pasarlo a tu Agenda.
+      </div>
+    </div>
+
+    <!-- TAB MATERIAS -->
+    <div id="tab-materias" class="tab-card" style="display:none;">
+      <div class="subjects-layout">
+        <div class="subjects-list-box">
+          <strong>Materias creadas</strong>
+          <div id="subjectsList" style="margin-top:.5rem;"></div>
+          <div id="subjectsEmptyMsg" style="font-size:.85rem;color:#9ca3af;display:none;margin-top:.4rem;">
+            No hay materias. Creá una materia en el formulario de la derecha.
+          </div>
+        </div>
+        <div class="subject-form-box">
+          <strong id="subjectFormTitle">Nueva materia</strong>
+          <input id="subjectName" placeholder="Nombre de la materia" />
+          <label style="font-size:.8rem;color:#9ca3af;">Color</label>
+          <input id="subjectColor" type="color" value="#2563eb" />
+          <div style="margin-top:.6rem;display:flex;gap:.5rem;justify-content:flex-end;">
+            <button class="btn-gray btn-small" id="btnSubjectReset">Limpiar</button>
+            <button class="btn-blue btn-small" id="btnSubjectSave">Guardar</button>
+          </div>
+          <p style="margin-top:.6rem;font-size:.8rem;color:#9ca3af;">
+            Al editar una materia se actualizará su nombre también en el calendario de estudio y en la agenda.
+            Al borrar una materia podés elegir si se eliminan también sus clases y registros de estudio.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB PLANIFICADOR -->
+    <div id="tab-planificador" class="tab-card" style="display:none;">
+      <div class="planner-layout">
+        <div class="planner-box">
+          <div class="planner-toolbar">
+            <div class="planner-toolbar-left">
+              <strong>Horarios disponibles</strong>
+              <span class="badge" id="sectionsCountBadge">0</span>
+            </div>
+            <div class="planner-toolbar-right">
+              <input class="input-mini" id="sectionsSearch" placeholder="Buscar materia / comisión / sede..." />
+              <button class="btn-outline btn-small" id="btnReloadSections">Recargar</button>
+            </div>
+          </div>
+          <div class="small-muted" style="margin-bottom:.6rem;">
+            Estos horarios los cargó el administrador (comisiones, días, horas y sedes). Elegí una comisión por materia.
+          </div>
+          <div class="planner-list" id="sectionsList"></div>
+        </div>
+
+        <div class="planner-box">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;">
+            <strong>Presets</strong>
+            <div class="small-muted" id="activePresetLabel">Sin preset cargado</div>
+          </div>
+
+          <div class="preset-row" style="margin-top:.6rem;">
+            <input class="input-mini" id="presetNameInput" placeholder="Nombre del preset (ej: Plan A)" />
+            <button class="btn-blue btn-small" id="btnPresetSave">Guardar preset</button>
+            <button class="btn-outline btn-small" id="btnPresetNew">Nuevo</button>
+          </div>
+
+          <div class="preset-row" style="margin-top:.45rem;">
+            <button class="btn-outline btn-small" id="btnPresetDuplicate">Duplicar</button>
+            <button class="btn-danger btn-small" id="btnPresetDelete">Eliminar</button>
+            <button class="btn-outline btn-small" id="btnPresetToAgenda">Pasar a Agenda</button>
+          </div>
+
+          <div class="preset-list" id="presetsList"></div>
+
+          <hr class="hr-soft">
+
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;">
+            <strong>Selección del preset</strong>
+            <span class="small-muted" id="selectedCountLabel">0 comisiones</span>
+          </div>
+          <div class="planner-list" id="selectedSectionsList" style="max-height:220px;margin-top:.6rem;"></div>
+
+          <hr class="hr-soft">
+
+          <div class="agenda-header" style="margin-bottom:.4rem;">
+            <div><strong>Vista previa semanal</strong> (solo preview)</div>
+            <div class="small-muted">No modifica tu Agenda hasta que presiones “Pasar a Agenda”.</div>
+          </div>
+          <div class="agenda-shell">
+            <div class="agenda-grid" id="plannerPreviewGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ESTUDIO -->
+  <div class="modal-bg" id="modalBg">
+    <div class="modal">
+      <h3 class="modal-title">Registrar estudio</h3>
+      <div id="eventsList"></div>
+
+      <input id="inpHoras" placeholder="Horas" type="number" min="0" />
+      <input id="inpMins" placeholder="Minutos" type="number" min="0" />
+      <textarea id="inpTema" placeholder="Tema"></textarea>
+      <select id="inpMateria"></select>
+
+      <div style="margin-top:.5rem; display:flex; gap:.5rem; justify-content:flex-end;">
+        <button class="btn-gray" id="btnCancelar">Cancelar</button>
+        <button class="btn-blue" id="btnGuardar">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL AGENDA -->
+  <div class="modal-bg" id="agendaModalBg">
+    <div class="modal">
+      <h3 class="modal-title" id="agendaModalTitle">Añadir clase</h3>
+      <label>Día</label>
+      <select id="agendaDay"></select>
+
+      <label>Materia</label>
+      <select id="agendaSubject"></select>
+
+      <label>Aula (opcional)</label>
+      <input id="agendaRoom" placeholder="Aula / Laboratorio" />
+
+      <div style="display:flex;gap:.5rem;">
+        <div style="flex:1;">
+          <label>Inicio</label>
+          <input id="agendaStart" type="time" min="08:00" max="23:00" />
+        </div>
+        <div style="flex:1;">
+          <label>Fin</label>
+          <input id="agendaEnd" type="time" min="08:00" max="23:00" />
+        </div>
+      </div>
+
+      <div style="margin-top:.6rem;display:flex;gap:.5rem;justify-content:flex-end;">
+        <button class="btn-gray btn-small" id="btnAgendaCancel">Cancelar</button>
+        <button class="btn-danger btn-small" id="btnAgendaDelete" style="display:none;">Eliminar</button>
+        <button class="btn-blue btn-small" id="btnAgendaSave">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PASAR PRESET A AGENDA -->
+  <div class="modal-bg" id="presetToAgendaModalBg">
+    <div class="modal modal-wide">
+      <h3 class="modal-title">Pasar preset a Agenda</h3>
+
+      <div class="small-muted" style="margin-bottom:.45rem;">
+        Elegí qué preset querés aplicar y si querés <strong>agregar</strong> a tu agenda actual o <strong>reemplazarla</strong>.
+        (Los cambios se guardan en Firebase).
+      </div>
+
+      <label>Preset</label>
+      <select id="presetApplySelect"></select>
+
+      <label style="margin-top:.35rem;">Modo</label>
+      <div class="radio-row">
+        <label class="radio-pill">
+          <input type="radio" name="applyMode" value="add" checked />
+          <span><strong>Agregar</strong> (no borra tu agenda)</span>
+        </label>
+        <label class="radio-pill">
+          <input type="radio" name="applyMode" value="replace" />
+          <span><strong>Reemplazar</strong> (borra tu agenda y pone el preset)</span>
+        </label>
+      </div>
+
+      <div class="small-muted" id="presetApplyInfo" style="margin-top:.5rem;"></div>
+
+      <hr class="hr-soft">
+
+      <div style="display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap;">
+        <button class="btn-gray btn-small" id="btnPresetApplyCancel">Cancelar</button>
+        <button class="btn-blue btn-small" id="btnPresetApplyConfirm">Aplicar a Agenda</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ACADEMICO -->
+  <div class="modal-bg" id="acadModalBg">
+    <div class="modal">
+      <h3 class="modal-title" id="acadModalTitle">Añadir académico</h3>
+
+      <label>Tipo</label>
+      <select id="acadType">
+        <option value="Parcial">Parcial</option>
+        <option value="TP">TP</option>
+        <option value="Tarea">Tarea</option>
+        <option value="Informe">Informe</option>
+        <option value="Recordatorio">Recordatorio</option>
+      </select>
+
+      <label>Materia</label>
+      <select id="acadSubject"></select>
+
+      <label>Título</label>
+      <input id="acadTitle" placeholder="Ej: 1er Parcial" />
+
+      <label>Fecha y hora</label>
+      <input id="acadWhen" type="datetime-local" />
+
+      <label>Notas (opcional)</label>
+      <textarea id="acadNotes" placeholder="Detalles, requisitos, link, etc."></textarea>
+
+      <label>Estado</label>
+      <select id="acadStatus">
+        <option value="pending">Pendiente</option>
+        <option value="done">Hecho</option>
+      </select>
+
+      <div style="margin-top:.6rem;display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap;">
+        <button class="btn-gray btn-small" id="btnAcadCancel">Cancelar</button>
+        <button class="btn-danger btn-small" id="btnAcadDelete" style="display:none;">Eliminar</button>
+        <button class="btn-blue btn-small" id="btnAcadSave">Guardar</button>
+      </div>
+    </div>
+  </div>
+<script type="module" src="scripts/student.js"></script>
+</body>
+</html>

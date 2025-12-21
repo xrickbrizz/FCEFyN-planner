@@ -1,0 +1,56 @@
+{
+  "slug": "industrial",
+  "nombre": "Ingeniería Industrial",
+  "storageKey": "estadosMaterias_v2_industrial",
+  "materias": [
+    { "id": "matematica", "nombre": "Matemática", "semestre": 1, "requisitos": [] },
+    { "id": "fisica", "nombre": "Física", "semestre": 1, "requisitos": [] },
+    { "id": "ambientacion", "nombre": "Ambientación Universitaria", "semestre": 1, "requisitos": [] },
+
+    { "id": "am1", "nombre": "Análisis Matemático I", "semestre": 2, "requisitos": ["matematica"] },
+    { "id": "introIng", "nombre": "Introducción a la Ingeniería", "semestre": 2, "requisitos": ["ambientacion"] },
+    { "id": "quimicaGral", "nombre": "Química General", "semestre": 2, "requisitos": ["fisica"] },
+    { "id": "sistRep", "nombre": "Sistemas de Representación", "semestre": 2, "requisitos": [] },
+
+    { "id": "algebra", "nombre": "Álgebra Lineal", "semestre": 3, "requisitos": ["matematica"] },
+    { "id": "fisica1", "nombre": "Física I", "semestre": 3, "requisitos": ["fisica","am1"] },
+    { "id": "pyestad", "nombre": "Probabilidad y Estadística", "semestre": 3, "requisitos": ["am1"] },
+    { "id": "fundProcQuim", "nombre": "Fundamentos de los Procesos Químicos", "semestre": 3, "requisitos": ["quimicaGral"] },
+
+    { "id": "am2", "nombre": "Análisis Matemático II", "semestre": 4, "requisitos": ["am1","algebra"] },
+    { "id": "fisica2", "nombre": "Física II", "semestre": 4, "requisitos": ["fisica1","am2"] },
+    { "id": "compu", "nombre": "Computación y Cálculo Numérico", "semestre": 4, "requisitos": ["algebra","am1"] },
+    { "id": "quimInorg", "nombre": "Química Inorgánica", "semestre": 4, "requisitos": ["quimicaGral"] },
+
+    { "id": "economia", "nombre": "Economía", "semestre": 5, "requisitos": ["introIng"] },
+    { "id": "mecRacional", "nombre": "Mecánica Racional", "semestre": 5, "requisitos": ["fisica1","am2"] },
+    { "id": "cienciaMat", "nombre": "Ciencia de los Materiales", "semestre": 5, "requisitos": ["quimicaGral","fisica2"] },
+    { "id": "termoMaq", "nombre": "Termodinámica y Máquinas Térmicas", "semestre": 5, "requisitos": ["fisica2","am2"] },
+
+    { "id": "estudioTrabajo", "nombre": "Estudio del Trabajo", "semestre": 6, "requisitos": ["pyestad","economia"] },
+    { "id": "electrotecnia", "nombre": "Electrotecnia e Instalaciones Eléctricas", "semestre": 6, "requisitos": ["fisica2"] },
+    { "id": "mecFluidos", "nombre": "Mecánica de los Fluidos", "semestre": 6, "requisitos": ["mecRacional","termoMaq"] },
+    { "id": "costos", "nombre": "Costos y Presupuestos", "semestre": 6, "requisitos": ["economia"] },
+
+    { "id": "invOp1", "nombre": "Investigación Operativa I", "semestre": 7, "requisitos": ["pyestad","algebra"] },
+    { "id": "procManuf", "nombre": "Procesos de Manufactura", "semestre": 7, "requisitos": ["cienciaMat"] },
+    { "id": "gestionCalidad", "nombre": "Gestión de la Calidad", "semestre": 7, "requisitos": ["pyestad"] },
+    { "id": "ingles", "nombre": "Módulo de Idioma Inglés", "semestre": 7, "requisitos": [], "requiereAprobadas": 5 },
+
+    { "id": "logistica", "nombre": "Logística y Cadena de Suministro", "semestre": 8, "requisitos": ["invOp1"] },
+    { "id": "planControlProd", "nombre": "Planificación y Control de la Producción", "semestre": 8, "requisitos": ["estudioTrabajo"] },
+    { "id": "higieneSeg", "nombre": "Higiene y Seguridad Industrial", "semestre": 8, "requisitos": ["estudioTrabajo"] },
+    { "id": "mantenimiento", "nombre": "Mantenimiento Industrial", "semestre": 8, "requisitos": ["procManuf"] },
+
+    { "id": "evalProy", "nombre": "Evaluación de Proyectos", "semestre": 9, "requisitos": ["costos"] },
+    { "id": "legislacionRI", "nombre": "Legislación y Relaciones Industriales", "semestre": 9, "requisitos": ["economia"] },
+    { "id": "gestionAmbiental", "nombre": "Gestión Ambiental", "semestre": 9, "requisitos": ["quimicaGral","higieneSeg"] },
+    { "id": "electiva1", "nombre": "Electiva I", "semestre": 9, "requisitos": [] },
+
+    { "id": "pps", "nombre": "Práctica Profesional Supervisada", "semestre": 10, "requisitos": [], "requierePorcentaje": 85 },
+    { "id": "electiva2", "nombre": "Electiva II", "semestre": 10, "requisitos": [] },
+
+    { "id": "proyectoInt", "nombre": "Proyecto Integrador", "semestre": 11, "requisitos": ["pps"] },
+    { "id": "electiva3", "nombre": "Electiva III", "semestre": 11, "requisitos": [] }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "slug": "computacion",
+  "nombre": "Ingeniería en Computación",
+  "storageKey": "estadosMaterias_v2_computacion",
+  "materias": [
+    { "id": "ambientacion", "nombre": "Ambientación Universitaria", "semestre": 1, "requisitos": [] },
+    { "id": "fyq", "nombre": "Física y Química", "semestre": 1, "requisitos": [] },
+    { "id": "matematica", "nombre": "Matemática", "semestre": 1, "requisitos": [] },
+
+    { "id": "fundProg", "nombre": "Fundamentos de Programación", "semestre": 2, "requisitos": ["matematica"] },
+    { "id": "taller", "nombre": "Taller y Laboratorio", "semestre": 2, "requisitos": ["ambientacion","matematica"] },
+    { "id": "am1", "nombre": "Análisis Matemático I", "semestre": 2, "requisitos": ["matematica"] },
+    { "id": "estrDis", "nombre": "Estructuras Discretas", "semestre": 2, "requisitos": ["matematica"] },
+
+    { "id": "aed", "nombre": "Algoritmos y Estructuras de Datos", "semestre": 3, "requisitos": ["estrDis","fundProg"] },
+    { "id": "algebra", "nombre": "Álgebra Lineal", "semestre": 3, "requisitos": ["matematica"] },
+    { "id": "fisica1", "nombre": "Física I", "semestre": 3, "requisitos": ["fyq","am1"] },
+    { "id": "ingles", "nombre": "Módulo de Inglés", "semestre": 3, "requisitos": [], "requiereAprobadas": 5 },
+
+    { "id": "progAv", "nombre": "Programación Avanzada", "semestre": 4, "requisitos": ["aed"] },
+    { "id": "ed1", "nombre": "Electrónica Digital I", "semestre": 4, "requisitos": ["taller","estrDis","fundProg"] },
+    { "id": "fisica2", "nombre": "Física II", "semestre": 4, "requisitos": ["fisica1","algebra"] },
+    { "id": "am2", "nombre": "Análisis Matemático II", "semestre": 4, "requisitos": ["am1","algebra"] },
+
+    { "id": "ed2", "nombre": "Electrónica Digital II", "semestre": 5, "requisitos": ["ed1"] },
+    { "id": "electronica", "nombre": "Electrónica", "semestre": 5, "requisitos": ["taller","fisica2"] },
+    { "id": "am3", "nombre": "Análisis Matemático III", "semestre": 5, "requisitos": ["am2"] },
+    { "id": "pyestad", "nombre": "Probabilidad y Estadística", "semestre": 5, "requisitos": ["am1"] },
+
+    { "id": "bd", "nombre": "Bases de Datos", "semestre": 6, "requisitos": ["aed"] },
+    { "id": "ish", "nombre": "Ingeniería de Software y Hardware", "semestre": 6, "requisitos": ["progAv","ed2"] },
+    { "id": "ed3", "nombre": "Electrónica Digital III", "semestre": 6, "requisitos": ["progAv","ed2"] },
+    { "id": "senySis", "nombre": "Señales y Sistemas", "semestre": 6, "requisitos": ["am3","fisica2"] },
+
+    { "id": "sc1", "nombre": "Sistemas de Control I", "semestre": 7, "requisitos": ["senySis"] },
+    { "id": "pcp", "nombre": "Programación Concurrente y Paralela", "semestre": 7, "requisitos": ["progAv"] },
+    { "id": "redes", "nombre": "Redes de Computadoras", "semestre": 7, "requisitos": ["ed2"] },
+    { "id": "procSen", "nombre": "Procesamiento de Señales", "semestre": 7, "requisitos": ["senySis"] },
+
+    { "id": "calidadSHS", "nombre": "Calidad de Software y Hardware-Software", "semestre": 8, "requisitos": ["ish"] },
+    { "id": "so", "nombre": "Sistemas Operativos", "semestre": 8, "requisitos": ["pcp"] },
+    { "id": "embebidos", "nombre": "Sistemas Embebidos", "semestre": 8, "requisitos": ["ed3"] },
+    { "id": "ia", "nombre": "Inteligencia Artificial", "semestre": 8, "requisitos": ["ish"] },
+
+    { "id": "segInf", "nombre": "Seguridad Informática", "semestre": 9, "requisitos": ["calidadSHS"] },
+    { "id": "sistDist", "nombre": "Sistemas Distribuidos", "semestre": 9, "requisitos": ["redes","so"] },
+    { "id": "arqComp", "nombre": "Arquitectura de Computadoras", "semestre": 9, "requisitos": ["so"] },
+    { "id": "sc2", "nombre": "Sistemas de Control II", "semestre": 9, "requisitos": ["sc1"] },
+
+    { "id": "ciberfis", "nombre": "Sistemas Ciberfísicos", "semestre": 10, "requisitos": ["sc2"] },
+    { "id": "sistInfo", "nombre": "Sistemas Informáticos", "semestre": 10, "requisitos": ["segInf"] },
+    { "id": "sel1", "nombre": "Selectiva 1", "semestre": 10, "requisitos": [] },
+    { "id": "sel2", "nombre": "Selectiva 2", "semestre": 10, "requisitos": [] },
+
+    { "id": "ecoLegal", "nombre": "Ingeniería Económica y Legal", "semestre": 11, "requisitos": ["ish"] },
+    { "id": "higiene", "nombre": "Higiene y Seguridad", "semestre": 11, "requisitos": ["calidadSHS"] },
+    { "id": "practica", "nombre": "Práctica Profesional Integradora", "semestre": 11, "requisitos": [], "requierePorcentaje": 85 }
+  ]
+}

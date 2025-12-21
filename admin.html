@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Panel de administración — FCEFyN Planner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style/admin.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-title">FCEFyN Planner</div>
+    <div class="sidebar-sub">
+      Panel Admin — gestión de usuarios y carga de horarios para que los estudiantes armen su agenda.
+    </div>
+
+    <div class="nav-section">Secciones</div>
+
+    <div class="nav-item active" id="navUsers" data-section="users">
+      <span>Usuarios</span>
+      <span class="nav-badge" id="badgeUsers">0</span>
+    </div>
+
+    <div class="nav-item" id="navSections" data-section="sections">
+      <span>Horarios de materias</span>
+      <span class="nav-badge" id="badgeSections">0</span>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title" id="topbarTitle">Panel de administración — Usuarios</div>
+      <div class="topbar-right">
+        <div id="adminEmail" class="topbar-email">—</div>
+        <button class="btn btn-outline" id="btnLogout">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- METRICS (siempre visibles, no rompe nada) -->
+      <div class="cards-row">
+        <div class="card">
+          <div class="card-title">Usuarios</div>
+          <div class="metric-main" id="metricUsersTotal">0</div>
+          <div class="metric-sub" id="metricUsersDetail">Admin: 0 · Estudiantes: 0 · Suspendidos: 0</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Horarios cargados</div>
+          <div class="metric-main" id="metricSectionsTotal">0</div>
+          <div class="metric-sub" id="metricSectionsDetail">Materias distintas: 0</div>
+        </div>
+      </div>
+
+      <!-- SECTION: USERS -->
+      <div id="section-users" class="section-wrap active">
+        <div class="card">
+          <div class="card-header">
+            <h2>Usuarios</h2>
+            <div class="muted">Rol, suspensión por minutos y quitar suspensión</div>
+          </div>
+          <div id="usersCards" class="users-grid"></div>
+        </div>
+      </div>
+
+      <!-- SECTION: SECTIONS -->
+      <div id="section-sections" class="section-wrap">
+        <div class="card">
+          <div class="card-header">
+            <h2>Horarios de materias / comisiones</h2>
+            <button class="btn btn-blue" id="btnNewSection">+ Nuevo horario</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Materia</th>
+                  <th>Comisión</th>
+                  <th>Día</th>
+                  <th>Horario</th>
+                  <th>Sede</th>
+                  <th>Aula</th>
+                  <th>Docentes</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="sectionsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HORARIO -->
+<div class="modal-bg" id="sectionModalBg">
+  <div class="modal">
+    <h3 id="sectionModalTitle">Nuevo horario</h3>
+
+    <div class="modal-grid">
+      <div>
+        <label>Materia</label>
+        <input id="secSubject" placeholder="Ej: Análisis Matemático 2">
+      </div>
+      <div>
+        <label>Comisión</label>
+        <input id="secCommission" placeholder="Ej: 2.2">
+      </div>
+      <div>
+        <label>Carrera (opcional)</label>
+        <input id="secDegree" placeholder="Ej: Ing. Civil">
+      </div>
+      <div>
+        <label>Aula</label>
+        <input id="secRoom" placeholder="Ej: 109">
+      </div>
+      <div>
+        <label>Sede (por defecto)</label>
+        <select id="secCampus">
+          <option value="">—</option>
+          <option value="Ciudad Universitaria">Ciudad Universitaria</option>
+          <option value="Centro">Centro</option>
+          <option value="Virtual sincrónica">Virtual sincrónica</option>
+        </select>
+      </div>
+      <div>
+        <label>Correo jefe de cátedra</label>
+        <input id="secHeadEmail" type="email" placeholder="correo@fcefyn.unc.edu.ar">
+      </div>
+    </div>
+
+    <div class="modal-grid">
+      <div>
+        <label>Titular</label>
+        <input id="secTitular" placeholder="Nombre del titular">
+      </div>
+      <div>
+        <label>Agregar docente / asistente / adjunto</label>
+        <div style="display:flex; gap:.4rem;">
+          <input id="docenteName" placeholder="Nombre">
+          <select id="docenteRole" style="max-width:150px;">
+            <option value="Docente">Docente</option>
+            <option value="Asistente">Asistente</option>
+            <option value="Adjunto">Adjunto</option>
+            <option value="Otro">Otro</option>
+          </select>
+          <button class="btn btn-gray" type="button" id="btnAddDocente">Añadir</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:.4rem;">
+      <div id="docentesChips"></div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:.7rem 0;">
+
+    <div>
+      <label>Días, horarios y sede</label>
+      <div style="display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:.4rem;">
+        <select id="daySelect" style="min-width:120px;">
+          <option value="">Día</option>
+          <option value="Lunes">Lunes</option>
+          <option value="Martes">Martes</option>
+          <option value="Miércoles">Miércoles</option>
+          <option value="Jueves">Jueves</option>
+          <option value="Viernes">Viernes</option>
+          <option value="Sábado">Sábado</option>
+        </select>
+        <input id="dayStart" type="time">
+        <input id="dayEnd" type="time">
+        <select id="dayCampus" style="min-width:170px;">
+          <option value="">Sede del día</option>
+          <option value="Ciudad Universitaria">Ciudad Universitaria</option>
+          <option value="Centro">Centro</option>
+          <option value="Virtual sincrónica">Virtual sincrónica</option>
+        </select>
+        <button class="btn btn-gray" type="button" id="btnAddDay">Agregar día</button>
+      </div>
+      <div id="daysChips"></div>
+      <div class="muted" style="margin-top:.2rem;">
+        Podés cargar hasta <strong>2 días por comisión</strong> (por ejemplo Lunes 11:30–14:45 en Ciudad Universitaria
+        y Miércoles 15:00–18:15 en Centro).
+      </div>
+    </div>
+
+    <div class="muted" style="margin-top:.7rem;">
+      Este horario se guarda en <code>/courseSections</code> y luego lo vamos a usar para que los estudiantes armen su agenda semanal.
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" type="button" id="btnDeleteSection" style="display:none;">Borrar horario</button>
+      <div class="modal-footer-right">
+        <button class="btn btn-gray" type="button" id="btnCancelSection">Cancelar</button>
+        <button class="btn btn-blue" type="button" id="btnSaveSection">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+import {
+  getFirestore, collection, doc, getDoc, getDocs,
+  addDoc, updateDoc, deleteDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA0i7hkXi5C-x3UwAEsh6FzRFqrFE5jpd8",
+  authDomain: "fcefyn-planner.firebaseapp.com",
+  projectId: "fcefyn-planner",
+  storageBucket: "fcefyn-planner.firebasestorage.app",
+  messagingSenderId: "713668406730",
+  appId: "1:713668406730:web:f41c459641bfdce0cd7333",
+  measurementId: "G-HLBVB8QHM8"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+let currentUser = null;
+
+/* ---------- estado modal horarios ---------- */
+let editingSectionId = null;
+let daysList = [];      // {day, start, end, campus}
+let docentesList = [];  // {name, role}
+
+/* ---------- helpers UI ---------- */
+const qs  = sel => document.querySelector(sel);
+
+/* ---------- navegación secciones ---------- */
+function setActiveNav(section){
+  const navUsers = qs("#navUsers");
+  const navSecs  = qs("#navSections");
+  const secUsers = qs("#section-users");
+  const secSecs  = qs("#section-sections");
+  const topTitle = qs("#topbarTitle");
+
+  navUsers.classList.toggle("active", section === "users");
+  navSecs.classList.toggle("active", section === "sections");
+
+  secUsers.classList.toggle("active", section === "users");
+  secSecs.classList.toggle("active", section === "sections");
+
+  topTitle.textContent = section === "users"
+    ? "Panel de administración — Usuarios"
+    : "Panel de administración — Horarios de materias";
+}
+
+function wireSidebar(){
+  qs("#navUsers").addEventListener("click", ()=> setActiveNav("users"));
+  qs("#navSections").addEventListener("click", ()=> setActiveNav("sections"));
+}
+
+/* ---------- sesión / acceso ---------- */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "app.html";
+    return;
+  }
+
+  const userRef = doc(db,"users",user.uid);
+  const snap = await getDoc(userRef);
+  if (!snap.exists() || snap.data().role !== "admin") {
+    window.location.href = "student.html";
+    return;
+  }
+
+  currentUser = user;
+  qs("#adminEmail").textContent = user.email || "—";
+
+  attachGlobalHandlers();
+  wireSidebar();
+  setActiveNav("users");
+
+  await Promise.all([loadUsers(), loadSections()]);
+});
+
+function attachGlobalHandlers(){
+  qs("#btnLogout").addEventListener("click", async () => {
+    try{
+      await signOut(auth);
+      window.location.href = "app.html";
+    }catch(e){
+      alert("Error al cerrar sesión: " + (e.message || e));
+    }
+  });
+
+  qs("#btnNewSection").addEventListener("click", () => openSectionModal(null));
+
+  qs("#btnCancelSection").addEventListener("click", closeSectionModal);
+  qs("#sectionModalBg").addEventListener("click", (e)=>{
+    if (e.target === qs("#sectionModalBg")) closeSectionModal();
+  });
+
+  qs("#btnAddDay").addEventListener("click", addDayToList);
+  qs("#btnAddDocente").addEventListener("click", addDocenteToList);
+  qs("#btnSaveSection").addEventListener("click", saveSection);
+  qs("#btnDeleteSection").addEventListener("click", deleteCurrentSection);
+
+  // acciones de tabla de horarios
+  qs("#sectionsTableBody").addEventListener("click", async (e)=>{
+    const id = e.target.getAttribute("data-id");
+    if (!id) return;
+    if (e.target.classList.contains("btn-edit-section")){
+      const ref = doc(db,"courseSections",id);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) return;
+      openSectionModal(id,snap.data());
+    } else if (e.target.classList.contains("btn-delete-section")){
+      if (!confirm("¿Borrar este horario y todos sus días?")) return;
+      await deleteDoc(doc(db,"courseSections",id));
+      await loadSections();
+    }
+  });
+}
+
+/* ---------- helpers suspensión ---------- */
+function nowMs(){ return Date.now(); }
+function getSuspendedUntilMs(data){
+  const v = data.suspendedUntil;
+  if (!v) return 0;
+  if (typeof v === "number") return v;
+  if (v && typeof v.toMillis === "function") return v.toMillis();
+  return 0;
+}
+function isSuspended(data){
+  const until = getSuspendedUntilMs(data);
+  return until > nowMs();
+}
+function fmtUntil(untilMs){
+  try{
+    const d = new Date(untilMs);
+    return d.toLocaleString("es-AR");
+  }catch(_){
+    return "";
+  }
+}
+function minutesLeft(untilMs){
+  const diff = untilMs - nowMs();
+  if (diff <= 0) return 0;
+  return Math.ceil(diff / 60000);
+}
+
+/* ---------- usuarios (CARDS) ---------- */
+async function loadUsers(){
+  const usersSnap = await getDocs(collection(db,"users"));
+  const cont = qs("#usersCards");
+  cont.innerHTML = "";
+
+  let total = 0, admins = 0, students = 0, suspended = 0;
+
+  usersSnap.forEach(d => {
+    total++;
+    const data = d.data();
+    const role = data.role || "student";
+
+    const untilMs = getSuspendedUntilMs(data);
+    const susp = isSuspended(data);
+
+    if (role === "admin") admins++;
+    else students++;
+
+    if (susp) suspended++;
+
+    const card = document.createElement("div");
+    card.className = "user-card";
+
+    const top = document.createElement("div");
+    top.className = "user-top";
+
+    const left = document.createElement("div");
+    const email = document.createElement("div");
+    email.className = "user-email";
+    email.textContent = data.email || "(sin correo)";
+    const name = document.createElement("div");
+    name.className = "user-name";
+    name.textContent = data.name || "—";
+    left.appendChild(email);
+    left.appendChild(name);
+
+    const pill = document.createElement("div");
+    pill.className = "pill " + (role === "admin" ? "admin" : "student");
+    pill.textContent = role === "admin" ? "Admin" : "Estudiante";
+
+    top.appendChild(left);
+    top.appendChild(pill);
+
+    const grid = document.createElement("div");
+    grid.className = "user-row";
+
+    // Rol select
+    const fRole = document.createElement("div");
+    fRole.className = "user-field";
+    const labR = document.createElement("label");
+    labR.textContent = "Rol";
+    const sel = document.createElement("select");
+    ["admin","student"].forEach(r=>{
+      const opt = document.createElement("option");
+      opt.value = r;
+      opt.textContent = r === "admin" ? "Admin" : "Estudiante";
+      if (r === role) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener("change", async ()=>{
+      await updateDoc(doc(db,"users",d.id),{ role: sel.value });
+      await loadUsers();
+    });
+    fRole.appendChild(labR);
+    fRole.appendChild(sel);
+
+    // Suspensión info
+    const fSusp = document.createElement("div");
+    fSusp.className = "user-field";
+    const labS = document.createElement("label");
+    labS.textContent = "Suspensión";
+    const vSusp = document.createElement("div");
+    vSusp.className = "value";
+
+    if (susp){
+      vSusp.textContent = `Activa (${minutesLeft(untilMs)} min) · hasta ${fmtUntil(untilMs)}`;
+    } else {
+      vSusp.textContent = "No suspendido";
+    }
+
+    fSusp.appendChild(labS);
+    fSusp.appendChild(vSusp);
+
+    grid.appendChild(fRole);
+    grid.appendChild(fSusp);
+
+    // Actions
+    const actions = document.createElement("div");
+    actions.className = "user-actions";
+
+    const btnSuspend = document.createElement("button");
+    btnSuspend.className = "btn btn-warn";
+    btnSuspend.textContent = "Suspender (min)";
+    btnSuspend.addEventListener("click", async ()=>{
+      const raw = prompt("¿Cuántos minutos querés suspender a este usuario?", "60");
+      if (raw === null) return; // cancelado
+      const mins = parseInt(String(raw).trim(), 10);
+      if (!Number.isFinite(mins) || mins <= 0){
+        alert("Ingresá un número válido de minutos (mayor que 0).");
+        return;
+      }
+      const until = Date.now() + mins*60000;
+
+      try{
+        await updateDoc(doc(db,"users",d.id),{
+          suspended: true,
+          suspendedUntil: until
+        });
+        await loadUsers();
+      }catch(e){
+        alert("Error al suspender: " + (e.message || e));
+      }
+    });
+
+    const btnUnsuspend = document.createElement("button");
+    btnUnsuspend.className = "btn btn-ok";
+    btnUnsuspend.textContent = "Quitar suspensión";
+    btnUnsuspend.addEventListener("click", async ()=>{
+      try{
+        await updateDoc(doc(db,"users",d.id),{
+          suspended: false,
+          suspendedUntil: 0
+        });
+        await loadUsers();
+      }catch(e){
+        alert("Error al quitar suspensión: " + (e.message || e));
+      }
+    });
+
+    // Chips de estado
+    const statusPill = document.createElement("div");
+    statusPill.className = "pill " + (susp ? "susp" : "");
+    statusPill.textContent = susp ? "Suspendido" : "Activo";
+
+    actions.appendChild(statusPill);
+    actions.appendChild(btnSuspend);
+    actions.appendChild(btnUnsuspend);
+
+    card.appendChild(top);
+    card.appendChild(grid);
+    card.appendChild(actions);
+
+    cont.appendChild(card);
+  });
+
+  qs("#metricUsersTotal").textContent = total.toString();
+  qs("#metricUsersDetail").textContent =
+    `Admin: ${admins} · Estudiantes: ${students} · Suspendidos: ${suspended}`;
+  qs("#badgeUsers").textContent = String(total);
+}
+
+/* ---------- horarios ---------- */
+async function loadSections(){
+  const snap = await getDocs(collection(db,"courseSections"));
+  const tbody = qs("#sectionsTableBody");
+  tbody.innerHTML = "";
+
+  let totalDocs = 0;
+  const subjectsSet = new Set();
+
+  snap.forEach(d =>{
+    totalDocs++;
+    const data = d.data();
+    const subject = data.subject || "—";
+    const commission = data.commission || "—";
+    const room = data.room || "—";
+    const campusDefault = data.campus || "—";
+    const titular = data.titular || "";
+    const docentesArr = Array.isArray(data.docentes) ? data.docentes : [];
+    const days = Array.isArray(data.days) ? data.days : [];
+
+    if (subject) subjectsSet.add(subject);
+
+    let docentesLabel = "";
+    if (titular) docentesLabel += "Titular: " + titular;
+    if (docentesArr.length){
+      const list = docentesArr.map(d0 => {
+        const n = d0.name || "";
+        const r = d0.role || "";
+        return r ? `${n} (${r})` : n;
+      }).join(", ");
+      docentesLabel += (docentesLabel ? " · " : "") + list;
+    }
+    if (!docentesLabel) docentesLabel = "—";
+
+    if (!days.length){
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${subject}</td>
+        <td>${commission}</td>
+        <td>—</td>
+        <td>—</td>
+        <td>${campusDefault}</td>
+        <td>${room}</td>
+        <td>${docentesLabel}</td>
+        <td>
+          <button class="btn btn-outline btn-edit-section" data-id="${d.id}">Editar</button>
+          <button class="btn btn-danger btn-delete-section" data-id="${d.id}">Borrar</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    } else {
+      days.forEach((dayObj, idx)=>{
+        const tr = document.createElement("tr");
+        const campus = dayObj.campus || campusDefault || "—";
+        const horario = (dayObj.start || "") && (dayObj.end || "")
+          ? `${dayObj.start} – ${dayObj.end}` : "—";
+        tr.innerHTML = `
+          <td>${idx === 0 ? subject : ""}</td>
+          <td>${idx === 0 ? commission : ""}</td>
+          <td>${dayObj.day || "—"}</td>
+          <td>${horario}</td>
+          <td>${campus}</td>
+          <td>${idx === 0 ? room : ""}</td>
+          <td>${idx === 0 ? docentesLabel : ""}</td>
+          <td>
+            <button class="btn btn-outline btn-edit-section" data-id="${d.id}">Editar</button>
+            <button class="btn btn-danger btn-delete-section" data-id="${d.id}">Borrar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  });
+
+  qs("#metricSectionsTotal").textContent = String(totalDocs);
+  qs("#metricSectionsDetail").textContent =
+    "Materias distintas: " + subjectsSet.size;
+  qs("#badgeSections").textContent = String(totalDocs);
+}
+
+/* ---------- modal horarios ---------- */
+function openSectionModal(id, data=null){
+  editingSectionId = id || null;
+  daysList = [];
+  docentesList = [];
+
+  qs("#sectionModalTitle").textContent = id ? "Editar horario" : "Nuevo horario";
+  qs("#btnDeleteSection").style.display = id ? "inline-flex" : "none";
+
+  qs("#secSubject").value    = data?.subject || "";
+  qs("#secCommission").value = data?.commission || "";
+  qs("#secDegree").value     = data?.degree || "";
+  qs("#secRoom").value       = data?.room || "";
+  qs("#secCampus").value     = data?.campus || "";
+  qs("#secHeadEmail").value  = data?.headEmail || "";
+  qs("#secTitular").value    = data?.titular || "";
+
+  if (Array.isArray(data?.docentes)){
+    docentesList = data.docentes.map(d => ({
+      name: d.name || "",
+      role: d.role || "Docente"
+    }));
+  }
+  if (Array.isArray(data?.days)){
+    daysList = data.days.map(d => ({
+      day: d.day || "",
+      start: d.start || "",
+      end: d.end || "",
+      campus: d.campus || ""
+    }));
+  }
+
+  renderDocentesChips();
+  renderDaysChips();
+
+  qs("#sectionModalBg").style.display = "flex";
+}
+
+function closeSectionModal(){
+  qs("#sectionModalBg").style.display = "none";
+  editingSectionId = null;
+  daysList = [];
+  docentesList = [];
+}
+
+/* docentes chips */
+function renderDocentesChips(){
+  const cont = qs("#docentesChips");
+  cont.innerHTML = "";
+  docentesList.forEach((d, idx)=>{
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = `
+      <span>${d.name} — ${d.role}</span>
+      <span class="chip-remove" data-idx="${idx}">✕</span>
+    `;
+    chip.querySelector(".chip-remove").addEventListener("click", ()=>{
+      docentesList.splice(idx,1);
+      renderDocentesChips();
+    });
+    cont.appendChild(chip);
+  });
+}
+
+function addDocenteToList(){
+  const name = qs("#docenteName").value.trim();
+  const role = qs("#docenteRole").value || "Docente";
+  if (!name){
+    alert("Ingresá el nombre del docente.");
+    return;
+  }
+  docentesList.push({ name, role });
+  qs("#docenteName").value = "";
+  renderDocentesChips();
+}
+
+/* days chips */
+function renderDaysChips(){
+  const cont = qs("#daysChips");
+  cont.innerHTML = "";
+  daysList.forEach((d, idx)=>{
+    const texto = `${d.day} ${d.start || ""}–${d.end || ""}${d.campus ? " · " + d.campus : ""}`;
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = `
+      <span>${texto}</span>
+      <span class="chip-remove" data-idx="${idx}">✕</span>
+    `;
+    chip.querySelector(".chip-remove").addEventListener("click", ()=>{
+      daysList.splice(idx,1);
+      renderDaysChips();
+    });
+    cont.appendChild(chip);
+  });
+}
+
+function addDayToList(){
+  const day    = qs("#daySelect").value;
+  const start  = qs("#dayStart").value;
+  const end    = qs("#dayEnd").value;
+  const campus = qs("#dayCampus").value || qs("#secCampus").value || "";
+
+  if (!day || !start || !end){
+    alert("Completá día, hora de inicio y fin.");
+    return;
+  }
+  if (start >= end){
+    alert("La hora de inicio debe ser menor que la de fin.");
+    return;
+  }
+  if (daysList.length >= 2){
+    alert("Sólo se permiten hasta 2 días por comisión.");
+    return;
+  }
+  if (daysList.some(d => d.day === day)){
+    alert("Ese día ya está cargado para esta comisión.");
+    return;
+  }
+
+  daysList.push({ day, start, end, campus });
+  renderDaysChips();
+
+  qs("#daySelect").value = "";
+  qs("#dayStart").value = "";
+  qs("#dayEnd").value = "";
+  qs("#dayCampus").value = "";
+}
+
+/* guardar / borrar horario */
+async function saveSection(){
+  const subject    = qs("#secSubject").value.trim();
+  const commission = qs("#secCommission").value.trim();
+  const degree     = qs("#secDegree").value.trim();
+  const room       = qs("#secRoom").value.trim();
+  const campus     = qs("#secCampus").value;
+  const headEmail  = qs("#secHeadEmail").value.trim();
+  const titular    = qs("#secTitular").value.trim();
+
+  if (!subject || !commission){
+    alert("Completá al menos la materia y la comisión.");
+    return;
+  }
+  if (!daysList.length){
+    alert("Cargá al menos un día y horario.");
+    return;
+  }
+
+  const payload = {
+    subject,
+    commission,
+    degree: degree || "",
+    room: room || "",
+    campus: campus || "",
+    headEmail: headEmail || "",
+    titular: titular || "",
+    docentes: docentesList,
+    days: daysList,
+    updatedAt: serverTimestamp()
+  };
+
+  try{
+    if (editingSectionId){
+      await updateDoc(doc(db,"courseSections",editingSectionId), payload);
+    } else {
+      payload.createdAt = serverTimestamp();
+      await addDoc(collection(db,"courseSections"), payload);
+    }
+    closeSectionModal();
+    await loadSections();
+  }catch(e){
+    alert("Error al guardar horario: " + (e.message || e));
+  }
+}
+
+async function deleteCurrentSection(){
+  if (!editingSectionId) return;
+  if (!confirm("¿Seguro que querés borrar este horario?")) return;
+  try{
+    await deleteDoc(doc(db,"courseSections",editingSectionId));
+    closeSectionModal();
+    await loadSections();
+  }catch(e){
+    alert("Error al borrar horario: " + (e.message || e));
+  }
+}
+</script>
+</body>
+</html>

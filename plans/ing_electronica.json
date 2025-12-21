@@ -1,0 +1,52 @@
+{
+  "slug": "electronica",
+  "nombre": "Ingeniería Electrónica",
+  "storageKey": "estadosMaterias_v2_electronica",
+  "materias": [
+    { "id": "matematica", "nombre": "Matemática", "semestre": 1, "requisitos": [] },
+    { "id": "fisica", "nombre": "Física", "semestre": 1, "requisitos": [] },
+    { "id": "ambientacion", "nombre": "Ambientación Universitaria", "semestre": 1, "requisitos": [] },
+
+    { "id": "am1", "nombre": "Análisis Matemático I", "semestre": 2, "requisitos": ["matematica"] },
+    { "id": "introIng", "nombre": "Introducción a la Ingeniería", "semestre": 2, "requisitos": ["ambientacion"] },
+    { "id": "quimicaGral", "nombre": "Química General", "semestre": 2, "requisitos": ["fisica"] },
+    { "id": "sistRep", "nombre": "Sistemas de Representación", "semestre": 2, "requisitos": [] },
+
+    { "id": "algebra", "nombre": "Álgebra Lineal", "semestre": 3, "requisitos": ["matematica"] },
+    { "id": "fisica1", "nombre": "Física I", "semestre": 3, "requisitos": ["fisica","am1"] },
+    { "id": "informatica", "nombre": "Informática", "semestre": 3, "requisitos": [] },
+    { "id": "ingles", "nombre": "Módulo de Inglés", "semestre": 3, "requisitos": [], "requiereAprobadas": 5 },
+
+    { "id": "am2", "nombre": "Análisis Matemático II", "semestre": 4, "requisitos": ["am1","algebra"] },
+    { "id": "fisica2", "nombre": "Física II", "semestre": 4, "requisitos": ["fisica1","am2"] },
+    { "id": "pyestad", "nombre": "Probabilidad y Estadística", "semestre": 4, "requisitos": ["am1"] },
+    { "id": "am3", "nombre": "Análisis Matemático III", "semestre": 4, "requisitos": ["am2"] },
+
+    { "id": "fisicaElectronica", "nombre": "Física Electrónica", "semestre": 5, "requisitos": ["fisica2","quimicaGral"] },
+    { "id": "tc1", "nombre": "Teoría de los Circuitos I", "semestre": 5, "requisitos": ["fisica2","am2"] },
+    { "id": "senySis", "nombre": "Señales y Sistemas", "semestre": 5, "requisitos": ["am3","tc1"] },
+
+    { "id": "dispositivos", "nombre": "Dispositivos Electrónicos", "semestre": 6, "requisitos": ["fisicaElectronica","tc1"] },
+    { "id": "tc2", "nombre": "Teoría de los Circuitos II", "semestre": 6, "requisitos": ["tc1","am3"] },
+    { "id": "td1", "nombre": "Técnicas Digitales I", "semestre": 6, "requisitos": ["informatica","dispositivos"] },
+
+    { "id": "medidas1", "nombre": "Medidas Electrónicas I", "semestre": 7, "requisitos": ["tc1","pyestad"] },
+    { "id": "maqInstElec", "nombre": "Máquinas e Instalaciones Eléctricas", "semestre": 7, "requisitos": ["tc1"] },
+    { "id": "com1", "nombre": "Sistemas de Comunicaciones I", "semestre": 7, "requisitos": ["senySis"] },
+
+    { "id": "td2", "nombre": "Técnicas Digitales II", "semestre": 8, "requisitos": ["td1"] },
+    { "id": "sc1", "nombre": "Sistemas de Control I", "semestre": 8, "requisitos": ["senySis"] },
+    { "id": "potencia", "nombre": "Electrónica de Potencia", "semestre": 8, "requisitos": ["dispositivos","tc2"] },
+
+    { "id": "medidas2", "nombre": "Medidas Electrónicas II", "semestre": 9, "requisitos": ["medidas1","dispositivos"] },
+    { "id": "tecElectronica", "nombre": "Tecnología Electrónica", "semestre": 9, "requisitos": ["dispositivos"] },
+    { "id": "com2", "nombre": "Sistemas de Comunicaciones II", "semestre": 9, "requisitos": ["com1"] },
+
+    { "id": "sc2", "nombre": "Sistemas de Control II", "semestre": 10, "requisitos": ["sc1"] },
+    { "id": "arqComp", "nombre": "Arquitectura de Computadoras (Digitales III)", "semestre": 10, "requisitos": ["td2"] },
+    { "id": "ecoOrgInd", "nombre": "Economía y Organización Industrial", "semestre": 10, "requisitos": ["introIng"] },
+
+    { "id": "legislacion", "nombre": "Legislación y Ejercicio Profesional", "semestre": 11, "requisitos": ["ecoOrgInd"] },
+    { "id": "proyectoFinal", "nombre": "Proyecto Final", "semestre": 11, "requisitos": [], "requierePorcentaje": 85 }
+  ]
+}

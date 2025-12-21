@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Planes de Estudio - FCEFyN</title>
+<style>
+  :root{
+    --bg1:#000000; --bg2:#141414;
+    --accent:#d4af37;
+    --muted:#9aa6b2;
+    --glass: rgba(255,255,255,0.04);
+    --shadow: 0 12px 34px rgba(2,6,23,0.75);
+    --card:#0f1216;
+    --line: rgba(255,255,255,0.08);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; min-height:100%;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background:
+      radial-gradient(900px 500px at 18% 0%, rgba(212,175,55,0.08), transparent 55%),
+      linear-gradient(135deg, var(--bg1), var(--bg2));
+    color:#e6eef6;
+    display:flex; flex-direction:column; align-items:center;
+    padding:18px;
+  }
+  header{
+    width:100%; max-width:1400px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:14px 16px;
+    background: rgba(255,255,255,0.02);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow: var(--shadow);
+  }
+  .title{
+    display:flex; flex-direction:column; gap:2px;
+  }
+  h1{
+    margin:0;
+    font-size:1.35rem;
+    color:var(--accent);
+    text-shadow:0 0 12px rgba(212,175,55,0.20);
+  }
+  .sub{ font-size:0.92rem; color:var(--muted); margin:0; }
+  .controls{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+  }
+  .input{
+    min-width:320px;
+    background: var(--glass);
+    color:#d9e6f2;
+    border:1px solid rgba(255,255,255,0.06);
+    padding:10px 12px;
+    border-radius:12px;
+    outline:none;
+  }
+  .btn{
+    background: var(--glass);
+    color:#d9e6f2;
+    border:1px solid rgba(255,255,255,0.06);
+    padding:10px 12px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:700;
+    transition: transform .12s, background .12s, border-color .12s;
+    user-select:none;
+  }
+  .btn:hover{ transform:translateY(-2px); background:rgba(255,255,255,0.06); border-color:rgba(212,175,55,0.30); }
+  main{
+    width:100%; max-width:1400px;
+    margin-top:14px;
+  }
+  .msg{
+    width:100%;
+    padding:14px 16px;
+    border-radius:14px;
+    border:1px solid rgba(212,175,55,0.22);
+    background: rgba(212,175,55,0.06);
+    box-shadow: var(--shadow);
+    color:#f3e7c3;
+    display:none;
+  }
+  .grid{
+    margin-top:14px;
+    display:grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap:14px;
+  }
+  @media (max-width:900px){
+    .input{ min-width: 220px; width: 100%; }
+    header{ flex-direction:column; align-items:stretch; }
+    .grid{ grid-template-columns:1fr; }
+    .controls{ justify-content:space-between; }
+  }
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:16px;
+    padding:14px 16px;
+    box-shadow: var(--shadow);
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .card h2{
+    margin:0;
+    font-size:1.05rem;
+    color: var(--accent);
+    letter-spacing:0.2px;
+  }
+  .meta{
+    margin-top:6px;
+    font-size:0.9rem;
+    color: var(--muted);
+  }
+  .pill{
+    font-size:0.8rem;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.08);
+    background: rgba(0,0,0,0.22);
+    color: #b9c6d2;
+  }
+  footer{
+    width:100%; max-width:1400px;
+    margin-top:12px;
+    color: var(--muted);
+    font-size:0.85rem;
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="title">
+      <h1>Planes de Estudio</h1>
+      <p class="sub">Elegí una carrera para abrir su malla (correlativas + estados).</p>
+    </div>
+    <div class="controls">
+      <input id="q" class="input" placeholder="Buscar (ej: civil, ambiental, electrónica)..." />
+      <button class="btn" id="btnClear" type="button">Limpiar</button>
+      <button class="btn" id="btnBack" type="button">← Volver</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="msg" id="msg"></div>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <footer>
+    <div>Orden alfabético automático</div>
+    <div>FCEFyN • UNC</div>
+  </footer>
+
+<script>
+(function(){
+  const INDEX_URL = "./plans/plans_index.json";
+  const msg = document.getElementById("msg");
+  const grid = document.getElementById("grid");
+  const q = document.getElementById("q");
+  const btnClear = document.getElementById("btnClear");
+  const btnBack = document.getElementById("btnBack");
+
+  function showMsg(text){
+    msg.style.display = "block";
+    msg.textContent = text;
+  }
+  function hideMsg(){
+    msg.style.display = "none";
+    msg.textContent = "";
+  }
+
+  function normalize(s){
+    return (s || "")
+      .toString()
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function getBackUrl(){
+    const from = localStorage.getItem("plans_from_url");
+    return from && typeof from === "string" ? from : "app.html";
+  }
+
+  function openPlan(plan){
+    // guardo selección sin query string visible
+    sessionStorage.setItem("selectedPlanSlug", plan.slug || "");
+    sessionStorage.setItem("selectedPlanJson", plan.json || "");
+    sessionStorage.setItem("selectedPlanNombre", plan.nombre || "");
+    window.location.href = "plans.html";
+  }
+
+  let allPlans = [];
+
+  async function loadIndex(){
+    try{
+      const res = await fetch(INDEX_URL, { cache: "no-store" });
+      if(!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+
+      const arr = Array.isArray(data.plans) ? data.plans
+               : Array.isArray(data.carreras) ? data.carreras
+               : Array.isArray(data) ? data
+               : [];
+
+      if(!arr.length){
+        showMsg('El índice no tiene planes. Revisá "plans/plans_index.json".');
+        return;
+      }
+
+      allPlans = arr.slice().sort((a,b)=>{
+        return normalize(a.nombre).localeCompare(normalize(b.nombre), "es");
+      });
+
+      render();
+    }catch(e){
+      showMsg("No se pudo cargar carreras. Revisá que exista: " + INDEX_URL);
+    }
+  }
+
+  function render(){
+    hideMsg();
+    const term = normalize(q.value);
+    const filtered = allPlans.filter(p=>{
+      const txt = normalize((p.nombre||"") + " " + (p.slug||""));
+      return !term || txt.includes(term);
+    });
+
+    grid.innerHTML = "";
+    filtered.forEach(p=>{
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div>
+          <h2>${p.nombre || "Sin nombre"}</h2>
+          <div class="meta">
+            <span class="pill">Correlativas + estados</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="btn" type="button">Abrir</button>
+        </div>
+      `;
+      card.querySelector("button").addEventListener("click", ()=> openPlan(p));
+      grid.appendChild(card);
+    });
+
+    if(!filtered.length){
+      showMsg("No hay resultados con ese filtro.");
+    }
+  }
+
+  q.addEventListener("input", render);
+  btnClear.addEventListener("click", ()=>{ q.value=""; render(); q.focus(); });
+  btnBack.addEventListener("click", ()=>{ window.location.href = getBackUrl(); });
+
+  loadIndex();
+})();
+</script>
+</body>
+</html>
