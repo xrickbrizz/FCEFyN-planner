@@ -5,6 +5,7 @@ export function createQuickSidebar(options){
     title="Accesos rápidos",
     subtitle="Navegá las secciones principales",
     footer="Se sincroniza con las pestaas actuales.",
+    collapsed=true,
     onSelect
   } = options || {};
 
@@ -15,6 +16,7 @@ export function createQuickSidebar(options){
 
   const aside = document.createElement("aside");
   aside.className = "quick-sidebar";
+  if (collapsed) aside.classList.add("collapsed");
 
   const head = document.createElement("div");
   head.className = "qs-head";
@@ -81,6 +83,8 @@ export function createQuickSidebar(options){
   mount.appendChild(backdrop);
   mount.appendChild(aside);
 
+  let isCollapsed = !!collapsed;
+
   function setActive(id){
     buttons.forEach(b => b.classList.toggle("active", b.dataset.id === id));
   }
@@ -96,8 +100,15 @@ export function createQuickSidebar(options){
     if (aside.classList.contains("open")) close();
     else open();
   }
+  function setCollapsed(state){
+    isCollapsed = !!state;
+    aside.classList.toggle("collapsed", isCollapsed);
+  }
+  function expand(){ setCollapsed(false); }
+  function collapse(){ setCollapsed(true); }
+  function getCollapsed(){ return isCollapsed; }
 
   backdrop.addEventListener("click", close);
 
-  return { setActive, open, close, toggle, el: aside };
+  return { setActive, open, close, toggle, setCollapsed, expand, collapse, getCollapsed, el: aside };
 }

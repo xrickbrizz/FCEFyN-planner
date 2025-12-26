@@ -23,19 +23,12 @@
     </div>
   </header>
 
-  <div class="page-layout">
+  <div class="page-layout sidebar-collapsed" id="pageLayout">
     <div id="quickSidebarMount"></div>
     <div class="page-content">
       <button class="quick-toggle-btn" id="sidebarToggle" type="button">☰ Accesos rápidos</button>
+      <div class="section-label" id="currentSectionLabel">📒 Estudio</div>
       <div class="main-shell">
-        <div class="tabs-bar">
-          <button id="tabBtnEstudio" class="tab-btn tab-active" onclick="showTab('estudio')">Estudio</button>
-          <button id="tabBtnAcademico" class="tab-btn" onclick="showTab('academico')">Académico</button>
-          <button id="tabBtnAgenda" class="tab-btn" onclick="showTab('agenda')">Agenda</button>
-          <button id="tabBtnMaterias" class="tab-btn" onclick="showTab('materias')">Materias</button>
-          <button id="tabBtnPlanificador" class="tab-btn" onclick="showTab('planificador')">Planificador</button>
-        </div>
-
     <!-- TAB ESTUDIO -->
     <div id="tab-estudio" class="tab-card">
       <div class="tab-estudio-layout">
