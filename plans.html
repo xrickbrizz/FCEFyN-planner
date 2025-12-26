@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Plan de Estudios</title>
+<link rel="stylesheet" href="style/ui-components.css">
 <style>
   :root{
     --bg1:#000000; --bg2:#161616;
@@ -230,7 +231,8 @@
 
 <div id="menu" style="display:none; position:fixed; z-index:9999;"></div>
 
-<script>
+<script type="module">
+import { showConfirm } from "./scripts/ui/notifications.js";
 (function(){
   const INDEX_URL = "./plans/plans_index.json";
   const STORAGE_KEY = "estadosMaterias_v2";
@@ -326,8 +328,15 @@
 
     const btnResetPanel = document.getElementById("btnResetPanel");
     if(btnResetPanel){
-      btnResetPanel.addEventListener("click", ()=>{
-        if(!confirm("¿Borrar todos los estados?")) return;
+      btnResetPanel.addEventListener("click", async ()=>{
+        const ok = await showConfirm({
+          title:"Reiniciar panel",
+          message:"¿Borrar todos los estados?",
+          confirmText:"Resetear",
+          cancelText:"Cancelar",
+          danger:true
+        });
+        if(!ok) return;
         localStorage.removeItem(STORAGE_KEY);
         updateUI();
       });
@@ -542,8 +551,15 @@
 
   btnBack.addEventListener("click", ()=> window.location.href = getBackUrl());
 
-  btnReset.addEventListener("click", ()=>{
-    if(!confirm("¿Querés reiniciar todos los estados? Esta acción no se puede deshacer.")) return;
+  btnReset.addEventListener("click", async ()=>{
+    const ok = await showConfirm({
+      title:"Reiniciar estados",
+      message:"¿Querés reiniciar todos los estados? Esta acción no se puede deshacer.",
+      confirmText:"Reiniciar",
+      cancelText:"Cancelar",
+      danger:true
+    });
+    if(!ok) return;
     localStorage.removeItem(STORAGE_KEY);
     updateUI();
   });

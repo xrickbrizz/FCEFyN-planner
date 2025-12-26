@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Panel del Estudiante</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style/ui-components.css">
   <link rel="stylesheet" href="style/student.css">
 </head>
 
@@ -22,14 +23,18 @@
     </div>
   </header>
 
-  <div class="main-shell">
-    <div class="tabs-bar">
-      <button id="tabBtnEstudio" class="tab-btn tab-active" onclick="showTab('estudio')">Estudio</button>
-      <button id="tabBtnAcademico" class="tab-btn" onclick="showTab('academico')">Académico</button>
-      <button id="tabBtnAgenda" class="tab-btn" onclick="showTab('agenda')">Agenda</button>
-      <button id="tabBtnMaterias" class="tab-btn" onclick="showTab('materias')">Materias</button>
-      <button id="tabBtnPlanificador" class="tab-btn" onclick="showTab('planificador')">Planificador</button>
-    </div>
+  <div class="page-layout">
+    <div id="quickSidebarMount"></div>
+    <div class="page-content">
+      <button class="quick-toggle-btn" id="sidebarToggle" type="button">☰ Accesos rápidos</button>
+      <div class="main-shell">
+        <div class="tabs-bar">
+          <button id="tabBtnEstudio" class="tab-btn tab-active" onclick="showTab('estudio')">Estudio</button>
+          <button id="tabBtnAcademico" class="tab-btn" onclick="showTab('academico')">Académico</button>
+          <button id="tabBtnAgenda" class="tab-btn" onclick="showTab('agenda')">Agenda</button>
+          <button id="tabBtnMaterias" class="tab-btn" onclick="showTab('materias')">Materias</button>
+          <button id="tabBtnPlanificador" class="tab-btn" onclick="showTab('planificador')">Planificador</button>
+        </div>
 
     <!-- TAB ESTUDIO -->
     <div id="tab-estudio" class="tab-card">
@@ -223,6 +228,10 @@
       </div>
     </div>
   </div>
+
+      </div> <!-- main-shell -->
+    </div> <!-- page-content -->
+  </div> <!-- page-layout -->
 
   <!-- MODAL ESTUDIO -->
   <div class="modal-bg" id="modalBg">

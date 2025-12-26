@@ -84,7 +84,25 @@ button{
 .btn-danger{ background:#b91c1c; color:#fff; box-shadow:0 8px 20px rgba(185,28,28,.35); }
 .btn-small{ padding:.24rem .68rem; font-size:.8rem; border-radius:10px; }
 
-.main-shell{ max-width:1200px; margin:1.3rem auto 2rem; padding:0 1rem; }
+.page-layout{
+  display:grid;
+  grid-template-columns:240px minmax(0,1fr);
+  gap:1rem;
+  max-width:1280px;
+  margin:1.3rem auto 2rem;
+  padding:0 1rem;
+  align-items:flex-start;
+}
+.page-content{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:.75rem;
+}
+.main-shell{ max-width:none; margin:0; padding:0; }
+@media(max-width:1024px){
+  .page-layout{ grid-template-columns:1fr; }
+}
 
     .tabs-bar{
       display:flex;
