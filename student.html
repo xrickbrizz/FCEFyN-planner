@@ -26,8 +26,11 @@
   <div class="page-layout sidebar-collapsed" id="pageLayout">
     <div id="quickSidebarMount"></div>
     <div class="page-content">
-      <button class="quick-toggle-btn" id="sidebarToggle" type="button">☰ Accesos rápidos</button>
-      <div class="section-label" id="currentSectionLabel">📒 Estudio</div>
+      <div class="content-header">
+        <button class="quick-toggle-btn" id="sidebarToggle" type="button" aria-label="Abrir accesos rápidos">☰</button>
+        <div class="section-label" id="currentSectionLabel">📒 Estudio</div>
+        <button class="help-btn" id="helpButton" type="button" aria-label="Ayuda contextual">?</button>
+      </div>
       <div class="main-shell">
     <!-- TAB ESTUDIO -->
     <div id="tab-estudio" class="tab-card">
@@ -348,6 +351,17 @@
         <button class="btn-gray btn-small" id="btnAcadCancel">Cancelar</button>
         <button class="btn-danger btn-small" id="btnAcadDelete" style="display:none;">Eliminar</button>
         <button class="btn-blue btn-small" id="btnAcadSave">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL AYUDA -->
+  <div class="modal-bg" id="helpModalBg">
+    <div class="modal modal-help">
+      <h3 class="modal-title" id="helpModalTitle">Ayuda</h3>
+      <div class="help-modal-body" id="helpModalBody"></div>
+      <div class="help-modal-actions">
+        <button class="btn-blue btn-small" id="btnHelpClose">Entendido</button>
       </div>
     </div>
   </div>

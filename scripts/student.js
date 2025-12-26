@@ -69,6 +69,91 @@ const navItems = [
   { id:"materias", label:"Materias", icon:"📚" },
   { id:"planificador", label:"Planificador", icon:"🧭" },
 ];
+let activeSection = "estudio";
+const helpButton = document.getElementById("helpButton");
+const helpModalBg = document.getElementById("helpModalBg");
+const helpModalTitle = document.getElementById("helpModalTitle");
+const helpModalBody = document.getElementById("helpModalBody");
+const btnHelpClose = document.getElementById("btnHelpClose");
+
+const helpContent = {
+  estudio: {
+    title: "Cómo usar Estudio",
+    bullets: [
+      "Hacé click en un día del calendario para registrar horas, tema y materia.",
+      "Usá “Editar” o “Borrar” en la lista del modal para corregir entradas existentes.",
+      "Las materias se cargan desde la sección “Materias”; asegurate de tener al menos una."
+    ]
+  },
+  academico: {
+    title: "Cómo usar Académico",
+    bullets: [
+      "Click en un día para ver el detalle y usar el botón “Añadir”.",
+      "Podés cargar Parciales, TPs, Tareas, Informes o Recordatorios con fecha/hora y estado.",
+      "Todo se guarda en tu planner (Firebase) y actualiza los widgets y el panel lateral."
+    ]
+  },
+  agenda: {
+    title: "Cómo usar Agenda",
+    bullets: [
+      "Presioná “Añadir clase” o pasá un preset desde Planificador para poblar la agenda.",
+      "Editá o borrá bloques haciendo click en cada clase dentro de la grilla semanal.",
+      "Se validan superposiciones y horarios permitidos (08:00–23:00)."
+    ]
+  },
+  materias: {
+    title: "Cómo usar Materias",
+    bullets: [
+      "Creá o edita materias con color; se usan en Estudio, Agenda y Académico.",
+      "Al editar un nombre, se actualiza en todos los registros existentes.",
+      "Al eliminar una materia, también se limpian sus registros asociados."
+    ]
+  },
+  planificador: {
+    title: "Cómo usar Planificador",
+    bullets: [
+      "Buscá comisiones del admin y agregalas a un preset evitando superposiciones.",
+      "Guardá el preset y duplicalo o elimínalo según necesites.",
+      "Podés pasar el preset a Agenda eligiendo entre agregar o reemplazar."
+    ]
+  }
+};
+
+function renderHelpContent(sectionId){
+  const data = helpContent[sectionId] || helpContent.estudio;
+  if (helpModalTitle) helpModalTitle.textContent = data.title || "Ayuda";
+  if (helpModalBody){
+    helpModalBody.innerHTML = "";
+    if (Array.isArray(data.bullets)){
+      const ul = document.createElement("ul");
+      ul.className = "help-list";
+      data.bullets.forEach(b =>{
+        const li = document.createElement("li");
+        li.textContent = b;
+        ul.appendChild(li);
+      });
+      const heading = document.createElement("div");
+      heading.className = "help-section-title";
+      heading.textContent = "Tips rápidos";
+      helpModalBody.appendChild(heading);
+      helpModalBody.appendChild(ul);
+    } else {
+      helpModalBody.textContent = "Sin ayuda disponible para esta sección.";
+    }
+  }
+}
+
+function openHelpModal(sectionId){
+  renderHelpContent(sectionId);
+  if (helpModalBg) helpModalBg.style.display = "flex";
+}
+function closeHelpModal(){
+  if (helpModalBg) helpModalBg.style.display = "none";
+}
+
+if (helpButton) helpButton.addEventListener("click", ()=> openHelpModal(activeSection));
+if (btnHelpClose) btnHelpClose.addEventListener("click", closeHelpModal);
+if (helpModalBg) helpModalBg.addEventListener("click", (e)=>{ if (e.target === helpModalBg) closeHelpModal(); });
 
 // ------------------------ TABS ------------------------
 function initSidebar(){
@@ -127,6 +212,7 @@ function initSidebar(){
 }
 
 window.showTab = function(name){
+  activeSection = name;
   const tabEstudio       = document.getElementById("tab-estudio");
   const tabAcademico     = document.getElementById("tab-academico");
   const tabAgenda        = document.getElementById("tab-agenda");
@@ -387,6 +473,11 @@ function partsToDtLocal(p){
 function fmtShortDateTimeFromParts(p){
   if (!p) return "—";
   return p.y + "-" + pad2(p.m) + "-" + pad2(p.d) + " " + pad2(p.hh) + ":" + pad2(p.mm);
+}
+function dateFromLocal(dtLocal){
+  const p = dtLocalToParts(dtLocal);
+  if (!p) return null;
+  return new Date(p.y, p.m-1, p.d, p.hh, p.mm, 0, 0);
 }
 function escapeHtml(s){
   return (s || "").toString()
@@ -884,6 +975,9 @@ const acadDetailSub = document.getElementById("acadDetailSub");
 const acadDetailCount = document.getElementById("acadDetailCount");
 const acadDetailList = document.getElementById("acadDetailList");
 const btnAcadAddFromDetail = document.getElementById("btnAcadAddFromDetail");
+const btnAcadAddGlobal = document.getElementById("btnAcadAddGlobal");
+const acadWidgetsBox = document.getElementById("acadWidgets");
+const acadNext7Box = document.getElementById("acadNext7");
 
 function initAcademicoNav(){
   document.getElementById("btnAcadPrev").addEventListener("click", ()=>{
@@ -905,6 +999,13 @@ function initAcademicoNav(){
   btnAcadAddFromDetail.addEventListener("click", ()=>{
     if (acadSelectedDateKey) openAcadModalForDate(acadSelectedDateKey, -1);
   });
+  if (btnAcadAddGlobal){
+    btnAcadAddGlobal.addEventListener("click", ()=>{
+      const now = new Date();
+      const fallbackKey = dateKeyFromYMD(now.getFullYear(), now.getMonth()+1, now.getDate());
+      openAcadModalForDate(acadSelectedDateKey || fallbackKey, -1);
+    });
+  }
 }
 
 function renderAcadCalendar(){
@@ -921,6 +1022,8 @@ function renderAcadCalendar(){
 
   const now = new Date();
   const todayKey = dateKeyFromYMD(now.getFullYear(), now.getMonth()+1, now.getDate());
+  const selectedKey = acadSelectedDateKey || todayKey;
+  acadSelectedDateKey = selectedKey;
 
   acadMonthTitle.textContent = firstDay.toLocaleString("es-ES", { month:"long", year:"numeric" });
 
@@ -937,7 +1040,9 @@ function renderAcadCalendar(){
     const dateKey = dateKeyFromYMD(acadViewYear, acadViewMonth+1, d);
     const card = document.createElement("div");
     card.className = "day";
+    card.dataset.dateKey = dateKey;
     if (dateKey === todayKey) card.classList.add("is-today");
+    if (dateKey === acadSelectedDateKey) card.classList.add("is-selected");
 
     const head = document.createElement("div");
     head.className = "day-number";
@@ -945,7 +1050,7 @@ function renderAcadCalendar(){
     card.appendChild(head);
 
     const items = Array.isArray(academicoCache?.[dateKey]) ? academicoCache[dateKey] : [];
-    items.sort((a,b)=> (a.when||"").localeCompare(b.when||""));
+    items.sort((a,b)=> (a.cuando || a.when || "").localeCompare(b.cuando || b.when || ""));
 
     const list = document.createElement("div");
     list.className = "acad-day-list";
@@ -989,13 +1094,23 @@ function renderAcadCalendar(){
 
     card.addEventListener("click", ()=>{
       acadSelectedDateKey = dateKey;
+      highlightAcadSelection(dateKey);
       openAcadDetail(dateKey);
     });
 
     acadGrid.appendChild(card);
   }
 
+  highlightAcadSelection(acadSelectedDateKey);
   openAcadDetail(acadSelectedDateKey || todayKey);
+}
+
+function highlightAcadSelection(dateKey){
+  if (!acadGrid) return;
+  acadGrid.querySelectorAll(".day").forEach(card =>{
+    if (!card.dataset.dateKey) return;
+    card.classList.toggle("is-selected", card.dataset.dateKey === dateKey);
+  });
 }
 
 function openAcadDetail(dateKey){
@@ -1006,15 +1121,16 @@ function openAcadDetail(dateKey){
   }
 
   acadSelectedDateKey = dateKey;
+  highlightAcadSelection(dateKey);
 
   acadDetailTitle.textContent = "Detalle del " + parts.d + "/" + parts.m;
   acadDetailSub.textContent = "Año " + parts.y;
   const items = Array.isArray(academicoCache?.[dateKey]) ? academicoCache[dateKey].slice() : [];
-  items.sort((a,b)=> (a.when||"").localeCompare(b.when||""));
+  items.sort((a,b)=> (a.cuando || a.when || "").localeCompare(b.cuando || b.when || ""));
 
   acadDetailCount.textContent = String(items.length);
   acadDetailList.innerHTML = "";
-  acadDetailBox.style.display = items.length ? "block" : "none";
+  acadDetailBox.style.display = "block";
 
   items.forEach((item, idx)=>{
     const row = document.createElement("div");
@@ -1042,6 +1158,71 @@ function openAcadDetail(dateKey){
 
     acadDetailList.appendChild(row);
   });
+
+  if (!items.length){
+    const empty = document.createElement("div");
+    empty.className = "acad-detail-empty";
+    empty.textContent = "No hay items para esta fecha. Usá “Añadir” para crear uno.";
+    acadDetailList.appendChild(empty);
+  }
+
+  updateAcadWidgets();
+}
+
+function updateAcadWidgets(){
+  if (!acadWidgetsBox || !acadNext7Box) return;
+  const items = [];
+  Object.keys(academicoCache || {}).forEach(dateKey =>{
+    const arr = Array.isArray(academicoCache[dateKey]) ? academicoCache[dateKey] : [];
+    arr.forEach(item =>{
+      const d = dateFromLocal(item.cuando || item.when || "");
+      if (d && !isNaN(d)) items.push({ ...item, _date:d, _dateKey:dateKey });
+    });
+  });
+
+  const now = new Date();
+  const limit30 = new Date(now); limit30.setDate(limit30.getDate() + 30);
+  const back30 = new Date(now); back30.setDate(back30.getDate() - 30);
+  const limit7 = new Date(now); limit7.setDate(limit7.getDate() + 7);
+
+  const fmtLabel = (it)=>{
+    const parts = dtLocalToParts(it?.cuando || it?.when || "");
+    return parts ? fmtShortDateTimeFromParts(parts) : "—";
+  };
+
+  const pending = items
+    .filter(it => (it.estado || "pending") !== "done" && it._date >= now)
+    .sort((a,b)=> a._date - b._date);
+  const next = pending[0];
+
+  const pending30 = items.filter(it =>
+    (it.estado || "pending") !== "done" && it._date >= now && it._date <= limit30
+  ).length;
+  const done30 = items.filter(it =>
+    (it.estado || "pending") === "done" && it._date >= back30 && it._date <= limit30
+  ).length;
+
+  acadWidgetsBox.innerHTML =
+    "• Próximo vencimiento: <strong>" + (next ? (fmtLabel(next) + " · " + escapeHtml(next.titulo || next.tipo || "")) : "—") + "</strong><br/>" +
+    "• Pendientes (30 días): <strong>" + pending30 + "</strong><br/>" +
+    "• Hechos (30 días): <strong>" + done30 + "</strong>";
+
+  const next7 = items
+    .filter(it => it._date >= now && it._date <= limit7)
+    .sort((a,b)=> a._date - b._date)
+    .slice(0, 10);
+
+  acadNext7Box.innerHTML = "";
+  if (!next7.length){
+    acadNext7Box.textContent = "—";
+  } else {
+    next7.forEach(it =>{
+      const row = document.createElement("div");
+      row.className = "acad-next-row";
+      row.textContent = fmtLabel(it) + " · " + (it.tipo || "Item") + " · " + (it.titulo || it.materia || "");
+      acadNext7Box.appendChild(row);
+    });
+  }
 }
 
 function openAcadModalForDate(dateKey, index){
@@ -1049,6 +1230,8 @@ function openAcadModalForDate(dateKey, index){
   if (!parts) return;
 
   acadEditing = { dateKey, index };
+  acadSelectedDateKey = dateKey;
+  highlightAcadSelection(dateKey);
   const modalBg = document.getElementById("acadModalBg");
   const titleEl = document.getElementById("acadModalTitle");
   const typeSel = document.getElementById("acadType");
@@ -1126,19 +1309,26 @@ document.getElementById("btnAcadSave").addEventListener("click", async ()=>{
   const { dateKey, index } = acadEditing;
   if (!dateKey) return;
 
-  const ref = doc(db, "planner", currentUser.uid);
-  const snap = await getDoc(ref);
-  let data = snap.exists() ? snap.data() : {};
-  if (!data.academico) data.academico = {};
-  if (!Array.isArray(data.academico[dateKey])) data.academico[dateKey] = [];
+  try{
+    const ref = doc(db, "planner", currentUser.uid);
+    const snap = await getDoc(ref);
+    let data = snap.exists() ? snap.data() : {};
+    if (!data.academico) data.academico = {};
+    if (!Array.isArray(data.academico[dateKey])) data.academico[dateKey] = [];
 
-  if (index >= 0) data.academico[dateKey][index] = item;
-  else data.academico[dateKey].push(item);
+    if (index >= 0) data.academico[dateKey][index] = item;
+    else data.academico[dateKey].push(item);
 
-  await setDoc(ref, data);
-  academicoCache = data.academico;
-  renderAcadCalendar();
-  document.getElementById("acadModalBg").style.display = "none";
+    await setDoc(ref, data);
+    academicoCache = data.academico || {};
+    acadSelectedDateKey = dateKey;
+    renderAcadCalendar();
+    openAcadDetail(dateKey);
+    document.getElementById("acadModalBg").style.display = "none";
+    notifySuccess("Académico guardado.");
+  }catch(e){
+    notifyError("No se pudo guardar en Académico: " + (e.message || e));
+  }
 });
 
 document.getElementById("btnAcadDelete").addEventListener("click", async ()=>{
@@ -1155,19 +1345,26 @@ document.getElementById("btnAcadDelete").addEventListener("click", async ()=>{
   });
   if (!ok) return;
 
-  const ref = doc(db, "planner", currentUser.uid);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return;
-  const data = snap.data() || {};
-  if (!Array.isArray(data.academico?.[dateKey])) return;
+  try{
+    const ref = doc(db, "planner", currentUser.uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const data = snap.data() || {};
+    if (!Array.isArray(data.academico?.[dateKey])) return;
 
-  data.academico[dateKey].splice(index,1);
-  if (!data.academico[dateKey].length) delete data.academico[dateKey];
+    data.academico[dateKey].splice(index,1);
+    if (!data.academico[dateKey].length) delete data.academico[dateKey];
 
-  await setDoc(ref, data);
-  academicoCache = data.academico || {};
-  renderAcadCalendar();
-  document.getElementById("acadModalBg").style.display = "none";
+    await setDoc(ref, data);
+    academicoCache = data.academico || {};
+    acadSelectedDateKey = dateKey;
+    renderAcadCalendar();
+    openAcadDetail(dateKey);
+    document.getElementById("acadModalBg").style.display = "none";
+    notifySuccess("Item eliminado.");
+  }catch(e){
+    notifyError("No se pudo eliminar: " + (e.message || e));
+  }
 });
 
 // ------------------------ AGENDA ------------------------

@@ -99,18 +99,51 @@ button{
   width: fit-content;
 }
 
-.page-layout{
+.content-header{
   display:grid;
-  grid-template-columns:236px minmax(0,1fr);
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:.75rem;
+  position:sticky;
+  top:0;
+  z-index:12;
+  padding:.35rem .5rem;
+  background:linear-gradient(120deg, rgba(4,7,22,.75), rgba(12,16,34,.78));
+  border-radius:14px;
+  border:1px solid rgba(31,41,55,.6);
+  box-shadow:0 12px 26px rgba(0,0,0,.45);
+}
+.content-header .section-label{
+  justify-self:center;
+}
+.help-btn{
+  border:1px solid rgba(99,102,241,.65);
+  background:rgba(99,102,241,.1);
+  color:#cbd5e1;
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  font-weight:800;
+  font-size:1.05rem;
+  box-shadow:0 10px 22px rgba(99,102,241,.3);
+}
+.help-btn:hover{ filter:brightness(1.05); }
+
+.page-layout{
+  --sidebar-expanded:240px;
+  --sidebar-collapsed:96px;
+  display:grid;
+  grid-template-columns:var(--sidebar-expanded) minmax(0,1fr);
   gap:1rem;
-  max-width:1280px;
+  max-width:none;
+  width:calc(100% - 2rem);
   margin:1.3rem auto 2rem;
-  padding:0 1rem;
+  padding:0 .5rem 0 1rem;
   align-items:flex-start;
   transition:grid-template-columns .18s ease;
 }
 .page-layout.sidebar-collapsed{
-  grid-template-columns:96px minmax(0,1fr);
+  grid-template-columns:var(--sidebar-collapsed) minmax(0,1fr);
 }
 .page-content{
   min-width:0;
@@ -120,7 +153,7 @@ button{
 }
 .main-shell{ max-width:none; margin:0; padding:0; }
 @media(max-width:1024px){
-  .page-layout{ grid-template-columns:1fr; }
+  .page-layout{ grid-template-columns:1fr; width:calc(100% - 1.6rem); padding:0 .8rem; }
 }
 
     .tabs-bar{
@@ -304,6 +337,33 @@ button{
       font-size:.85rem;
       border-radius:10px;
     }
+    .modal-help{
+      max-width:720px;
+    }
+    .help-modal-body{
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:12px;
+      padding:.75rem .85rem;
+      line-height:1.45;
+      color:#e5e7eb;
+    }
+    .help-section-title{
+      font-weight:800;
+      margin-bottom:.35rem;
+    }
+    .help-list{
+      margin:0;
+      padding-left:1.1rem;
+      color:#cbd5e1;
+    }
+    .help-list li{ margin-bottom:.25rem; }
+    .help-modal-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:.5rem;
+      margin-top:.8rem;
+    }
 
     /* TAB ACADEMICO */
     .acad-layout{
@@ -425,6 +485,20 @@ button{
       flex-wrap:wrap;
       justify-content:flex-end;
       flex:0 0 auto;
+    }
+    .acad-next-row{
+      font-size:.88rem;
+      color:#e5e7eb;
+      margin-bottom:.25rem;
+    }
+    .acad-detail-empty{
+      color:#94a3b8;
+      font-size:.9rem;
+      padding:.35rem 0;
+    }
+    .day.is-selected{
+      border-color:rgba(99,102,241,.6);
+      box-shadow:0 0 0 1px rgba(99,102,241,.2), 0 10px 28px rgba(99,102,241,.25);
     }
     .badge-soft{
       display:inline-flex;

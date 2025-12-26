@@ -15,7 +15,8 @@
 
 /* ---------- Quick sidebar ---------- */
 .quick-sidebar{
-  width: 236px;
+  width: 100%;
+  max-width: 236px;
   background: linear-gradient(180deg, rgba(11,18,36,.94), rgba(8,12,28,.96));
   border: 1px solid var(--ui-border);
   border-radius: 16px;
@@ -28,7 +29,8 @@
   overflow:hidden;
 }
 .quick-sidebar.collapsed{
-  width: 80px;
+  width: 100%;
+  max-width: 92px;
   padding: 0.75rem 0.6rem;
 }
 .quick-sidebar.collapsed .qs-head,
@@ -134,7 +136,7 @@
 }
 
 .quick-toggle-btn{
-  display:none;
+  display:inline-flex;
   align-self:flex-start;
   padding:.55rem .85rem;
   border-radius:12px;
@@ -193,9 +195,6 @@
   .quick-sidebar-backdrop.visible{
     opacity:1;
     pointer-events:auto;
-  }
-  .quick-toggle-btn{
-    display:inline-flex;
   }
 }
 

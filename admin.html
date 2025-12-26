@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <title>Panel de administración — FCEFyN Planner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style/ui-components.css">
   <link rel="stylesheet" href="style/admin.css">
 </head>
 <body>
@@ -201,7 +200,6 @@
 </div>
 
 <script type="module">
-import { showToast, showConfirm, showPrompt } from "./scripts/ui/notifications.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import {
@@ -224,10 +222,6 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 let currentUser = null;
-const toast = (message, type="info") => showToast({ message, type });
-const toastSuccess = (message) => showToast({ message, type:"success" });
-const toastError = (message) => showToast({ message, type:"error" });
-const toastWarn = (message) => showToast({ message, type:"warning" });
 
 /* ---------- estado modal horarios ---------- */
 let editingSectionId = null;
@@ -291,7 +285,7 @@ function attachGlobalHandlers(){
       await signOut(auth);
       window.location.href = "app.html";
     }catch(e){
-      toastError("Error al cerrar sesión: " + (e.message || e));
+      alert("Error al cerrar sesión: " + (e.message || e));
     }
   });
 
@@ -317,14 +311,7 @@ function attachGlobalHandlers(){
       if (!snap.exists()) return;
       openSectionModal(id,snap.data());
     } else if (e.target.classList.contains("btn-delete-section")){
-      const ok = await showConfirm({
-        title:"Borrar horario",
-        message:"¿Borrar este horario y todos sus días?",
-        confirmText:"Eliminar",
-        cancelText:"Cancelar",
-        danger:true
-      });
-      if (!ok) return;
+      if (!confirm("¿Borrar este horario y todos sus días?")) return;
       await deleteDoc(doc(db,"courseSections",id));
       await loadSections();
     }
@@ -453,22 +440,13 @@ async function loadUsers(){
     btnSuspend.className = "btn btn-warn";
     btnSuspend.textContent = "Suspender (min)";
     btnSuspend.addEventListener("click", async ()=>{
-      const raw = await showPrompt({
-        title:"Suspender usuario",
-        message:"¿Cuántos minutos querés suspender a este usuario?",
-        inputType:"number",
-        defaultValue:"60",
-        placeholder:"Ej: 60",
-        confirmText:"Suspender",
-        cancelText:"Cancelar",
-        validate:(val)=>{
-          const mins = parseInt(String(val || "").trim(),10);
-          if (!Number.isFinite(mins) || mins <= 0) return "Ingresá un número válido (mayor que 0).";
-          return "";
-        }
-      });
+      const raw = prompt("¿Cuántos minutos querés suspender a este usuario?", "60");
       if (raw === null) return; // cancelado
       const mins = parseInt(String(raw).trim(), 10);
+      if (!Number.isFinite(mins) || mins <= 0){
+        alert("Ingresá un número válido de minutos (mayor que 0).");
+        return;
+      }
       const until = Date.now() + mins*60000;
 
       try{
@@ -477,9 +455,8 @@ async function loadUsers(){
           suspendedUntil: until
         });
         await loadUsers();
-        toastSuccess("Usuario suspendido por " + mins + " minutos.");
       }catch(e){
-        toastError("Error al suspender: " + (e.message || e));
+        alert("Error al suspender: " + (e.message || e));
       }
     });
 
@@ -493,9 +470,8 @@ async function loadUsers(){
           suspendedUntil: 0
         });
         await loadUsers();
-        toastSuccess("Suspensión quitada.");
       }catch(e){
-        toastError("Error al quitar suspensión: " + (e.message || e));
+        alert("Error al quitar suspensión: " + (e.message || e));
       }
     });
 
@@ -669,7 +645,7 @@ function addDocenteToList(){
   const name = qs("#docenteName").value.trim();
   const role = qs("#docenteRole").value || "Docente";
   if (!name){
-    toastWarn("Ingresá el nombre del docente.");
+    alert("Ingresá el nombre del docente.");
     return;
   }
   docentesList.push({ name, role });
@@ -704,19 +680,19 @@ function addDayToList(){
   const campus = qs("#dayCampus").value || qs("#secCampus").value || "";
 
   if (!day || !start || !end){
-    toastWarn("Completá día, hora de inicio y fin.");
+    alert("Completá día, hora de inicio y fin.");
     return;
   }
   if (start >= end){
-    toastWarn("La hora de inicio debe ser menor que la de fin.");
+    alert("La hora de inicio debe ser menor que la de fin.");
     return;
   }
   if (daysList.length >= 2){
-    toastWarn("Sólo se permiten hasta 2 días por comisión.");
+    alert("Sólo se permiten hasta 2 días por comisión.");
     return;
   }
   if (daysList.some(d => d.day === day)){
-    toastWarn("Ese día ya está cargado para esta comisión.");
+    alert("Ese día ya está cargado para esta comisión.");
     return;
   }
 
@@ -740,11 +716,11 @@ async function saveSection(){
   const titular    = qs("#secTitular").value.trim();
 
   if (!subject || !commission){
-    toastWarn("Completá al menos la materia y la comisión.");
+    alert("Completá al menos la materia y la comisión.");
     return;
   }
   if (!daysList.length){
-    toastWarn("Cargá al menos un día y horario.");
+    alert("Cargá al menos un día y horario.");
     return;
   }
 
@@ -770,29 +746,20 @@ async function saveSection(){
     }
     closeSectionModal();
     await loadSections();
-    toastSuccess("Horario guardado.");
   }catch(e){
-    toastError("Error al guardar horario: " + (e.message || e));
+    alert("Error al guardar horario: " + (e.message || e));
   }
 }
 
 async function deleteCurrentSection(){
   if (!editingSectionId) return;
-  const ok = await showConfirm({
-    title:"Eliminar horario",
-    message:"¿Seguro que querés borrar este horario?",
-    confirmText:"Eliminar",
-    cancelText:"Cancelar",
-    danger:true
-  });
-  if (!ok) return;
+  if (!confirm("¿Seguro que querés borrar este horario?")) return;
   try{
     await deleteDoc(doc(db,"courseSections",editingSectionId));
     closeSectionModal();
     await loadSections();
-    toastSuccess("Horario eliminado.");
   }catch(e){
-    toastError("Error al borrar horario: " + (e.message || e));
+    alert("Error al borrar horario: " + (e.message || e));
   }
 }
 </script>
