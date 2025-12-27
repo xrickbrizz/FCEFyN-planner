@@ -760,3 +760,181 @@ button{
       font-weight:800;
       font-size:.8rem;
     }
+
+/* ===== PROFESORES ===== */
+.prof-layout{
+  display:grid;
+  grid-template-columns: minmax(0,1.2fr) minmax(0,0.8fr);
+  gap:1rem;
+}
+@media(max-width:1000px){
+  .prof-layout{ grid-template-columns:1fr; }
+}
+.prof-list-panel, .prof-detail-panel{
+  display:flex;
+  flex-direction:column;
+  gap:.75rem;
+}
+.prof-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+.prof-filters{
+  display:flex;
+  gap:.6rem;
+  flex-wrap:wrap;
+}
+.prof-filters select{
+  background:#0f172a;
+  border:1px solid rgba(31,41,55,.8);
+  color:#e5e7eb;
+  border-radius:10px;
+  padding:.45rem .65rem;
+  min-width:160px;
+}
+.prof-list{
+  display:flex;
+  flex-direction:column;
+  gap:.65rem;
+}
+.prof-card{
+  background:rgba(15,23,42,.72);
+  border:1px solid rgba(148,163,184,.18);
+  border-radius:14px;
+  padding:.85rem;
+  box-shadow:0 12px 28px rgba(0,0,0,.45);
+  cursor:pointer;
+  transition:transform .12s ease, border-color .12s ease;
+}
+.prof-card:hover{ transform:translateY(-1px); border-color:rgba(99,102,241,.45); }
+.prof-card.active{ border-color:rgba(99,102,241,.65); box-shadow:0 16px 36px rgba(99,102,241,.25); }
+.prof-card-title{
+  font-size:1rem;
+  font-weight:800;
+}
+.prof-card-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:.5rem;
+  flex-wrap:wrap;
+}
+.prof-card-meta{ color:var(--muted); font-size:.9rem; }
+.prof-badges{ display:flex; gap:.35rem; flex-wrap:wrap; margin-top:.3rem; }
+.prof-badge{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(148,163,184,.22);
+  padding:.18rem .45rem;
+  border-radius:10px;
+  font-size:.82rem;
+  color:#cbd5e1;
+}
+.prof-detail-card{
+  background:rgba(15,23,42,.78);
+  border:1px solid rgba(148,163,184,.18);
+  border-radius:14px;
+  padding:1rem;
+  box-shadow:0 16px 38px rgba(0,0,0,.5);
+}
+.prof-detail-head{
+  display:flex;
+  justify-content:space-between;
+  gap:.75rem;
+  flex-wrap:wrap;
+  align-items:flex-start;
+}
+.prof-detail-name{ font-size:1.15rem; font-weight:800; }
+.prof-detail-meta{ color:var(--muted); font-size:.9rem; }
+.prof-score{
+  text-align:right;
+}
+.prof-score-big{
+  font-size:1.6rem;
+  font-weight:800;
+}
+.stars{
+  display:flex;
+  gap:.1rem;
+  align-items:center;
+}
+.star{ color:#475569; font-size:1rem; }
+.star.full{ color:#fbbf24; text-shadow:0 0 12px rgba(251,191,36,.45); }
+.prof-criteria-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:.6rem;
+  margin-top:.8rem;
+}
+@media(max-width:760px){
+  .prof-criteria-grid{ grid-template-columns:1fr; }
+}
+.prof-criteria{
+  background:rgba(255,255,255,.02);
+  border:1px solid rgba(148,163,184,.2);
+  border-radius:12px;
+  padding:.75rem;
+}
+.prof-comments{
+  margin-top:.9rem;
+  display:flex;
+  flex-direction:column;
+  gap:.45rem;
+}
+.prof-comment{
+  background:rgba(255,255,255,.02);
+  border:1px solid rgba(148,163,184,.16);
+  border-radius:12px;
+  padding:.7rem;
+}
+.prof-comment-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:.5rem;
+  flex-wrap:wrap;
+}
+.prof-rate-card{
+  background:rgba(15,23,42,.78);
+  border:1px solid rgba(148,163,184,.18);
+  border-radius:14px;
+  padding:1rem;
+  box-shadow:0 16px 38px rgba(0,0,0,.5);
+}
+.prof-rate-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:.6rem;
+  margin-bottom:.65rem;
+}
+@media(max-width:760px){
+  .prof-rate-grid{ grid-template-columns:1fr; }
+}
+.prof-rate-field{
+  background:rgba(255,255,255,.02);
+  border:1px solid rgba(148,163,184,.16);
+  border-radius:12px;
+  padding:.65rem;
+}
+.prof-rate-value{ color:var(--muted); margin-top:.2rem; }
+.prof-rate-title{ margin:0 0 .35rem; }
+.prof-rate-card textarea{
+  width:100%;
+  min-height:88px;
+  background:#0f172a;
+  border:1px solid rgba(148,163,184,.22);
+  color:#e5e7eb;
+  border-radius:10px;
+  padding:.6rem;
+  font-family:inherit;
+}
+.prof-rate-check{
+  display:flex;
+  gap:.4rem;
+  align-items:center;
+  margin-top:.35rem;
+  color:#cbd5e1;
+  font-size:.9rem;
+}

@@ -223,6 +223,67 @@
         </div>
       </div>
     </div>
+    
+    <!-- TAB PROFESORES -->
+    <div id="tab-profesores" class="tab-card" style="display:none;">
+      <div class="prof-layout">
+        <div class="prof-list-panel">
+          <div class="prof-header">
+            <div>
+              <strong>Profesores</strong>
+              <div class="small-muted">Ordenados por mejor promedio general.</div>
+            </div>
+            <div class="prof-filters">
+              <div>
+                <label>Carrera</label>
+                <select id="profFilterCareer"></select>
+              </div>
+              <div>
+                <label>Materia</label>
+                <select id="profFilterSubject"></select>
+              </div>
+            </div>
+          </div>
+          <div id="professorsList" class="prof-list"></div>
+        </div>
+        <div class="prof-detail-panel">
+          <div id="profDetailBox" class="prof-detail-card">
+            <div class="small-muted">Seleccioná un profesor para ver detalles y valorar.</div>
+          </div>
+
+          <div class="prof-rate-card">
+            <h3 class="prof-rate-title">Tu valoración</h3>
+            <div class="prof-rate-grid">
+              <div class="prof-rate-field">
+                <label>Calidad de enseñanza</label>
+                <input type="range" min="0" max="5" step="1" id="rateTeaching">
+                <div class="prof-rate-value" id="labelRateTeaching">0 ★</div>
+              </div>
+              <div class="prof-rate-field">
+                <label>Dificultad de parciales</label>
+                <input type="range" min="0" max="5" step="1" id="rateExams">
+                <div class="prof-rate-value" id="labelRateExams">0 ★</div>
+              </div>
+              <div class="prof-rate-field">
+                <label>Trato con estudiantes</label>
+                <input type="range" min="0" max="5" step="1" id="rateTreatment">
+                <div class="prof-rate-value" id="labelRateTreatment">0 ★</div>
+              </div>
+            </div>
+            <label>Comentario (opcional)</label>
+            <textarea id="rateComment" placeholder="Impresiones, tips, qué mejorar"></textarea>
+            <label class="prof-rate-check">
+              <input type="checkbox" id="rateAnonymous">
+              <span>Publicar comentario como anónimo</span>
+            </label>
+            <button class="btn-blue btn-small" id="btnSubmitRating" type="button" style="margin-top:.6rem;">Enviar valoración</button>
+            <div class="small-muted" style="margin-top:.3rem;">
+              Podés valorar sin comentar. Las reseñas se guardan por profesor y se actualizan si volvés a enviar.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
       </div> <!-- main-shell -->

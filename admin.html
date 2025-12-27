@@ -26,6 +26,11 @@
       <span>Horarios de materias</span>
       <span class="nav-badge" id="badgeSections">0</span>
     </div>
+
+    <div class="nav-item" id="navProfessors" data-section="professors">
+      <span>Profesores</span>
+      <span class="nav-badge" id="badgeProfessors">0</span>
+    </div>
   </aside>
 
   <div class="main">
@@ -38,7 +43,6 @@
     </header>
 
     <div class="content">
-      <!-- METRICS (siempre visibles, no rompe nada) -->
       <div class="cards-row">
         <div class="card">
           <div class="card-title">Usuarios</div>
@@ -51,9 +55,14 @@
           <div class="metric-main" id="metricSectionsTotal">0</div>
           <div class="metric-sub" id="metricSectionsDetail">Materias distintas: 0</div>
         </div>
+
+        <div class="card">
+          <div class="card-title">Profesores</div>
+          <div class="metric-main" id="metricProfessorsTotal">0</div>
+          <div class="metric-sub" id="metricProfessorsDetail">Activos: 0 · Ocultos: 0</div>
+        </div>
       </div>
 
-      <!-- SECTION: USERS -->
       <div id="section-users" class="section-wrap active">
         <div class="card">
           <div class="card-header">
@@ -64,7 +73,6 @@
         </div>
       </div>
 
-      <!-- SECTION: SECTIONS -->
       <div id="section-sections" class="section-wrap">
         <div class="card">
           <div class="card-header">
@@ -90,11 +98,39 @@
           </div>
         </div>
       </div>
+
+      <div id="section-professors" class="section-wrap">
+        <div class="card">
+          <div class="card-header">
+            <h2>Profesores</h2>
+            <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+              <span class="muted">Carga, carreras, materias y visibilidad.</span>
+              <button class="btn btn-blue" id="btnNewProfessor">+ Nuevo profesor</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Carreras</th>
+                  <th>Materias</th>
+                  <th>Estado</th>
+                  <th>Promedio</th>
+                  <th>Evaluaciones</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="professorsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
-<!-- MODAL HORARIO -->
 <div class="modal-bg" id="sectionModalBg">
   <div class="modal">
     <h3 id="sectionModalTitle">Nuevo horario</h3>
@@ -200,6 +236,65 @@
   </div>
 </div>
 
+<div class="modal-bg" id="profModalBg">
+  <div class="modal modal-wide">
+    <h3 id="profModalTitle">Nuevo profesor</h3>
+    <div class="modal-grid">
+      <div>
+        <label>Nombre del profesor</label>
+        <input id="profName" placeholder="Ej: Ing. Juan Pérez">
+      </div>
+      <div>
+        <label>Visibilidad</label>
+        <div style="display:flex;align-items:center;gap:.5rem;margin-top:.35rem;">
+          <input id="profActive" type="checkbox">
+          <span class="muted">Activo / visible para estudiantes</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-grid">
+      <div>
+        <label>Agregar carrera</label>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;">
+          <input id="profCareerInput" placeholder="Ej: Ing. Civil">
+          <button class="btn btn-gray" type="button" id="btnAddCareer">Añadir</button>
+        </div>
+        <div class="muted" style="margin-top:.25rem;">Podés cargar varias; es obligatorio al menos una.</div>
+      </div>
+      <div>
+        <label>Agregar materia</label>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;">
+          <input id="profSubjectInput" placeholder="Ej: Análisis Matemático II">
+          <button class="btn btn-gray" type="button" id="btnAddSubject">Añadir</button>
+        </div>
+        <div class="muted" style="margin-top:.25rem;">Podés cargar varias; es obligatorio al menos una.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:.6rem;">
+      <label>Carreras cargadas</label>
+      <div id="profCareersChips" style="margin-top:.3rem;"></div>
+    </div>
+    <div style="margin-top:.6rem;">
+      <label>Materias cargadas</label>
+      <div id="profSubjectsChips" style="margin-top:.3rem;"></div>
+    </div>
+
+    <div class="muted" style="margin-top:.8rem;">
+      Se guarda en <code>/professors</code>. Las reseñas se almacenan en <code>/professorReviews</code> y calculan los promedios por criterio.
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" type="button" id="btnCancelProfessor">Cancelar</button>
+      <div class="modal-footer-right">
+        <button class="btn btn-danger" type="button" id="btnDeleteProfessor" style="display:none;">Eliminar</button>
+        <button class="btn btn-blue" type="button" id="btnSaveProfessor">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
@@ -230,6 +325,11 @@ let editingSectionId = null;
 let daysList = [];      // {day, start, end, campus}
 let docentesList = [];  // {name, role}
 
+/* ---------- NUEVO: estado modal profesores ---------- */
+let editingProfessorId = null;
+let professorCareers = [];
+let professorSubjects = [];
+
 /* ---------- helpers UI ---------- */
 const qs  = sel => document.querySelector(sel);
 
@@ -237,24 +337,29 @@ const qs  = sel => document.querySelector(sel);
 function setActiveNav(section){
   const navUsers = qs("#navUsers");
   const navSecs  = qs("#navSections");
+  const navProf  = qs("#navProfessors"); // NUEVO
   const secUsers = qs("#section-users");
   const secSecs  = qs("#section-sections");
+  const secProf  = qs("#section-professors"); // NUEVO
   const topTitle = qs("#topbarTitle");
 
   navUsers.classList.toggle("active", section === "users");
   navSecs.classList.toggle("active", section === "sections");
+  navProf.classList.toggle("active", section === "professors");
 
   secUsers.classList.toggle("active", section === "users");
   secSecs.classList.toggle("active", section === "sections");
+  secProf.classList.toggle("active", section === "professors");
 
-  topTitle.textContent = section === "users"
-    ? "Panel de administración — Usuarios"
-    : "Panel de administración — Horarios de materias";
+  if(section === "users") topTitle.textContent = "Panel de administración — Usuarios";
+  else if(section === "sections") topTitle.textContent = "Panel de administración — Horarios de materias";
+  else topTitle.textContent = "Panel de administración — Profesores";
 }
 
 function wireSidebar(){
   qs("#navUsers").addEventListener("click", ()=> setActiveNav("users"));
   qs("#navSections").addEventListener("click", ()=> setActiveNav("sections"));
+  qs("#navProfessors").addEventListener("click", ()=> setActiveNav("professors")); // NUEVO
 }
 
 /* ---------- sesión / acceso ---------- */
@@ -278,7 +383,8 @@ onAuthStateChanged(auth, async (user) => {
   wireSidebar();
   setActiveNav("users");
 
-  await Promise.all([loadUsers(), loadSections()]);
+  // Cargamos también loadProfessors()
+  await Promise.all([loadUsers(), loadSections(), loadProfessors()]);
 });
 
 function attachGlobalHandlers(){
@@ -291,8 +397,8 @@ function attachGlobalHandlers(){
     }
   });
 
+  // Botones Sección Horarios
   qs("#btnNewSection").addEventListener("click", () => openSectionModal(null));
-
   qs("#btnCancelSection").addEventListener("click", closeSectionModal);
   qs("#sectionModalBg").addEventListener("click", (e)=>{
     if (e.target === qs("#sectionModalBg")) closeSectionModal();
@@ -302,6 +408,15 @@ function attachGlobalHandlers(){
   qs("#btnAddDocente").addEventListener("click", addDocenteToList);
   qs("#btnSaveSection").addEventListener("click", saveSection);
   qs("#btnDeleteSection").addEventListener("click", deleteCurrentSection);
+
+  // NUEVO: Botones Sección Profesores
+  qs("#btnNewProfessor").addEventListener("click", ()=> openProfessorModal(null));
+  qs("#btnCancelProfessor").addEventListener("click", closeProfessorModal);
+  qs("#profModalBg").addEventListener("click", (e)=>{ if (e.target === qs("#profModalBg")) closeProfessorModal(); });
+  qs("#btnAddCareer").addEventListener("click", addCareerToList);
+  qs("#btnAddSubject").addEventListener("click", addSubjectToList);
+  qs("#btnSaveProfessor").addEventListener("click", saveProfessor);
+  qs("#btnDeleteProfessor").addEventListener("click", deleteProfessor);
 
   // acciones de tabla de horarios
   qs("#sectionsTableBody").addEventListener("click", async (e)=>{
@@ -324,6 +439,27 @@ function attachGlobalHandlers(){
       await deleteDoc(doc(db,"courseSections",id));
       await loadSections();
       showToast({ message:"Horario eliminado.", type:"success" });
+    }
+  });
+
+  // NUEVO: acciones de tabla de profesores
+  qs("#professorsTableBody").addEventListener("click", async (e)=>{
+    const id = e.target.getAttribute("data-id");
+    if (!id) return;
+
+    if (e.target.classList.contains("btn-edit-prof")){
+      const ref = doc(db,"professors",id);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) return;
+      openProfessorModal(id, snap.data());
+    } else if (e.target.classList.contains("btn-toggle-prof")){
+      const ref = doc(db,"professors",id);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) return;
+      const active = !!snap.data().active;
+      await updateDoc(ref, { active: !active, updatedAt: serverTimestamp() });
+      await loadProfessors();
+      showToast({ message: !active ? "Profesor publicado para estudiantes." : "Profesor ocultado.", type: !active ? "success" : "warning" });
     }
   });
 }
@@ -593,6 +729,178 @@ async function loadSections(){
   qs("#metricSectionsDetail").textContent =
     "Materias distintas: " + subjectsSet.size;
   qs("#badgeSections").textContent = String(totalDocs);
+}
+
+/* ---------- NUEVO: funciones de profesores ---------- */
+async function loadProfessors(){
+  const tbody = qs("#professorsTableBody");
+  tbody.innerHTML = "";
+
+  const snap = await getDocs(collection(db,"professors"));
+  let total = 0;
+  let activeCount = 0;
+  let hiddenCount = 0;
+
+  snap.forEach(d =>{
+    total++;
+    const data = d.data() || {};
+    const careers = Array.isArray(data.careers) ? data.careers : [];
+    const subjects = Array.isArray(data.subjects) ? data.subjects : [];
+    const active = !!data.active;
+    const ratingCount = data.ratingCount || 0;
+    const commentsCount = data.commentsCount || 0;
+    const avg = typeof data.avgGeneral === "number" ? data.avgGeneral : 0;
+
+    if (active) activeCount++;
+    else hiddenCount++;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${data.name || "—"}</td>
+      <td>${careers.join(", ") || "—"}</td>
+      <td>${subjects.join(", ") || "—"}</td>
+      <td>${active ? "<span class='pill ok'>Activo</span>" : "<span class='pill susp'>Oculto</span>"}</td>
+      <td>${avg.toFixed(1)} ★</td>
+      <td>${ratingCount} valoraciones · ${commentsCount} comentarios</td>
+      <td>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-edit-prof" data-id="${d.id}">Editar</button>
+          <button class="btn ${active ? "btn-warn" : "btn-ok"} btn-toggle-prof" data-id="${d.id}">${active ? "Ocultar" : "Publicar"}</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  qs("#badgeProfessors").textContent = String(total);
+  qs("#metricProfessorsTotal").textContent = String(total);
+  qs("#metricProfessorsDetail").textContent = `Activos: ${activeCount} · Ocultos: ${hiddenCount}`;
+}
+
+function renderProfChips(list, mountId){
+  const cont = qs(mountId);
+  cont.innerHTML = "";
+  list.forEach((v, idx)=>{
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = `
+      <span>${v}</span>
+      <span class="chip-remove" data-idx="${idx}">✕</span>
+    `;
+    chip.querySelector(".chip-remove").addEventListener("click", ()=>{
+      list.splice(idx,1);
+      renderProfChips(list, mountId);
+    });
+    cont.appendChild(chip);
+  });
+}
+
+function openProfessorModal(id, data=null){
+  editingProfessorId = id || null;
+  professorCareers = Array.isArray(data?.careers) ? data.careers.slice() : [];
+  professorSubjects = Array.isArray(data?.subjects) ? data.subjects.slice() : [];
+
+  qs("#profModalTitle").textContent = id ? "Editar profesor" : "Nuevo profesor";
+  qs("#btnDeleteProfessor").style.display = id ? "inline-flex" : "none";
+
+  qs("#profName").value = data?.name || "";
+  qs("#profActive").checked = !!data?.active;
+
+  renderProfChips(professorCareers, "#profCareersChips");
+  renderProfChips(professorSubjects, "#profSubjectsChips");
+
+  qs("#profModalBg").style.display = "flex";
+}
+
+function closeProfessorModal(){
+  qs("#profModalBg").style.display = "none";
+  editingProfessorId = null;
+  professorCareers = [];
+  professorSubjects = [];
+}
+
+function addCareerToList(){
+  const inp = qs("#profCareerInput");
+  const val = (inp.value || "").trim();
+  if (!val) return;
+  if (!professorCareers.includes(val)) professorCareers.push(val);
+  inp.value = "";
+  renderProfChips(professorCareers, "#profCareersChips");
+}
+
+function addSubjectToList(){
+  const inp = qs("#profSubjectInput");
+  const val = (inp.value || "").trim();
+  if (!val) return;
+  if (!professorSubjects.includes(val)) professorSubjects.push(val);
+  inp.value = "";
+  renderProfChips(professorSubjects, "#profSubjectsChips");
+}
+
+async function saveProfessor(){
+  const name = qs("#profName").value.trim();
+  const active = qs("#profActive").checked;
+
+  if (!name){
+    showToast({ message:"Ingresá el nombre del profesor.", type:"warning" });
+    return;
+  }
+  if (!professorCareers.length){
+    showToast({ message:"Cargá al menos una carrera.", type:"warning" });
+    return;
+  }
+  if (!professorSubjects.length){
+    showToast({ message:"Cargá al menos una materia.", type:"warning" });
+    return;
+  }
+
+  const payload = {
+    name,
+    careers: professorCareers,
+    subjects: professorSubjects,
+    active,
+    updatedAt: serverTimestamp()
+  };
+
+  try{
+    if (editingProfessorId){
+      await updateDoc(doc(db,"professors",editingProfessorId), payload);
+    } else {
+      payload.createdAt = serverTimestamp();
+      payload.avgGeneral = 0;
+      payload.avgTeaching = 0;
+      payload.avgExams = 0;
+      payload.avgTreatment = 0;
+      payload.ratingCount = 0;
+      payload.commentsCount = 0;
+      await addDoc(collection(db,"professors"), payload);
+    }
+    closeProfessorModal();
+    await loadProfessors();
+    showToast({ message:"Profesor guardado.", type:"success" });
+  }catch(e){
+    showToast({ message:"Error al guardar profesor: " + (e.message || e), type:"error" });
+  }
+}
+
+async function deleteProfessor(){
+  if (!editingProfessorId) return;
+  const ok = await showConfirm({
+    title:"Eliminar profesor",
+    message:"Esto eliminará el profesor. Las reseñas permanecen en la colección si existen.",
+    confirmText:"Eliminar",
+    cancelText:"Cancelar",
+    danger:true
+  });
+  if (!ok) return;
+  try{
+    await deleteDoc(doc(db,"professors",editingProfessorId));
+    closeProfessorModal();
+    await loadProfessors();
+    showToast({ message:"Profesor eliminado.", type:"success" });
+  }catch(e){
+    showToast({ message:"No se pudo eliminar: " + (e.message || e), type:"error" });
+  }
 }
 
 /* ---------- modal horarios ---------- */
