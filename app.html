@@ -28,12 +28,26 @@
 
   <div class="shell">
     <div class="hero-grid">
-      <section class="card">
-        <h1 class="hero-title">Planificá el cuatri sin sufrir.</h1>
+      <section class="card card-hero">
+        <div class="eyebrow">Planner académico — FCEFyN</div>
+        <h1 class="hero-title">Una puerta de entrada profesional a tu cuatri.</h1>
         <p class="hero-sub">
-          Armá horarios por comisión, guardá presets, registrá estudio y mantené tus parciales/TPs/tareas ordenados.
-          Todo con estética oscura, rápida y pensada para la FCEFyN.
+          Armá horarios por comisión, guardá presets, registrá estudio y mantené parciales/TPs/tareas sin estrés.
+          Todo en un entorno oscuro, moderno y listo para tus materias.
         </p>
+
+        <div class="highlight-row">
+          <div>
+            <div class="highlight-title">Tu próximo ingreso</div>
+            <div class="highlight-big">Panel Estudiante</div>
+            <div class="highlight-sub">Agenda semanal · Académico · Estudio · Planificador de comisiones</div>
+          </div>
+          <div class="chips-row">
+            <span class="chip">Modo oscuro</span>
+            <span class="chip">Firebase Auth + Firestore</span>
+            <span class="chip">Roles Admin / Estudiante</span>
+          </div>
+        </div>
 
         <div class="feature-grid">
           <div class="feat">
@@ -66,22 +80,36 @@
           </div>
         </div>
 
-        <div class="notice">
-          <strong>Registro:</strong> se permite crear cuenta solo con correo <strong>@mi.unc.edu.ar</strong>.
-          <br/>El <strong>inicio de sesión</strong> funciona para cuentas existentes (incluidas las de test).
+        <div class="metric-row">
+          <div class="metric-card">
+            <div class="metric-label">Ingreso rápido</div>
+            <div class="metric-value">Dashboard directo</div>
+            <div class="metric-sub">Redirección automática según rol.</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Carreras</div>
+            <div class="metric-value">Civil · Industrial · Sistemas</div>
+            <div class="metric-sub">Y cualquier otra de la FCEFyN.</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Experiencia</div>
+            <div class="metric-value">UI pulida</div>
+            <div class="metric-sub">Espaciados, tipografía y feedback moderno.</div>
+          </div>
         </div>
 
         <div class="footer-note">
-          <div>Tip: si sos admin, tu cuenta te redirige al panel automáticamente.</div>
+          <div><strong>Registro</strong>: usá tu correo <strong>@mi.unc.edu.ar</strong>. Admin va directo al panel.</div>
           <div>Proyecto: fcefyn-planner</div>
         </div>
       </section>
 
-      <section class="card">
+      <section class="card card-auth">
         <div class="auth-top">
           <div>
-            <h2 class="auth-title">Acceso</h2>
-            <p class="auth-sub">Entrá con tu cuenta. Si no tenés, podés crear una (Auth).</p>
+            <div class="eyebrow">Acceso seguro</div>
+            <h2 class="auth-title">Ingresá o creá tu cuenta</h2>
+            <p class="auth-sub">Un sólo acceso para estudiante o administrador.</p>
           </div>
 
           <div class="segmented">
@@ -90,30 +118,69 @@
           </div>
         </div>
 
-        <div id="authForm">
-          <label>Email</label>
-          <input id="inpEmail" type="email" placeholder="tuusuario@mi.unc.edu.ar" autocomplete="email" />
+        <div class="auth-hint-row">
+          <div class="auth-pill">Redirección automática a tu panel</div>
+          <div class="auth-pill ghost" id="authHint">student.html o admin.html según rol</div>
+        </div>
 
-          <label>Contraseña</label>
-          <div class="pwd-wrap">
-            <input id="inpPass" type="password" placeholder="••••••••" autocomplete="current-password" />
-            <button id="btnTogglePass" class="pwd-toggle" type="button">ver</button>
-          </div>
-
-          <div id="signupExtra" style="display:none;">
-            <label>Confirmar contraseña</label>
-            <div class="pwd-wrap">
-              <input id="inpPass2" type="password" placeholder="••••••••" autocomplete="new-password" />
-              <button id="btnTogglePass2" class="pwd-toggle" type="button">ver</button>
+        <div id="authForm" class="auth-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Correo institucional</label>
+              <input id="inpEmail" type="email" placeholder="tuusuario@mi.unc.edu.ar" autocomplete="email" />
+            </div>
+            <div class="form-group">
+              <label>Contraseña</label>
+              <div class="pwd-wrap">
+                <input id="inpPass" type="password" placeholder="••••••••" autocomplete="current-password" />
+                <button id="btnTogglePass" class="pwd-toggle" type="button">ver</button>
+              </div>
             </div>
           </div>
 
-          <div class="row">
+          <div id="signupExtra" class="form-grid signup-extra" style="display:none;">
+            <div class="form-group">
+              <label>Nombre</label>
+              <input id="inpName" type="text" placeholder="Ej: Sofía" autocomplete="given-name" />
+            </div>
+            <div class="form-group">
+              <label>Apellido</label>
+              <input id="inpLast" type="text" placeholder="Ej: Domínguez" autocomplete="family-name" />
+            </div>
+            <div class="form-group">
+              <label>Carrera</label>
+              <select id="inpCareer">
+                <option value="">Elegí tu carrera</option>
+                <option>Ing. Civil</option>
+                <option>Ing. Industrial</option>
+                <option>Ing. en Sistemas</option>
+                <option>Ing. Mecánica</option>
+                <option>Ing. Eléctrica</option>
+                <option>Otra</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Año de ingreso (opcional)</label>
+              <input id="inpYear" type="number" placeholder="2024" inputmode="numeric" />
+            </div>
+            <div class="form-group">
+              <label>Legajo (opcional)</label>
+              <input id="inpLegajo" type="text" placeholder="N° de legajo" />
+            </div>
+            <div class="form-group">
+              <label>Confirmar contraseña</label>
+              <div class="pwd-wrap">
+                <input id="inpPass2" type="password" placeholder="••••••••" autocomplete="new-password" />
+                <button id="btnTogglePass2" class="pwd-toggle" type="button">ver</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row actions-row">
             <div class="left">
               <button id="btnSubmit" class="btn btn-primary" type="button">Entrar</button>
               <button id="btnForgot" class="btn btn-ghost" type="button">Olvidé mi contraseña</button>
             </div>
-            <div class="small" id="authHint">Al entrar se redirige a student.html o admin.html.</div>
           </div>
 
           <div class="notice" id="msgBox" style="display:none;"></div>
@@ -135,7 +202,8 @@
       getFirestore,
       doc,
       getDoc,
-      setDoc
+      setDoc,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -192,7 +260,7 @@
       clearMsg();
       btnModeLogin.classList.toggle("active", mode === "login");
       btnModeSignup.classList.toggle("active", mode === "signup");
-      signupExtra.style.display = (mode === "signup") ? "block" : "none";
+      signupExtra.style.display = (mode === "signup") ? "grid" : "none";
       btnSubmit.textContent = (mode === "signup") ? "Crear cuenta" : "Entrar";
       document.getElementById("inpPass").setAttribute("autocomplete", mode === "signup" ? "new-password" : "current-password");
     }
@@ -256,6 +324,11 @@
       const email = (document.getElementById("inpEmail").value || "").trim();
       const pass  = (document.getElementById("inpPass").value || "").trim();
       const pass2 = (document.getElementById("inpPass2").value || "").trim();
+      const first = (document.getElementById("inpName").value || "").trim();
+      const last  = (document.getElementById("inpLast").value || "").trim();
+      const career= (document.getElementById("inpCareer").value || "").trim();
+      const year  = (document.getElementById("inpYear").value || "").trim();
+      const legajo= (document.getElementById("inpLegajo").value || "").trim();
 
       if (!email || !pass){
         setMsg("Completá email y contraseña.", true);
@@ -281,9 +354,31 @@
           setMsg("Las contraseñas no coinciden.", true);
           return;
         }
+        if (!first || !last || !career){
+          setMsg("Completá <strong>Nombre</strong>, <strong>Apellido</strong> y <strong>Carrera</strong>.", true);
+          return;
+        }
+        if (year){
+          const y = parseInt(year, 10);
+          if (!Number.isFinite(y) || y < 2000 || y > 2100){
+            setMsg("El año de ingreso debe ser un número válido (ej: 2024).", true);
+            return;
+          }
+        }
 
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
         await ensurePlannerDoc(cred.user.uid);
+        await setDoc(doc(db,"users",cred.user.uid),{
+          email,
+          role:"student",
+          firstName:first,
+          lastName:last,
+          name: (first + " " + last).trim(),
+          career,
+          yearIn: year ? parseInt(year, 10) : "",
+          legajo: legajo || "",
+          createdAt: serverTimestamp()
+        }, { merge:true });
         setMsg("Cuenta creada. Entrando…", false);
         await routeUser(cred.user);
       }catch(e){

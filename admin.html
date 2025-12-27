@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <title>Panel de administración — FCEFyN Planner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style/ui-components.css">
   <link rel="stylesheet" href="style/admin.css">
 </head>
 <body>
@@ -125,7 +126,7 @@
         </select>
       </div>
       <div>
-        <label>Correo jefe de cátedra</label>
+        <label>Correo jefe de ctedra</label>
         <input id="secHeadEmail" type="email" placeholder="correo@fcefyn.unc.edu.ar">
       </div>
     </div>
@@ -206,6 +207,7 @@ import {
   getFirestore, collection, doc, getDoc, getDocs,
   addDoc, updateDoc, deleteDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import { showToast, showConfirm, showPrompt } from "./ui/notifications.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA0i7hkXi5C-x3UwAEsh6FzRFqrFE5jpd8",
@@ -285,7 +287,7 @@ function attachGlobalHandlers(){
       await signOut(auth);
       window.location.href = "app.html";
     }catch(e){
-      alert("Error al cerrar sesión: " + (e.message || e));
+      showToast({ message: "Error al cerrar sesión: " + (e.message || e), type:"error" });
     }
   });
 
@@ -311,9 +313,17 @@ function attachGlobalHandlers(){
       if (!snap.exists()) return;
       openSectionModal(id,snap.data());
     } else if (e.target.classList.contains("btn-delete-section")){
-      if (!confirm("¿Borrar este horario y todos sus días?")) return;
+      const ok = await showConfirm({
+        title:"Borrar horario",
+        message:"Se eliminará la comisión y todos sus días asociados.",
+        confirmText:"Borrar",
+        cancelText:"Cancelar",
+        danger:true
+      });
+      if (!ok) return;
       await deleteDoc(doc(db,"courseSections",id));
       await loadSections();
+      showToast({ message:"Horario eliminado.", type:"success" });
     }
   });
 }
@@ -440,13 +450,19 @@ async function loadUsers(){
     btnSuspend.className = "btn btn-warn";
     btnSuspend.textContent = "Suspender (min)";
     btnSuspend.addEventListener("click", async ()=>{
-      const raw = prompt("¿Cuántos minutos querés suspender a este usuario?", "60");
-      if (raw === null) return; // cancelado
+      const raw = await showPrompt({
+        title:"Suspender usuario",
+        message:"Ingresá la cantidad de minutos de suspensión.",
+        placeholder:"Ej: 60",
+        inputType:"number",
+        validate:(val)=>{
+          const n = parseInt(String(val || "").trim(),10);
+          if (!Number.isFinite(n) || n <= 0) return "Ingresá un número mayor que 0.";
+          return "";
+        }
+      });
+      if (raw === null) return;
       const mins = parseInt(String(raw).trim(), 10);
-      if (!Number.isFinite(mins) || mins <= 0){
-        alert("Ingresá un número válido de minutos (mayor que 0).");
-        return;
-      }
       const until = Date.now() + mins*60000;
 
       try{
@@ -455,8 +471,9 @@ async function loadUsers(){
           suspendedUntil: until
         });
         await loadUsers();
+        showToast({ message:`Usuario suspendido por ${mins} min.`, type:"warning" });
       }catch(e){
-        alert("Error al suspender: " + (e.message || e));
+        showToast({ message:"Error al suspender: " + (e.message || e), type:"error" });
       }
     });
 
@@ -470,8 +487,9 @@ async function loadUsers(){
           suspendedUntil: 0
         });
         await loadUsers();
+        showToast({ message:"Suspensión quitada.", type:"success" });
       }catch(e){
-        alert("Error al quitar suspensión: " + (e.message || e));
+        showToast({ message:"Error al quitar suspensión: " + (e.message || e), type:"error" });
       }
     });
 
@@ -645,7 +663,7 @@ function addDocenteToList(){
   const name = qs("#docenteName").value.trim();
   const role = qs("#docenteRole").value || "Docente";
   if (!name){
-    alert("Ingresá el nombre del docente.");
+    showToast({ message:"Ingresá el nombre del docente.", type:"warning" });
     return;
   }
   docentesList.push({ name, role });
@@ -680,19 +698,19 @@ function addDayToList(){
   const campus = qs("#dayCampus").value || qs("#secCampus").value || "";
 
   if (!day || !start || !end){
-    alert("Completá día, hora de inicio y fin.");
+    showToast({ message:"Completá día, hora de inicio y fin.", type:"warning" });
     return;
   }
   if (start >= end){
-    alert("La hora de inicio debe ser menor que la de fin.");
+    showToast({ message:"La hora de inicio debe ser menor que la de fin.", type:"warning" });
     return;
   }
   if (daysList.length >= 2){
-    alert("Sólo se permiten hasta 2 días por comisión.");
+    showToast({ message:"Sólo se permiten hasta 2 días por comisión.", type:"warning" });
     return;
   }
   if (daysList.some(d => d.day === day)){
-    alert("Ese día ya está cargado para esta comisión.");
+    showToast({ message:"Ese día ya está cargado para esta comisión.", type:"warning" });
     return;
   }
 
@@ -716,11 +734,11 @@ async function saveSection(){
   const titular    = qs("#secTitular").value.trim();
 
   if (!subject || !commission){
-    alert("Completá al menos la materia y la comisión.");
+    showToast({ message:"Completá al menos la materia y la comisión.", type:"warning" });
     return;
   }
   if (!daysList.length){
-    alert("Cargá al menos un día y horario.");
+    showToast({ message:"Cargá al menos un día y horario.", type:"warning" });
     return;
   }
 
@@ -746,20 +764,29 @@ async function saveSection(){
     }
     closeSectionModal();
     await loadSections();
+    showToast({ message:"Horario guardado correctamente.", type:"success" });
   }catch(e){
-    alert("Error al guardar horario: " + (e.message || e));
+    showToast({ message:"Error al guardar horario: " + (e.message || e), type:"error" });
   }
 }
 
 async function deleteCurrentSection(){
   if (!editingSectionId) return;
-  if (!confirm("¿Seguro que querés borrar este horario?")) return;
+  const ok = await showConfirm({
+    title:"Eliminar horario",
+    message:"Vas a eliminar esta comisión y sus días.",
+    confirmText:"Eliminar",
+    cancelText:"Cancelar",
+    danger:true
+  });
+  if (!ok) return;
   try{
     await deleteDoc(doc(db,"courseSections",editingSectionId));
     closeSectionModal();
     await loadSections();
+    showToast({ message:"Horario eliminado.", type:"success" });
   }catch(e){
-    alert("Error al borrar horario: " + (e.message || e));
+    showToast({ message:"Error al borrar horario: " + (e.message || e), type:"error" });
   }
 }
 </script>

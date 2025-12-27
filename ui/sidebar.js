@@ -80,6 +80,7 @@ export function createQuickSidebar(options){
   });
 
   mount.innerHTML = "";
+  mount.classList.add("quick-sidebar-wrap");
   mount.appendChild(backdrop);
   mount.appendChild(aside);
 
