@@ -232,10 +232,10 @@
 <div id="menu" style="display:none; position:fixed; z-index:9999;"></div>
 
 <script type="module">
-import { showConfirm } from "./scripts/ui/notifications.js";
+import { showConfirm } from "./ui/notifications.js";
 (function(){
   const INDEX_URL = "./plans/plans_index.json";
-  const STORAGE_KEY = "estadosMaterias_v2";
+  const STORAGE_KEY_DEFAULT = "estadosMaterias_v2";
 
   const title = document.getElementById("title");
   const msg = document.getElementById("msg");
@@ -273,12 +273,14 @@ import { showConfirm } from "./scripts/ui/notifications.js";
     return from && typeof from === "string" ? from : "plans_index.html";
   }
 
+  let storageKey = STORAGE_KEY_DEFAULT;
+
   function getEstados(){
-    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+    try{ return JSON.parse(localStorage.getItem(storageKey) || "{}"); }
     catch{ return {}; }
   }
   function setEstados(obj){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+    localStorage.setItem(storageKey, JSON.stringify(obj));
   }
 
   let indexPlans = [];
@@ -337,7 +339,7 @@ import { showConfirm } from "./scripts/ui/notifications.js";
           danger:true
         });
         if(!ok) return;
-        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(storageKey);
         updateUI();
       });
     }
@@ -496,9 +498,9 @@ import { showConfirm } from "./scripts/ui/notifications.js";
     const data = await res.json();
 
     const arr = Array.isArray(data.plans) ? data.plans
-             : Array.isArray(data.carreras) ? data.carreras
-             : Array.isArray(data) ? data
-             : [];
+              : Array.isArray(data.carreras) ? data.carreras
+              : Array.isArray(data) ? data
+              : [];
 
     indexPlans = arr.slice().sort((a,b)=>{
       return normalize(a.nombre).localeCompare(normalize(b.nombre), "es");
@@ -526,6 +528,7 @@ import { showConfirm } from "./scripts/ui/notifications.js";
     const res = await fetch(plan.json, { cache: "no-store" });
     if(!res.ok) throw new Error("No pude leer " + plan.json + " (HTTP " + res.status + ").");
     const data = await res.json();
+    storageKey = data.storageKey || STORAGE_KEY_DEFAULT;
 
     materias = detectMaterias(data);
     if(!materias.length){
@@ -560,7 +563,7 @@ import { showConfirm } from "./scripts/ui/notifications.js";
       danger:true
     });
     if(!ok) return;
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(storageKey);
     updateUI();
   });
 
@@ -570,6 +573,7 @@ import { showConfirm } from "./scripts/ui/notifications.js";
       gridWrap.style.display = "none";
       title.textContent = "Planes de Estudio";
       showMsg("Elegí una carrera para abrir su plan.");
+      storageKey = STORAGE_KEY_DEFAULT;
       return;
     }
     loadPlanBySlug(slug).catch(e=>{
@@ -578,7 +582,7 @@ import { showConfirm } from "./scripts/ui/notifications.js";
     });
   });
 
-  window.addEventListener("storage", (e)=>{ if(e.key === STORAGE_KEY) updateUI(); });
+  window.addEventListener("storage", (e)=>{ if(e.key === storageKey) updateUI(); });
 
   (async function init(){
     try{

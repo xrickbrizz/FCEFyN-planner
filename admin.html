@@ -257,18 +257,25 @@
       <div>
         <label>Agregar carrera</label>
         <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;">
-          <input id="profCareerInput" placeholder="Ej: Ing. Civil">
+          <select id="profCareerSelect" style="min-width:220px;">
+            <option value="">Elegí carrera…</option>
+          </select>
           <button class="btn btn-gray" type="button" id="btnAddCareer">Añadir</button>
         </div>
-        <div class="muted" style="margin-top:.25rem;">Podés cargar varias; es obligatorio al menos una.</div>
+        <div class="muted" style="margin-top:.25rem;">Opciones tomadas de los JSON de planes. Podés cargar varias.</div>
       </div>
       <div>
         <label>Agregar materia</label>
         <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;">
-          <input id="profSubjectInput" placeholder="Ej: Análisis Matemático II">
+          <select id="profSubjectCareerSelect" style="min-width:160px;">
+            <option value="">Elegí carrera…</option>
+          </select>
+          <select id="profSubjectSelect" style="min-width:220px;">
+            <option value="">Elegí materia…</option>
+          </select>
           <button class="btn btn-gray" type="button" id="btnAddSubject">Añadir</button>
         </div>
-        <div class="muted" style="margin-top:.25rem;">Podés cargar varias; es obligatorio al menos una.</div>
+        <div class="muted" style="margin-top:.25rem;">Las materias dependen de la carrera seleccionada.</div>
       </div>
     </div>
 
@@ -303,6 +310,7 @@ import {
   addDoc, updateDoc, deleteDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 import { showToast, showConfirm, showPrompt } from "./ui/notifications.js";
+import { getPlansIndex, getPlanWithSubjects, mapCareersToPlans, normalizeStr } from "./scripts/plans-data.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA0i7hkXi5C-x3UwAEsh6FzRFqrFE5jpd8",
@@ -329,9 +337,41 @@ let docentesList = [];  // {name, role}
 let editingProfessorId = null;
 let professorCareers = [];
 let professorSubjects = [];
+let plansIndex = [];
+const planSubjectsCache = new Map(); // slug -> array materias
 
 /* ---------- helpers UI ---------- */
 const qs  = sel => document.querySelector(sel);
+
+/* ---------- planes (JSON local) ---------- */
+async function ensurePlansIndex(){
+  if (plansIndex.length) return;
+  try{
+    plansIndex = await getPlansIndex();
+  }catch(e){
+    plansIndex = [];
+    showToast({ message:"No pude leer plans_index.json: " + (e.message || e), type:"error" });
+  }
+}
+
+async function getSubjectsForCareer(slug){
+  if (!slug) return [];
+  if (planSubjectsCache.has(slug)) return planSubjectsCache.get(slug);
+  try{
+    const { subjects } = await getPlanWithSubjects(slug);
+    const sorted = subjects.slice().sort((a,b)=> normalizeStr(a.nombre||a.id).localeCompare(normalizeStr(b.nombre||b.id), "es"));
+    planSubjectsCache.set(slug, sorted);
+    return sorted;
+  }catch(e){
+    showToast({ message:"No pude leer materias de " + slug + ": " + (e.message || e), type:"error" });
+    return [];
+  }
+}
+
+function planNameFromSlug(slug){
+  const plan = plansIndex.find(p => p.slug === slug);
+  return plan ? plan.nombre : slug;
+}
 
 /* ---------- navegación secciones ---------- */
 function setActiveNav(section){
@@ -410,11 +450,12 @@ function attachGlobalHandlers(){
   qs("#btnDeleteSection").addEventListener("click", deleteCurrentSection);
 
   // NUEVO: Botones Sección Profesores
-  qs("#btnNewProfessor").addEventListener("click", ()=> openProfessorModal(null));
+  qs("#btnNewProfessor").addEventListener("click", ()=> openProfessorModal(null).catch(console.error));
   qs("#btnCancelProfessor").addEventListener("click", closeProfessorModal);
   qs("#profModalBg").addEventListener("click", (e)=>{ if (e.target === qs("#profModalBg")) closeProfessorModal(); });
-  qs("#btnAddCareer").addEventListener("click", addCareerToList);
-  qs("#btnAddSubject").addEventListener("click", addSubjectToList);
+  qs("#btnAddCareer").addEventListener("click", ()=> addCareerToList().catch(console.error));
+  qs("#btnAddSubject").addEventListener("click", ()=> addSubjectToList().catch(console.error));
+  qs("#profSubjectCareerSelect").addEventListener("change", ()=> updateSubjectSelectOptions().catch(console.error));
   qs("#btnSaveProfessor").addEventListener("click", saveProfessor);
   qs("#btnDeleteProfessor").addEventListener("click", deleteProfessor);
 
@@ -451,7 +492,7 @@ function attachGlobalHandlers(){
       const ref = doc(db,"professors",id);
       const snap = await getDoc(ref);
       if (!snap.exists()) return;
-      openProfessorModal(id, snap.data());
+      await openProfessorModal(id, snap.data());
     } else if (e.target.classList.contains("btn-toggle-prof")){
       const ref = doc(db,"professors",id);
       const snap = await getDoc(ref);
@@ -736,7 +777,16 @@ async function loadProfessors(){
   const tbody = qs("#professorsTableBody");
   tbody.innerHTML = "";
 
-  const snap = await getDocs(collection(db,"professors"));
+  let snap;
+  try{
+    snap = await getDocs(collection(db,"professors"));
+  }catch(e){
+    showToast({ message:"No se pudieron cargar profesores: " + (e.message || e), type:"error" });
+    qs("#badgeProfessors").textContent = "0";
+    qs("#metricProfessorsTotal").textContent = "0";
+    qs("#metricProfessorsDetail").textContent = "Activos: 0 · Ocultos: 0";
+    return;
+  }
   let total = 0;
   let activeCount = 0;
   let hiddenCount = 0;
@@ -777,28 +827,154 @@ async function loadProfessors(){
   qs("#metricProfessorsDetail").textContent = `Activos: ${activeCount} · Ocultos: ${hiddenCount}`;
 }
 
-function renderProfChips(list, mountId){
-  const cont = qs(mountId);
+function setCareerSelectOptions(){
+  const sel = qs("#profCareerSelect");
+  if (!sel) return;
+  const selected = new Set(professorCareers.map(c => c.slug));
+  sel.innerHTML = `<option value=\"\">Elegí carrera…</option>`;
+  plansIndex.forEach(p =>{
+    const opt = document.createElement("option");
+    opt.value = p.slug;
+    opt.textContent = p.nombre || p.slug;
+    opt.disabled = selected.has(p.slug);
+    sel.appendChild(opt);
+  });
+}
+
+function renderCareerChips(){
+  const cont = qs("#profCareersChips");
   cont.innerHTML = "";
-  list.forEach((v, idx)=>{
+  professorCareers.forEach((c, idx)=>{
     const chip = document.createElement("span");
     chip.className = "chip";
     chip.innerHTML = `
-      <span>${v}</span>
+      <span>${c.name}</span>
       <span class="chip-remove" data-idx="${idx}">✕</span>
     `;
     chip.querySelector(".chip-remove").addEventListener("click", ()=>{
-      list.splice(idx,1);
-      renderProfChips(list, mountId);
+      professorCareers.splice(idx,1);
+      professorSubjects = professorSubjects.filter(s => !s.careerSlug || professorCareers.some(cc => cc.slug === s.careerSlug));
+      renderCareerChips();
+      renderSubjectCareerSelect();
+      renderSubjectChips();
+    });
+    cont.appendChild(chip);
+  });
+  setCareerSelectOptions();
+}
+
+function renderSubjectChips(){
+  const cont = qs("#profSubjectsChips");
+  cont.innerHTML = "";
+  professorSubjects.forEach((s, idx)=>{
+    const labelCareer = s.careerSlug ? planNameFromSlug(s.careerSlug) : "Sin carrera";
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = `
+      <span>${s.name}${s.careerSlug ? " — " + labelCareer : ""}</span>
+      <span class="chip-remove" data-idx="${idx}">✕</span>
+    `;
+    chip.querySelector(".chip-remove").addEventListener("click", ()=>{
+      professorSubjects.splice(idx,1);
+      renderSubjectChips();
+      updateSubjectSelectOptions().catch(console.error);
     });
     cont.appendChild(chip);
   });
 }
 
-function openProfessorModal(id, data=null){
+function renderSubjectCareerSelect(){
+  const sel = qs("#profSubjectCareerSelect");
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = `<option value=\"\">Elegí carrera…</option>`;
+  professorCareers.forEach(c =>{
+    const opt = document.createElement("option");
+    opt.value = c.slug;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+  if (professorCareers.length === 1){
+    sel.value = professorCareers[0].slug;
+  } else if (current && professorCareers.some(c => c.slug === current)){
+    sel.value = current;
+  }
+  updateSubjectSelectOptions().catch(console.error);
+}
+
+async function updateSubjectSelectOptions(){
+  const selCareer = qs("#profSubjectCareerSelect");
+  const sel = qs("#profSubjectSelect");
+  if (!selCareer || !sel) return;
+  const slug = selCareer.value;
+  sel.innerHTML = `<option value=\"\">Elegí materia…</option>`;
+  if (!slug) return;
+  const subjects = await getSubjectsForCareer(slug);
+  const selectedPairs = new Set(professorSubjects.map(s => `${s.careerSlug}|${s.id}`));
+  subjects.forEach(sub =>{
+    const id = sub.id || sub.nombre;
+    const opt = document.createElement("option");
+    opt.value = id;
+    opt.textContent = sub.nombre || sub.id || "Materia";
+    opt.disabled = selectedPairs.has(`${slug}|${id}`);
+    sel.appendChild(opt);
+  });
+}
+
+function hydrateCareers(data){
+  if (Array.isArray(data?.careerSlugs) && data.careerSlugs.length){
+    return data.careerSlugs.map(slug =>{
+      const plan = plansIndex.find(p => p.slug === slug);
+      return plan ? { slug: plan.slug, name: plan.nombre } : { slug, name: slug };
+    });
+  }
+  if (Array.isArray(data?.careers)) return mapCareersToPlans(data.careers);
+  return [];
+}
+
+function hydrateSubjects(data){
+  const pairs = Array.isArray(data?.subjectPairs) ? data.subjectPairs : [];
+  const mapped = pairs.map(p => ({
+    id: p.subjectId || p.id || p.subjectName || "",
+    name: p.subjectName || p.subjectId || p.id || "",
+    careerSlug: p.careerSlug || p.career || ""
+  })).filter(p => p.id && p.name);
+  if (mapped.length) return mapped;
+
+  const subjects = Array.isArray(data?.subjects) ? data.subjects : [];
+  if (!subjects.length) return [];
+  if (professorCareers.length === 1){
+    return subjects.map(name => ({ id: normalizeStr(name) || name, name, careerSlug: professorCareers[0].slug }));
+  }
+  return subjects.map(name => ({ id: normalizeStr(name) || name, name, careerSlug: "" }));
+}
+
+async function alignSubjectsWithCareers(){
+  if (!professorSubjects.length || !professorCareers.length) return;
+  await Promise.all(professorCareers.map(c => getSubjectsForCareer(c.slug)));
+  professorSubjects = professorSubjects.map(sub =>{
+    if (sub.careerSlug) return sub;
+    const matches = professorCareers.filter(c =>{
+      const list = planSubjectsCache.get(c.slug) || [];
+      return list.some(m => normalizeStr(m.nombre||m.id) === normalizeStr(sub.name) || normalizeStr(m.id) === normalizeStr(sub.id));
+    });
+    if (matches.length === 1){
+      return { ...sub, careerSlug: matches[0].slug };
+    }
+    return sub;
+  });
+}
+
+async function openProfessorModal(id, data=null){
+  await ensurePlansIndex();
   editingProfessorId = id || null;
-  professorCareers = Array.isArray(data?.careers) ? data.careers.slice() : [];
-  professorSubjects = Array.isArray(data?.subjects) ? data.subjects.slice() : [];
+  professorCareers = hydrateCareers(data);
+  professorSubjects = hydrateSubjects(data);
+
+  if (professorCareers.length === 1){
+    professorSubjects = professorSubjects.map(s => ({ ...s, careerSlug: s.careerSlug || professorCareers[0].slug }));
+  }
+  await alignSubjectsWithCareers();
 
   qs("#profModalTitle").textContent = id ? "Editar profesor" : "Nuevo profesor";
   qs("#btnDeleteProfessor").style.display = id ? "inline-flex" : "none";
@@ -806,8 +982,10 @@ function openProfessorModal(id, data=null){
   qs("#profName").value = data?.name || "";
   qs("#profActive").checked = !!data?.active;
 
-  renderProfChips(professorCareers, "#profCareersChips");
-  renderProfChips(professorSubjects, "#profSubjectsChips");
+  setCareerSelectOptions();
+  renderCareerChips();
+  renderSubjectCareerSelect();
+  renderSubjectChips();
 
   qs("#profModalBg").style.display = "flex";
 }
@@ -817,24 +995,54 @@ function closeProfessorModal(){
   editingProfessorId = null;
   professorCareers = [];
   professorSubjects = [];
+  ["#profCareerSelect","#profSubjectCareerSelect","#profSubjectSelect"].forEach(id => {
+    const el = qs(id);
+    if (el) el.value = "";
+  });
 }
 
-function addCareerToList(){
-  const inp = qs("#profCareerInput");
-  const val = (inp.value || "").trim();
-  if (!val) return;
-  if (!professorCareers.includes(val)) professorCareers.push(val);
-  inp.value = "";
-  renderProfChips(professorCareers, "#profCareersChips");
+async function addCareerToList(){
+  await ensurePlansIndex();
+  const sel = qs("#profCareerSelect");
+  const slug = sel.value;
+  if (!slug){
+    showToast({ message:"Elegí una carrera del listado.", type:"warning" });
+    return;
+  }
+  if (professorCareers.some(c => c.slug === slug)) return;
+  const plan = plansIndex.find(p => p.slug === slug);
+  professorCareers.push({ slug, name: plan?.nombre || slug });
+  renderCareerChips();
+  renderSubjectCareerSelect();
+  sel.value = "";
 }
 
-function addSubjectToList(){
-  const inp = qs("#profSubjectInput");
-  const val = (inp.value || "").trim();
-  if (!val) return;
-  if (!professorSubjects.includes(val)) professorSubjects.push(val);
-  inp.value = "";
-  renderProfChips(professorSubjects, "#profSubjectsChips");
+async function addSubjectToList(){
+  const selCareer = qs("#profSubjectCareerSelect");
+  const sel = qs("#profSubjectSelect");
+  const slug = selCareer?.value || "";
+  const id = sel?.value || "";
+  if (!slug){
+    showToast({ message:"Primero elegí una carrera para listar sus materias.", type:"warning" });
+    return;
+  }
+  if (!id){
+    showToast({ message:"Elegí una materia del selector.", type:"warning" });
+    return;
+  }
+  const subjects = await getSubjectsForCareer(slug);
+  const match = subjects.find(s => (s.id || s.nombre) === id || normalizeStr(s.nombre||s.id) === normalizeStr(id));
+  const name = match?.nombre || match?.id || id;
+  const internalId = match?.id || id;
+  const key = `${slug}|${internalId}`;
+  const exists = professorSubjects.some(s => `${s.careerSlug}|${s.id}` === key);
+  if (exists){
+    showToast({ message:"Esa materia ya está asociada a la carrera.", type:"info" });
+    return;
+  }
+  professorSubjects.push({ id: internalId, name, careerSlug: slug });
+  renderSubjectChips();
+  updateSubjectSelectOptions().catch(console.error);
 }
 
 async function saveProfessor(){
@@ -854,11 +1062,21 @@ async function saveProfessor(){
     return;
   }
 
+  const careerSlugs = new Set(professorCareers.map(c => c.slug));
+  if (professorSubjects.some(s => !s.careerSlug || !careerSlugs.has(s.careerSlug))){
+    showToast({ message:"Cada materia debe pertenecer a una carrera seleccionada.", type:"warning" });
+    return;
+  }
+
   const payload = {
     name,
-    careers: professorCareers,
-    subjects: professorSubjects,
+    careers: professorCareers.map(c => c.name),
+    careerSlugs: professorCareers.map(c => c.slug),
+    subjects: professorSubjects.map(s => s.name),
+    subjectIds: professorSubjects.map(s => s.id),
+    subjectPairs: professorSubjects.map(s => ({ careerSlug: s.careerSlug, subjectId: s.id, subjectName: s.name })),
     active,
+    createdBy: currentUser?.uid || "",
     updatedAt: serverTimestamp()
   };
 
@@ -879,7 +1097,8 @@ async function saveProfessor(){
     await loadProfessors();
     showToast({ message:"Profesor guardado.", type:"success" });
   }catch(e){
-    showToast({ message:"Error al guardar profesor: " + (e.message || e), type:"error" });
+    const msg = (e && e.message) ? e.message : e;
+    showToast({ message:"Error al guardar profesor: " + msg, type:"error" });
   }
 }
 
