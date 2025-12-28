@@ -1,4 +1,3 @@
-<!-- app.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -205,6 +204,7 @@
       setDoc,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { getPlansIndex, normalizeStr } from "./scripts/plans-data.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA0i7hkXi5C-x3UwAEsh6FzRFqrFE5jpd8",
@@ -222,6 +222,28 @@
     const pillClock = document.getElementById("pillClock");
     const dotFirebase = document.getElementById("dotFirebase");
     const msgBox = document.getElementById("msgBox");
+    const selCareer = document.getElementById("inpCareer");
+
+    async function loadCareerOptions(){
+      if (!selCareer) return;
+      selCareer.innerHTML = `<option value="">Elegí tu carrera</option>`;
+      try{
+        const plans = await getPlansIndex();
+        plans.sort((a,b)=> (a.nombre||"").localeCompare(b.nombre||"", "es"));
+        plans.forEach(p =>{
+          const opt = document.createElement("option");
+          opt.value = p.slug;
+          opt.textContent = p.nombre || p.slug;
+          selCareer.appendChild(opt);
+        });
+        const otherOpt = document.createElement("option");
+        otherOpt.value = "otra";
+        otherOpt.textContent = "Otra / no listada";
+        selCareer.appendChild(otherOpt);
+      }catch(e){
+        console.error("No pude cargar carreras", e);
+      }
+    }
 
     function setMsg(html, isError=false){
       msgBox.style.display = "block";
@@ -326,7 +348,9 @@
       const pass2 = (document.getElementById("inpPass2").value || "").trim();
       const first = (document.getElementById("inpName").value || "").trim();
       const last  = (document.getElementById("inpLast").value || "").trim();
-      const career= (document.getElementById("inpCareer").value || "").trim();
+      const careerSlug= (document.getElementById("inpCareer").value || "").trim();
+      const careerOpt = document.getElementById("inpCareer");
+      const careerName = careerOpt?.selectedOptions?.[0]?.textContent || careerSlug || "";
       const year  = (document.getElementById("inpYear").value || "").trim();
       const legajo= (document.getElementById("inpLegajo").value || "").trim();
 
@@ -354,7 +378,7 @@
           setMsg("Las contraseñas no coinciden.", true);
           return;
         }
-        if (!first || !last || !career){
+        if (!first || !last || !careerSlug){
           setMsg("Completá <strong>Nombre</strong>, <strong>Apellido</strong> y <strong>Carrera</strong>.", true);
           return;
         }
@@ -374,7 +398,8 @@
           firstName:first,
           lastName:last,
           name: (first + " " + last).trim(),
-          career,
+          career: careerName,
+          careerSlug: careerSlug,
           yearIn: year ? parseInt(year, 10) : "",
           legajo: legajo || "",
           createdAt: serverTimestamp()
@@ -417,6 +442,7 @@
     });
 
     // default mode
+    loadCareerOptions();
     setMode("login");
   </script>
 </body>

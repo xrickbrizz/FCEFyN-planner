@@ -284,6 +284,58 @@
         </div>
       </div>
     </div>
+    
+    <!-- TAB MENSAJES -->
+ <idid/div="tab-mensajes" clase="ficha-card" estilo="display:ninguno;"> 
+ <clase div="layout-mensajes"> 
+ <clase div="mensajes-izquierda"> 
+ <clase div="bloque de cartas"> 
+ <div class="block-title">Agregar amigo</div> 
+            <div class="small-muted">Enviá una solicitud usando el correo institucional.</div>
+ <clase div="friend-form"> 
+ <input id="friendEmailInput" tipo="email" placeholder="correo@mi.unc.edu.ar" /> 
+ <button class="btn-blue btn-small" id="btnSendFriendRequest" type="button">Enviar solicitud</button> 
+            </div>
+          </div>
+
+ <clase div="bloque de cartas"> 
+ <div class="block-title">Solicitudes recibidas</div> 
+ <div id="incomingRequests" clase="requests-box"></div> 
+          </div>
+
+ <clase div="bloque de cartas"> 
+ <div class="block-title">Solicitudes enviadas</div> 
+ <iddiv="outgoingRequests" clase="requests-box"></div> 
+          </div>
+
+ <clase div="bloque de cartas"> 
+ <clase div="título de bloque"> 
+              Amigos
+ <clase span="small-muted" style="margin-left:.4rem;">Solo podés chatear con aceptados</span> 
+            </div>
+ <div id="friendsListBox" clase="friends-box"></div> 
+          </div>
+        </div>
+
+ <clase div="mensajes-derecha"> 
+ <clase div="encabezado de chat"> 
+            <div>
+ <id_div="chatHeader" class="chat-title">Seleccioná un amigo para chatear</div> 
+              <div class="small-muted">Estado y última conexión según privacidad.</div>
+            </div>
+ <clase etiqueta="línea de alternancia"> 
+ <tipo de entrada="casilla de verificación" id="toggleLastSeen" /> 
+              <span>Mostrar mi última conexión</span>
+            </Sello>
+          </div>
+ <div id="messagesList" clase="messages-box"></div> 
+ <div class="chat-input-row"> 
+            <input id="messageInput" placeholder="Escribí un mensaje..." />
+ <clase button="btn-blue btn-small" id="btnSendMessage" tipo="button">Send</button> 
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
       </div> <!-- main-shell -->
