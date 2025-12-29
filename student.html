@@ -28,7 +28,7 @@
     <div class="page-content">
       <div class="content-header">
         <button class="quick-toggle-btn" id="sidebarToggle" type="button" aria-label="Abrir accesos rápidos">☰</button>
-        <div class="section-label" id="currentSectionLabel">📒 Estudio</div>
+        <button class="section-label" id="currentSectionLabel">📒 Estudio</button>
         <button class="help-btn" id="helpButton" type="button" aria-label="Ayuda contextual">?</button>
       </div>
       <div class="main-shell">
@@ -217,12 +217,13 @@
             <div><strong>Vista previa semanal</strong> (solo preview)</div>
             <div class="small-muted">No modifica tu Agenda hasta que presiones “Pasar a Agenda”.</div>
           </div>
-          <div class="agenda-shell">
-            <div class="agenda-grid" id="plannerPreviewGrid"></div>
-          </div>
         </div>
+        
+        <div class="agenda-shell">
+        <div class="agenda-grid" id="plannerPreviewGrid"></div>
       </div>
     </div>
+  </div>
     
     <!-- TAB PROFESORES -->
     <div id="tab-profesores" class="tab-card" style="display:none;">
@@ -479,5 +480,6 @@
     </div>
   </div>
 <script type="module" src="scripts/student.js"></script>
+<script type="module" src="scripts/scroll-ui.js"></script>
 </body>
 </html>
