@@ -1241,16 +1241,3 @@ button{
   background:rgba(15,23,42,.9);
   color:#e5e7eb;
 }
-.skeleton-line{
-  height:14px;
-  border-radius:999px;
-  background:linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.14), rgba(255,255,255,.06));
-  background-size:200% 100%;
-  animation:skeleton 1.2s ease-in-out infinite;
-}
-.skeleton-line.tall{ height:18px; }
-@keyframes skeleton{
-  0%{ background-position:200% 0; }
-  100%{ background-position:-200% 0; }
-}
-/*Seccion Agus*/
