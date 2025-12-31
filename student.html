@@ -28,12 +28,46 @@
     <div class="page-content">
       <div class="content-header">
         <button class="quick-toggle-btn" id="sidebarToggle" type="button" aria-label="Abrir accesos rápidos">☰</button>
-        <div class="section-label" id="currentSectionLabel">📒 Estudio</div>
+        <div class="section-label" id="currentSectionLabel">🏠 Inicio</div>
         <button class="help-btn" id="helpButton" type="button" aria-label="Ayuda contextual">?</button>
       </div>
       <div class="main-shell">
-    <!-- TAB ESTUDIO -->
-    <div id="tab-estudio" class="tab-card">
+        
+    <div id="tab-inicio" class="tab-card">
+      <div class="welcome-card">
+        <div>
+          <div class="eyebrow">FCEFyN Planner</div>
+          <h2 class="welcome-title">Tu punto de partida</h2>
+          <p class="welcome-sub">
+            Gestioná horarios, parciales, estudio y chats con tus compañeros en un solo lugar.
+            Todo se guarda en tu cuenta para que puedas continuar desde cualquier dispositivo.
+          </p>
+          <div class="welcome-grid">
+            <div class="welcome-item">
+              <div class="welcome-label">Calendarios</div>
+              <div class="welcome-desc">Ingresá a Estudio o Académico para trabajar con tu agenda diaria.</div>
+            </div>
+            <div class="welcome-item">
+              <div class="welcome-label">Horario semanal</div>
+              <div class="welcome-desc">Armá la semana en Agenda o probá combinaciones en Planificador.</div>
+            </div>
+            <div class="welcome-item">
+              <div class="welcome-label">Mensajería</div>
+              <div class="welcome-desc">Agregá amigos con su correo institucional y chateá en tiempo real.</div>
+            </div>
+          </div>
+        </div>
+        <div class="welcome-credits">
+          <div class="welcome-credits-title">Créditos</div>
+          <div class="welcome-credits-body">
+            FCEFyN Planner — Creado por <strong>Rick Román</strong> y <strong>Agus Mella</strong>.<br/>
+            Seleccioná una sección en la barra izquierda para comenzar.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-estudio" class="tab-card" style="display:none;">
       <div class="tab-estudio-layout">
         <div class="calendar-container">
           <div class="calendar-header">
@@ -64,7 +98,6 @@
       </div>
     </div>
 
-    <!-- TAB ACADEMICO -->
     <div id="tab-academico" class="tab-card" style="display:none;">
       <div class="acad-layout">
         <div class="acad-shell">
@@ -82,7 +115,7 @@
 
           <div class="acad-help">
             Parciales, TPs, Tareas, Informes y Recordatorios (se guardan en tu planner de Firebase).
-            <br/>Tip: tocá un día para ver el detalle a la derecha (no se buguea adentro del recuadro).
+            <br/>Tip: tocá un día para ver el detalle a la derecha y acceder a acciones rápidas.
           </div>
 
           <div class="grid" id="acadDow">
@@ -119,13 +152,18 @@
       </div>
     </div>
 
-    <!-- TAB AGENDA -->
     <div id="tab-agenda" class="tab-card" style="display:none;">
       <div class="agenda-header">
         <div><strong>Agenda semanal</strong> (08:00 – 23:00)</div>
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-          <button class="btn-outline btn-small" id="btnAgendaFromPreset">Pasar preset a agenda</button>
-          <button class="btn-blue" id="btnAddClass">Añadir clase</button>
+        <div class="agenda-actions">
+          <div class="agenda-downloads">
+            <button class="btn-outline btn-small" id="btnDownloadAgendaPng">Descargar PNG</button>
+            <button class="btn-outline btn-small" id="btnDownloadAgendaPdf">Descargar PDF</button>
+          </div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end;">
+            <button class="btn-outline btn-small" id="btnAgendaFromPreset">Pasar preset a agenda</button>
+            <button class="btn-blue" id="btnAddClass">Añadir clase</button>
+          </div>
         </div>
       </div>
       <div class="agenda-shell">
@@ -136,7 +174,6 @@
       </div>
     </div>
 
-    <!-- TAB MATERIAS -->
     <div id="tab-materias" class="tab-card" style="display:none;">
       <div class="subjects-layout">
         <div class="subjects-list-box">
@@ -163,7 +200,6 @@
       </div>
     </div>
 
-    <!-- TAB PLANIFICADOR -->
     <div id="tab-planificador" class="tab-card" style="display:none;">
       <div class="planner-layout">
         <div class="planner-box">
@@ -224,7 +260,6 @@
       </div>
     </div>
     
-    <!-- TAB PROFESORES -->
     <div id="tab-profesores" class="tab-card" style="display:none;">
       <div class="prof-layout">
         <div class="prof-list-panel">
@@ -284,66 +319,61 @@
         </div>
       </div>
     </div>
-    
-    <!-- TAB MENSAJES -->
- <idid/div="tab-mensajes" clase="ficha-card" estilo="display:ninguno;"> 
- <clase div="layout-mensajes"> 
- <clase div="mensajes-izquierda"> 
- <clase div="bloque de cartas"> 
- <div class="block-title">Agregar amigo</div> 
+
+    <div id="tab-mensajes" class="tab-card" style="display:none;">
+      <div class="messages-layout">
+        <div class="messages-left">
+          <div class="card-block">
+            <div class="block-title">Agregar amigo</div>
             <div class="small-muted">Enviá una solicitud usando el correo institucional.</div>
- <clase div="friend-form"> 
- <input id="friendEmailInput" tipo="email" placeholder="correo@mi.unc.edu.ar" /> 
- <button class="btn-blue btn-small" id="btnSendFriendRequest" type="button">Enviar solicitud</button> 
+            <div class="friend-form">
+              <input id="friendEmailInput" type="email" placeholder="correo@mi.unc.edu.ar" />
+              <button class="btn-blue btn-small" id="btnSendFriendRequest" type="button">Enviar solicitud</button>
             </div>
           </div>
 
- <clase div="bloque de cartas"> 
- <div class="block-title">Solicitudes recibidas</div> 
- <div id="incomingRequests" clase="requests-box"></div> 
+          <div class="card-block">
+            <div class="block-title">Solicitudes recibidas</div>
+            <div id="incomingRequests" class="requests-box"></div>
           </div>
 
- <clase div="bloque de cartas"> 
- <div class="block-title">Solicitudes enviadas</div> 
- <iddiv="outgoingRequests" clase="requests-box"></div> 
+          <div class="card-block">
+            <div class="block-title">Solicitudes enviadas</div>
+            <div id="outgoingRequests" class="requests-box"></div>
           </div>
 
- <clase div="bloque de cartas"> 
- <clase div="título de bloque"> 
-              Amigos
- <clase span="small-muted" style="margin-left:.4rem;">Solo podés chatear con aceptados</span> 
+          <div class="card-block">
+            <div class="block-title" style="display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;">
+               Amigos
+              <span class="small-muted" style="margin-left:.4rem;">Solo podés chatear con aceptados</span>
             </div>
- <div id="friendsListBox" clase="friends-box"></div> 
+            <div id="friendsListBox" class="friends-box"></div>
           </div>
         </div>
 
- <clase div="mensajes-derecha"> 
- <clase div="encabezado de chat"> 
-            <div>
- <id_div="chatHeader" class="chat-title">Seleccioná un amigo para chatear</div> 
-              <div class="small-muted">Estado y última conexión según privacidad.</div>
+        <div class="messages-right">
+          <div class="card-block">
+            <div class="chat-header">
+              <div>
+                <div id="chatHeader" class="chat-title">Seleccioná un amigo para chatear</div>
+                <div id="chatSubheader" class="small-muted">Estado y última conexión según privacidad.</div>
+              </div>
+              <label class="toggle-line">
+                <input type="checkbox" id="toggleLastSeen" />
+                <span>Mostrar mi última conexión</span>
+              </label>
             </div>
- <clase etiqueta="línea de alternancia"> 
- <tipo de entrada="casilla de verificación" id="toggleLastSeen" /> 
-              <span>Mostrar mi última conexión</span>
-            </Sello>
-          </div>
- <div id="messagesList" clase="messages-box"></div> 
- <div class="chat-input-row"> 
-            <input id="messageInput" placeholder="Escribí un mensaje..." />
- <clase button="btn-blue btn-small" id="btnSendMessage" tipo="button">Send</button> 
+            <div id="messagesList" class="messages-box"></div>
+            <div class="chat-input-row" id="chatInputRow">
+              <input id="messageInput" placeholder="Seleccioná un amigo para chatear" disabled />
+              <button class="btn-blue btn-small" id="btnSendMessage" type="button" disabled>Enviar</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-
-      </div> <!-- main-shell -->
-    </div> <!-- page-content -->
-  </div> <!-- page-layout -->
-
-  <!-- MODAL ESTUDIO -->
-  <div class="modal-bg" id="modalBg">
+  </div> 
+      </div> </div> </div> <div class="modal-bg" id="modalBg">
     <div class="modal">
       <h3 class="modal-title">Registrar estudio</h3>
       <div id="eventsList"></div>
@@ -360,7 +390,6 @@
     </div>
   </div>
 
-  <!-- MODAL AGENDA -->
   <div class="modal-bg" id="agendaModalBg">
     <div class="modal">
       <h3 class="modal-title" id="agendaModalTitle">Añadir clase</h3>
@@ -392,7 +421,6 @@
     </div>
   </div>
 
-  <!-- MODAL: PASAR PRESET A AGENDA -->
   <div class="modal-bg" id="presetToAgendaModalBg">
     <div class="modal modal-wide">
       <h3 class="modal-title">Pasar preset a Agenda</h3>
@@ -428,7 +456,6 @@
     </div>
   </div>
 
-  <!-- MODAL ACADEMICO -->
   <div class="modal-bg" id="acadModalBg">
     <div class="modal">
       <h3 class="modal-title" id="acadModalTitle">Añadir académico</h3>
@@ -468,7 +495,6 @@
     </div>
   </div>
 
-  <!-- MODAL AYUDA -->
   <div class="modal-bg" id="helpModalBg">
     <div class="modal modal-help">
       <h3 class="modal-title" id="helpModalTitle">Ayuda</h3>
@@ -479,5 +505,6 @@
     </div>
   </div>
 <script type="module" src="scripts/student.js"></script>
+<script type="module" src="scripts/scroll-ui.js"></script>
 </body>
 </html>

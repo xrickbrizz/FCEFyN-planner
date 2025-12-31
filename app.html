@@ -119,14 +119,14 @@
 
         <div class="auth-hint-row">
           <div class="auth-pill">Redirección automática a tu panel</div>
-          <div class="auth-pill ghost" id="authHint">student.html o admin.html según rol</div>
+          <div class="auth-pill ghost" id="authHint">Entrás al panel correcto según tu rol</div>
         </div>
 
         <div id="authForm" class="auth-form">
           <div class="form-grid">
             <div class="form-group">
-              <label>Correo institucional</label>
-              <input id="inpEmail" type="email" placeholder="tuusuario@mi.unc.edu.ar" autocomplete="email" />
+              <label>Correo o Documento</label>
+              <input id="inpEmail" type="text" placeholder="tuusuario@mi.unc.edu.ar o DNI" autocomplete="username" />
             </div>
             <div class="form-group">
               <label>Contraseña</label>
@@ -163,8 +163,8 @@
               <input id="inpYear" type="number" placeholder="2024" inputmode="numeric" />
             </div>
             <div class="form-group">
-              <label>Legajo (opcional)</label>
-              <input id="inpLegajo" type="text" placeholder="N° de legajo" />
+              <label>Documento (opcional)</label>
+              <input id="inpDocumento" type="text" placeholder="Documento (DNI)" />
             </div>
             <div class="form-group">
               <label>Confirmar contraseña</label>
@@ -202,7 +202,12 @@
       doc,
       getDoc,
       setDoc,
-      serverTimestamp
+      serverTimestamp,
+      collection,
+      getDocs,
+      query,
+      where,
+      limit
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
     import { getPlansIndex, normalizeStr } from "./scripts/plans-data.js";
 
@@ -307,6 +312,29 @@
       const e = (email || "").trim().toLowerCase();
       return e.endsWith("@mi.unc.edu.ar");
     }
+    function isEmailAddress(value){
+      return /\S+@\S+\.\S+/.test((value || "").trim());
+    }
+    function normalizeDocument(value){
+      return (value || "").toString().replace(/\D+/g, "");
+    }
+    async function findEmailByDocument(documentNumber){
+      const docNumber = normalizeDocument(documentNumber);
+      if (!docNumber) return null;
+      const tryQueries = [
+        where("documento","==", docNumber),
+        where("dni","==", docNumber),
+        where("legajo","==", docNumber)
+      ];
+      for (const cond of tryQueries){
+        const snap = await getDocs(query(collection(db,"users"), cond, limit(1)));
+        if (!snap.empty){
+          const data = snap.docs[0].data() || {};
+          if (data.email) return data.email;
+        }
+      }
+      return null;
+    }
 
     async function ensurePlannerDoc(uid){
       const ref = doc(db, "planner", uid);
@@ -343,7 +371,7 @@
     // --------- AUTH ----------
     btnSubmit.addEventListener("click", async ()=>{
       clearMsg();
-      const email = (document.getElementById("inpEmail").value || "").trim();
+      const emailInput = (document.getElementById("inpEmail").value || "").trim();
       const pass  = (document.getElementById("inpPass").value || "").trim();
       const pass2 = (document.getElementById("inpPass2").value || "").trim();
       const first = (document.getElementById("inpName").value || "").trim();
@@ -352,21 +380,34 @@
       const careerOpt = document.getElementById("inpCareer");
       const careerName = careerOpt?.selectedOptions?.[0]?.textContent || careerSlug || "";
       const year  = (document.getElementById("inpYear").value || "").trim();
-      const legajo= (document.getElementById("inpLegajo").value || "").trim();
+      const documentoInput = (document.getElementById("inpDocumento").value || "").trim();
+      const documento = normalizeDocument(documentoInput);
 
-      if (!email || !pass){
-        setMsg("Completá email y contraseña.", true);
+      if (!emailInput || !pass){
+        setMsg("Completá correo o documento y la contraseña.", true);
         return;
       }
 
       try{
         if (mode === "login"){
-          await signInWithEmailAndPassword(auth, email, pass);
+          let loginEmail = emailInput;
+          if (isEmailAddress(loginEmail)){
+            loginEmail = loginEmail.toLowerCase();
+          } else {
+            setMsg("Buscando tu cuenta por documento…", false);
+            const foundEmail = await findEmailByDocument(loginEmail);
+            if (!foundEmail){
+              setMsg("No encontramos una cuenta con ese documento. Probá con tu correo institucional.", true);
+              return;
+            }
+            loginEmail = foundEmail.toLowerCase();
+          }
+          await signInWithEmailAndPassword(auth, loginEmail, pass);
           return;
         }
 
         // signup
-        if (!isMiUnc(email)){
+        if (!isMiUnc(emailInput)){
           setMsg("Para crear cuenta usá tu correo <strong>@mi.unc.edu.ar</strong>.", true);
           return;
         }
@@ -390,10 +431,10 @@
           }
         }
 
-        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        const cred = await createUserWithEmailAndPassword(auth, emailInput, pass);
         await ensurePlannerDoc(cred.user.uid);
         await setDoc(doc(db,"users",cred.user.uid),{
-          email,
+          email: emailInput.toLowerCase(),
           role:"student",
           firstName:first,
           lastName:last,
@@ -401,7 +442,9 @@
           career: careerName,
           careerSlug: careerSlug,
           yearIn: year ? parseInt(year, 10) : "",
-          legajo: legajo || "",
+          documento: documento || "",
+          dni: documento || "",
+          legajo: documento || "",
           createdAt: serverTimestamp()
         }, { merge:true });
         setMsg("Cuenta creada. Entrando…", false);
@@ -414,13 +457,22 @@
 
     document.getElementById("btnForgot").addEventListener("click", async ()=>{
       clearMsg();
-      const email = (document.getElementById("inpEmail").value || "").trim();
-      if (!email){
-        setMsg("Escribí tu email para enviarte el enlace de recuperación.", true);
+      const emailOrDoc = (document.getElementById("inpEmail").value || "").trim();
+      if (!emailOrDoc){
+        setMsg("Escribí tu correo o documento para enviarte el enlace de recuperación.", true);
+        return;
+      }
+      let targetEmail = emailOrDoc;
+      if (!isEmailAddress(targetEmail)){
+        targetEmail = await findEmailByDocument(emailOrDoc);
+      }
+      if (targetEmail) targetEmail = targetEmail.toLowerCase();
+      if (!targetEmail){
+        setMsg("No encontramos una cuenta con esos datos. Probá con tu correo institucional.", true);
         return;
       }
       try{
-        await sendPasswordResetEmail(auth, email);
+        await sendPasswordResetEmail(auth, targetEmail);
         setMsg("Listo: te envié un mail para recuperar la contraseña (revisá spam).", false);
       }catch(e){
         setMsg("Error: " + ((e && e.message) ? e.message : String(e)), true);

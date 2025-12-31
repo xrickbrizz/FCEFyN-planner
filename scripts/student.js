@@ -39,6 +39,8 @@ const notify = (message, type="info") => showToast({ message, type });
 const notifySuccess = (message) => showToast({ message, type:"success" });
 const notifyError = (message) => showToast({ message, type:"error" });
 const notifyWarn = (message) => showToast({ message, type:"warning" });
+let html2canvasLib = null;
+let jsPDFLib = null;
 
 // ---- ESTUDIO
 let selectedDate = null;
@@ -51,8 +53,8 @@ let editingSubjectIndex = -1;
 
 // ---- AGENDA
 let agendaData = {};
-const dayKeys = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
-const dayLabels = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const dayKeys = ['lunes','martes','miercoles','jueves','viernes','sabado']; // sin domingo
+const dayLabels = ['Lun','Mar','Mié','Jue','Vie','Sáb'];
 let agendaEditDay = null;
 let agendaEditIndex = -1;
 const minutesStart = 8*60;
@@ -94,8 +96,12 @@ let messagesCache = {};
 let statusUnsubscribe = null;
 let userStatusMap = new Map();
 let showLastSeenPref = true;
+let requestsLoading = true;
+let friendsLoading = true;
+let messengerInitialCollapsed = false;
 
 const navItems = [
+  { id:"inicio", label:"Inicio", icon:"🏠" },
   { id:"estudio", label:"Estudio", icon:"📒" },
   { id:"academico", label:"Académico", icon:"🎓" },
   { id:"agenda", label:"Agenda", icon:"📅" },
@@ -104,7 +110,7 @@ const navItems = [
   { id:"profesores", label:"Profesores", icon:"⭐" }, // NUEVO
   { id:"mensajes", label:"Mensajes", icon:"💬" }, // NUEVO: contactos + chat
 ];
-let activeSection = "estudio";
+let activeSection = "inicio";
 const helpButton = document.getElementById("helpButton");
 const helpModalBg = document.getElementById("helpModalBg");
 const helpModalTitle = document.getElementById("helpModalTitle");
@@ -112,58 +118,80 @@ const helpModalBody = document.getElementById("helpModalBody");
 const btnHelpClose = document.getElementById("btnHelpClose");
 
 const helpContent = {
+  inicio: {
+    title: "Bienvenida a FCEFyN Planner",
+    bullets: [
+      "Desde la barra izquierda podés abrir Estudio, Académico, Agenda, Planificador, Profesores y Mensajería.",
+      "Los datos que cargues se guardan en tu cuenta de Firebase y se sincronizan al instante.",
+      "Usá este inicio para orientarte antes de abrir un calendario o una agenda."
+    ]
+  },
   estudio: {
     title: "Cómo usar Estudio",
     bullets: [
-      "Hacé click en un día del calendario para registrar horas, tema y materia.",
-      "Usá “Editar” o “Borrar” en la lista del modal para corregir entradas existentes.",
-      "Las materias se cargan desde la sección “Materias”; asegurate de tener al menos una."
+      "Seleccioná un día del calendario y cargá horas, tema y materia estudiada.",
+      "Revisá la lista del modal para editar o borrar registros sin perder tu historial.",
+      "Las materias vienen de la sección “Materias”; mantené colores coherentes para ubicarlas rápido.",
+      "Usá el botón Hoy para volver al mes actual en un clic."
     ]
   },
   academico: {
     title: "Cómo usar Académico",
     bullets: [
-      "Click en un día para ver el detalle y usar el botón “Añadir”.",
-      "Podés cargar Parciales, TPs, Tareas, Informes o Recordatorios con fecha/hora y estado.",
-      "Todo se guarda en tu planner (Firebase) y actualiza los widgets y el panel lateral."
+      "Abrí un día para ver o añadir parciales, TPs, tareas, informes o recordatorios.",
+      "Definí materia, título, fecha/hora y estado para que los widgets calculen próximos vencimientos.",
+      "El panel derecho muestra el detalle y métricas de los próximos 7 días.",
+      "Todo queda guardado en tu planner y se puede editar o eliminar sin perder consistencia."
     ]
   },
   agenda: {
     title: "Cómo usar Agenda",
     bullets: [
-      "Presioná “Añadir clase” o pasá un preset desde Planificador para poblar la agenda.",
-      "Editá o borrá bloques haciendo click en cada clase dentro de la grilla semanal.",
-      "Se validan superposiciones y horarios permitidos (08:00–23:00)."
+      "Añadí clases desde el botón principal o importá un preset creado en Planificador.",
+      "Los bloques se muestran entre 08:00 y 23:00 y validan que fin sea mayor que inicio.",
+      "Podés editar o borrar una clase haciendo click en el bloque dentro de la grilla.",
+      "Descargá la vista semanal en PNG o PDF para compartir tu horario."
     ]
   },
   materias: {
     title: "Cómo usar Materias",
     bullets: [
-      "Creá o edita materias con color; se usan en Estudio, Agenda y Académico.",
-      "Al editar un nombre, se actualiza en todos los registros existentes.",
-      "Al eliminar una materia, también se limpian sus registros asociados."
+      "Creá materias con nombre y color; se usan en Estudio, Agenda y Académico.",
+      "Al editar una materia, se actualiza en todos los registros asociados automáticamente.",
+      "Si eliminás una materia, elegí si querés limpiar también sus clases y registros."
     ]
   },
   planificador: {
     title: "Cómo usar Planificador",
     bullets: [
-      "Buscá comisiones del admin y agregalas a un preset evitando superposiciones.",
-      "Guardá el preset y duplicalo o elimínalo según necesites.",
-      "Podés pasar el preset a Agenda eligiendo entre agregar o reemplazar."
+      "Buscá comisiones del administrador y agregalas a un preset evitando superposiciones.",
+      "Guardá, duplicá o eliminá presets para comparar escenarios sin tocar tu Agenda real.",
+      "Pasá el preset a Agenda eligiendo entre agregar encima o reemplazar la agenda actual.",
+      "La vista previa semanal te deja ver choques antes de aplicar cambios."
     ]
   },
-  profesores: { // NUEVO
+  profesores: {
     title: "Cómo usar Profesores",
     bullets: [
-      "Filtrá por carrera y materia para distinguir profesores de la misma asignatura.",
-      "Hacé clic en un profesor para ver promedios por criterio y los comentarios.",
-      "Valorá con 0 a 5 estrellas cada criterio y optá por dejar un comentario anónimo."
+      "Filtrá por carrera y materia para encontrar al docente correcto.",
+      "Al seleccionar un profesor, mirá sus promedios por criterio y los comentarios recientes.",
+      "Valorá con 0 a 5 estrellas cada criterio y opcionalmente dejá un comentario anónimo.",
+      "Tus valoraciones actualizan los promedios y quedan ligadas a tu usuario."
     ]
-   }
+  },
+  mensajes: {
+    title: "Cómo usar Mensajería",
+    bullets: [
+      "Enviá solicitudes de amistad con el correo institucional de la otra persona.",
+      "Aceptá o rechazá solicitudes recibidas y revisá las enviadas desde el mismo panel.",
+      "Solo los amigos aceptados aparecen en la lista; elegí uno para abrir el chat.",
+      "El input se habilita al elegir un contacto y podés enviar mensajes en tiempo real."
+    ]
+  }
 };
 
 function renderHelpContent(sectionId){
-  const data = helpContent[sectionId] || helpContent.estudio;
+  const data = helpContent[sectionId] || helpContent.inicio || helpContent.estudio;
   if (helpModalTitle) helpModalTitle.textContent = data.title || "Ayuda";
   if (helpModalBody){
     helpModalBody.innerHTML = "";
@@ -255,29 +283,41 @@ function initSidebar(){
 }
 
 window.showTab = function(name){
+  if (name === "mensajes"){
+    openMessengerDock();
+    if (sidebarCtrl) sidebarCtrl.setActive(activeSection);
+    return;
+  }
   activeSection = name;
-  const tabEstudio        = document.getElementById("tab-estudio");
-  const tabAcademico      = document.getElementById("tab-academico");
-  const tabAgenda         = document.getElementById("tab-agenda");
-  const tabMaterias       = document.getElementById("tab-materias");
-  const tabPlanificador   = document.getElementById("tab-planificador");
-  const tabProfesores     = document.getElementById("tab-profesores"); // NUEVO
-  const tabMensajes       = document.getElementById("tab-mensajes"); // NUEVO
+  const tabInicio           = document.getElementById("tab-inicio");
+  const tabEstudio          = document.getElementById("tab-estudio");
+  const tabAcademico        = document.getElementById("tab-academico");
+  const tabAgenda           = document.getElementById("tab-agenda");
+  const tabMaterias         = document.getElementById("tab-materias");
+  const tabPlanificador     = document.getElementById("tab-planificador");
+  const tabProfesores       = document.getElementById("tab-profesores"); // NUEVO
+  const tabMensajes         = document.getElementById("tab-mensajes"); // NUEVO
+  const toggleTab = (el, visible)=>{ if (el) el.style.display = visible ? "block" : "none"; };
 
-  tabEstudio.style.display        = (name === "estudio")       ? "block" : "none";
-  tabAcademico.style.display      = (name === "academico")     ? "block" : "none";
-  tabAgenda.style.display         = (name === "agenda")        ? "block" : "none";
-  tabMaterias.style.display       = (name === "materias")      ? "block" : "none";
-  tabPlanificador.style.display = (name === "planificador") ? "block" : "none";
-  tabProfesores.style.display     = (name === "profesores")    ? "block" : "none"; // NUEVO
-  tabMensajes.style.display       = (name === "mensajes")      ? "block" : "none"; // NUEVO
+  toggleTab(tabInicio, name === "inicio");
+  toggleTab(tabEstudio, name === "estudio");
+  toggleTab(tabAcademico, name === "academico");
+  toggleTab(tabAgenda, name === "agenda");
+  toggleTab(tabMaterias, name === "materias");
+  toggleTab(tabPlanificador, name === "planificador");
+  toggleTab(tabProfesores, name === "profesores"); // NUEVO
+  toggleTab(tabMensajes, name === "mensajes"); // NUEVO
 
   if (name === "agenda") renderAgenda();
   if (name === "planificador") renderPlannerAll();
   if (name === "estudio") renderStudyCalendar();
   if (name === "academico") renderAcadCalendar();
   if (name === "profesores") renderProfessorsSection(); // NUEVO
-  if (name === "mensajes") renderMessaging(); // NUEVO
+  if (name === "mensajes"){
+    renderFriendRequestsUI();
+    renderFriendsList();
+    renderMessaging();
+  } // NUEVO
 
   if (sidebarCtrl) sidebarCtrl.setActive(name);
   const label = document.getElementById("currentSectionLabel");
@@ -329,7 +369,7 @@ onAuthStateChanged(auth, async user => {
 
   renderStudyCalendar();
   renderAcadCalendar();
-  showTab("estudio");
+  showTab("inicio");
 });
 
 window.logout = async function(){
@@ -357,12 +397,17 @@ async function loadPlannerData(){
 
   const ref = doc(db, "planner", currentUser.uid);
   const snap = await getDoc(ref);
+  let removedSunday = false;
 
   if (snap.exists()){
     const data = snap.data();
     if (data.estudios && typeof data.estudios === "object") estudiosCache = data.estudios;
     if (Array.isArray(data.subjects)) subjects = data.subjects;
     if (data.agenda && typeof data.agenda === "object") agendaData = data.agenda;
+    if (agendaData?.domingo){
+      delete agendaData.domingo;
+      removedSunday = true;
+    }
 
     if (Array.isArray(data.schedulePresets)) presets = data.schedulePresets;
     if (data.activePresetId) activePresetId = data.activePresetId;
@@ -386,6 +431,9 @@ async function loadPlannerData(){
   }
 
   ensureAgendaStructure();
+  if (removedSunday){
+    await setDoc(ref, { agenda: agendaData }, { merge:true });
+  }
 
   const p = presets.find(x => x.id === activePresetId);
   if (p){
@@ -411,6 +459,9 @@ async function loadUserProfile(){
 
 function ensureAgendaStructure(){
   if (!agendaData || typeof agendaData !== "object") agendaData = {};
+  Object.keys(agendaData).forEach(k => {
+    if (!dayKeys.includes(k)) delete agendaData[k];
+  });
   dayKeys.forEach(k => {
     if (!Array.isArray(agendaData[k])) agendaData[k] = [];
   });
@@ -425,6 +476,7 @@ function renderAgenda(){
 function renderAgendaGridInto(grid, data, allowEdit){
   if (!grid) return;
   grid.innerHTML = "";
+  grid.style.gridTemplateColumns = `70px repeat(${dayKeys.length},1fr)`;
 
   const hourCol = document.createElement("div");
   hourCol.className = "agenda-hour-col";
@@ -508,6 +560,91 @@ function renderAgendaGridInto(grid, data, allowEdit){
 
     col.appendChild(inner);
     grid.appendChild(col);
+  });
+}
+
+async function ensureHtml2canvas(){
+  if (html2canvasLib) return html2canvasLib;
+  try{
+    const mod = await import("https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm");
+    html2canvasLib = mod.default || mod;
+    return html2canvasLib;
+  }catch(_e){}
+  await loadRemoteScript("https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js");
+  html2canvasLib = window.html2canvas;
+  if (!html2canvasLib) throw new Error("html2canvas no disponible");
+  return html2canvasLib;
+}
+
+async function ensureJsPDF(){
+  if (jsPDFLib) return jsPDFLib;
+  try{
+    const mod = await import("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/+esm");
+    jsPDFLib = mod.jsPDF || mod.default?.jsPDF || mod.default;
+    return jsPDFLib;
+  }catch(_e){}
+  await loadRemoteScript("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js");
+  jsPDFLib = window.jspdf?.jsPDF || window.jspdf?.default?.jsPDF;
+  if (!jsPDFLib) throw new Error("jsPDF no disponible");
+  return jsPDFLib;
+}
+
+async function downloadAgenda(format){
+  const captureEl = document.getElementById("tab-agenda");
+  if (!captureEl || captureEl.style.display === "none"){
+    notifyWarn("Abrí la pestaña Agenda para descargar tu horario.");
+    return;
+  }
+  try{
+    renderAgenda();
+    captureEl.scrollTop = 0;
+    await new Promise(res => requestAnimationFrame(()=> requestAnimationFrame(res)));
+    const html2canvas = await ensureHtml2canvas();
+    const canvas = await html2canvas(captureEl, {
+      backgroundColor:"#0b1020",
+      scale:2,
+      useCORS:true
+    });
+
+    if (format === "png"){
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "horario.png";
+      link.click();
+      notifySuccess("Horario descargado en PNG.");
+      return;
+    }
+
+    const jsPDF = await ensureJsPDF();
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({ orientation:"landscape", unit:"pt", format:"a4" });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 30;
+    let renderWidth = pageWidth - margin * 2;
+    let renderHeight = canvas.height * (renderWidth / canvas.width);
+    if (renderHeight > pageHeight - margin * 2){
+      renderHeight = pageHeight - margin * 2;
+      renderWidth = canvas.width * (renderHeight / canvas.height);
+    }
+    const posX = (pageWidth - renderWidth) / 2;
+    const posY = (pageHeight - renderHeight) / 2;
+    pdf.addImage(imgData, "PNG", posX, posY, renderWidth, renderHeight);
+    pdf.save("horario.pdf");
+    notifySuccess("Horario descargado en PDF.");
+  }catch(e){
+    notifyError("No se pudo generar la descarga: " + (e.message || e));
+  }
+}
+
+function loadRemoteScript(url){
+  return new Promise((resolve, reject)=>{
+    const script = document.createElement("script");
+    script.src = url;
+    script.async = true;
+    script.onload = ()=> resolve();
+    script.onerror = ()=> reject(new Error("No se pudo cargar " + url));
+    document.head.appendChild(script);
   });
 }
 
@@ -1461,11 +1598,15 @@ const agendaGrid = document.getElementById("agendaGrid");
 const agendaModalBg = document.getElementById("agendaModalBg");
 const agendaModalTitle = document.getElementById("agendaModalTitle");
 const btnAddClass = document.getElementById("btnAddClass");
+const btnDownloadAgendaPng = document.getElementById("btnDownloadAgendaPng");
+const btnDownloadAgendaPdf = document.getElementById("btnDownloadAgendaPdf");
 const btnAgendaCancel = document.getElementById("btnAgendaCancel");
 const btnAgendaDelete = document.getElementById("btnAgendaDelete");
 const btnAgendaSave = document.getElementById("btnAgendaSave");
 
 btnAddClass.addEventListener("click", ()=> openAgendaModal(null, null));
+if (btnDownloadAgendaPng) btnDownloadAgendaPng.addEventListener("click", ()=> downloadAgenda("png"));
+if (btnDownloadAgendaPdf) btnDownloadAgendaPdf.addEventListener("click", ()=> downloadAgenda("pdf"));
 
 function openAgendaModal(dayKey, index){
   if (!currentUser) return;
@@ -1736,17 +1877,18 @@ function renderSectionsList(){
 
     const days = document.createElement("div");
     days.className = "section-days";
-    (sec.days || []).forEach(d=>{
+    const validDays = (sec.days || []).filter(d => dayNameToKey(d.day));
+    validDays.forEach(d=>{
       const pill = document.createElement("span");
       pill.className = "pill";
       const sedeDia = d.campus || sec.campus || "";
       pill.textContent = (d.day || "—") + " " + (d.start || "??") + "–" + (d.end || "??") + (sedeDia ? (" · " + sedeDia) : "");
       days.appendChild(pill);
     });
-    if (!(sec.days || []).length){
+    if (!validDays.length){
       const pill = document.createElement("span");
       pill.className = "pill pill-muted";
-      pill.textContent = "Sin días cargados";
+      pill.textContent = "Sin días cargados (Lun a Sáb)";
       days.appendChild(pill);
     }
 
@@ -1895,13 +2037,20 @@ function renderSelectedSectionsList(){
 
     const days = document.createElement("div");
     days.className = "section-days";
-    (sec.days || []).forEach(d=>{
+    const validDays = (sec.days || []).filter(d => dayNameToKey(d.day));
+    validDays.forEach(d=>{
       const pill = document.createElement("span");
       pill.className = "pill";
       const sedeDia = d.campus || sec.campus || "";
       pill.textContent = (d.day || "—") + " " + (d.start || "??") + "–" + (d.end || "??") + (sedeDia ? (" · " + sedeDia) : "");
       days.appendChild(pill);
     });
+    if (!validDays.length){
+      const pill = document.createElement("span");
+      pill.className = "pill pill-muted";
+      pill.textContent = "Sin días cargados (Lun a Sáb)";
+      days.appendChild(pill);
+    }
 
     card.appendChild(top);
     card.appendChild(days);
@@ -1918,7 +2067,6 @@ function dayNameToKey(dayName){
   if (n.startsWith("jue")) return "jueves";
   if (n.startsWith("vie")) return "viernes";
   if (n.startsWith("sáb") || n.startsWith("sab")) return "sabado";
-  if (n.startsWith("dom")) return "domingo";
   return null;
 }
 
@@ -2803,6 +2951,16 @@ function composeChatId(uids){
   return (uids || []).slice().sort().join("__");
 }
 
+function setChatInputState(enabled, placeholder){
+  const input = document.getElementById("messageInput");
+  const btn = document.getElementById("btnSendMessage");
+  if (input){
+    input.disabled = !enabled;
+    if (placeholder) input.placeholder = placeholder;
+  }
+  if (btn) btn.disabled = !enabled;
+}
+
 function userStatusLabel(uid){
   const st = userStatusMap.get(uid);
   if (!st) return "Desconectado";
@@ -2860,6 +3018,8 @@ async function initPresence(){
 
 async function loadFriendRequests(){
   if (!currentUser) return;
+  requestsLoading = true;
+  renderFriendRequestsUI();
   const incomingQ = query(collection(db,"friendRequests"), where("toUid","==", currentUser.uid));
   const outgoingQ = query(collection(db,"friendRequests"), where("fromUid","==", currentUser.uid));
   const [snapIn, snapOut] = await Promise.all([getDocs(incomingQ), getDocs(outgoingQ)]);
@@ -2876,11 +3036,14 @@ async function loadFriendRequests(){
     outgoing.push({ id:d.id, ...data });
   });
   friendRequests = { incoming, outgoing };
+  requestsLoading = false;
   renderFriendRequestsUI();
 }
 
 async function loadFriends(){
   if (!currentUser) return;
+  friendsLoading = true;
+  renderFriendsList();
   const snap = await getDocs(query(collection(db,"friends"), where("uids","array-contains", currentUser.uid)));
   const arr = [];
   for (const d of snap.docs){
@@ -2900,27 +3063,46 @@ async function loadFriends(){
     });
   }
   friendsList = arr;
+  friendsLoading = false;
   renderFriendsList();
 }
 
 function renderFriendRequestsUI(){
   const incomingBox = document.getElementById("incomingRequests");
   const outgoingBox = document.getElementById("outgoingRequests");
-  if (!incomingBox || !outgoingBox) return;
+  const hint = document.getElementById("requestsHint");
+  const card = document.getElementById("requestsCard");
+  if (!incomingBox || !outgoingBox || !card || !hint) return;
 
   incomingBox.innerHTML = "";
   outgoingBox.innerHTML = "";
 
-  if (!friendRequests.incoming.length){
-    incomingBox.innerHTML = "<div class='muted'>Sin solicitudes pendientes.</div>";
+  if (requestsLoading){
+    hint.textContent = "Cargando solicitudes...";
+    renderSkeletonLines(incomingBox, 2);
+    renderSkeletonLines(outgoingBox, 1);
+    return;
+  }
+
+  const incoming = friendRequests.incoming.filter(r => r.status === "pending");
+  const outgoing = friendRequests.outgoing.filter(r => r.status === "pending");
+  const hasAny = incoming.length || outgoing.length;
+
+  card.style.display = "block";
+  hint.textContent = hasAny ? "Aceptá o rechazá las invitaciones." : "No tenés solicitudes pendientes.";
+
+  if (!incoming.length){
+    incomingBox.innerHTML = "<div class='muted'>No tenés solicitudes pendientes.</div>";
   } else {
-    friendRequests.incoming.forEach(req =>{
+    incoming.forEach(req =>{
+      const name = req.fromName || req.fromEmail || "Estudiante";
+      const email = req.fromEmail || "Correo desconocido";
       const div = document.createElement("div");
       div.className = "request-card";
       div.innerHTML = `
         <div>
-          <div class="req-email">${req.fromEmail || "Correo desconocido"}</div>
-          <div class="req-meta">Estado: ${req.status || "pendiente"}</div>
+          <div class="req-email">${name}</div>
+          <div class="req-meta">${email}</div>
         </div>
         <div class="req-actions">
           <button class="btn-blue btn-small" data-action="accept" data-id="${req.id}">Aceptar</button>
@@ -2931,16 +3113,17 @@ function renderFriendRequestsUI(){
     });
   }
 
-  if (!friendRequests.outgoing.length){
-    outgoingBox.innerHTML = "<div class='muted'>No enviaste solicitudes.</div>";
+  if (!outgoing.length){
+    outgoingBox.innerHTML = "<div class='muted'>No enviaste solicitudes pendientes.</div>";
   } else {
-    friendRequests.outgoing.forEach(req =>{
+    outgoing.forEach(req =>{
+      const email = req.toEmail || "correo@mi.unc.edu.ar";
       const div = document.createElement("div");
-      div.className = "request-card ghost";
+      div.className = "request-card";
       div.innerHTML = `
         <div>
-          <div class="req-email">${req.toEmail || "Correo"}</div>
-          <div class="req-meta">Estado: ${req.status || "pendiente"}</div>
+          <div class="req-email">${email}</div>
+          <div class="req-meta">Pendiente de aceptación</div>
         </div>
       `;
       outgoingBox.appendChild(div);
@@ -2949,58 +3132,76 @@ function renderFriendRequestsUI(){
 }
 
 function renderFriendsList(){
-  const box = document.getElementById("friendsListBox");
-  if (!box) return;
-  box.innerHTML = "";
-  if (!friendsList.length){
-    box.innerHTML = "<div class='muted'>Agregá amigos para chatear.</div>";
+  const onlineBox = document.getElementById("friendsOnline");
+  const offlineBox = document.getElementById("friendsOffline");
+  if (!onlineBox || !offlineBox) return;
+  onlineBox.innerHTML = "";
+  offlineBox.innerHTML = "";
+
+  if (friendsLoading){
+    renderSkeletonLines(onlineBox, 3);
+    renderSkeletonLines(offlineBox, 3);
     return;
   }
-  friendsList.forEach(f =>{
-    const profile = f.otherProfile || {};
-    const name = profile.name || profile.fullName || profile.email || "Estudiante";
-    const status = userStatusLabel(f.otherUid);
-    const online = userStatusMap.get(f.otherUid)?.online;
-    const div = document.createElement("div");
-    div.className = "friend-row";
-    div.innerHTML = `
-      <div>
-        <div class="friend-name">${name}</div>
-        <div class="friend-meta">${status}</div>
-      </div>
-      <button class="btn-outline btn-small" data-chat="${f.chatId}">Chat</button>
-    `;
-    if (online) div.classList.add("friend-online");
-    div.querySelector("button").addEventListener("click", ()=> openChatWithFriend(f));
-    box.appendChild(div);
-  });
+
+  if (!friendsList.length){
+    onlineBox.innerHTML = "<div class='muted'>No tenés amigos todavía.</div>";
+    offlineBox.innerHTML = "<div class='muted'>Sumá contactos para habilitar el chat.</div>";
+    return;
+  }
+
+  const onlineFriends = friendsList.filter(f => userStatusMap.get(f.otherUid)?.online);
+  const offlineFriends = friendsList.filter(f => !userStatusMap.get(f.otherUid)?.online);
+
+  if (!onlineFriends.length){
+    onlineBox.innerHTML = "<div class='muted'>Nadie en línea.</div>";
+  } else {
+    onlineFriends.forEach(f => onlineBox.appendChild(renderFriendRow(f, true)));
+  }
+
+  if (!offlineFriends.length){
+    offlineBox.innerHTML = "<div class='muted'>Sin amigos desconectados.</div>";
+  } else {
+    offlineFriends.forEach(f => offlineBox.appendChild(renderFriendRow(f, false)));
+  }
 }
 
 function renderMessaging(){
-  const header = document.getElementById("chatHeader");
+  const title = document.getElementById("chatTitle");
+  const subtitle = document.getElementById("chatSubtitle");
   const list = document.getElementById("messagesList");
-  if (!header || !list){
+  const sub = document.getElementById("chatSubheader");
+  const inputRow = document.getElementById("chatInputRow");
+  if (!title || !subtitle || !list){
     return;
   }
   if (!activeChatPartner){
-    header.textContent = "Seleccioná un amigo para chatear";
-    list.innerHTML = "<div class='muted'>No hay conversación activa.</div>";
+    title.textContent = "Mensajes";
+    subtitle.textContent = "Seleccioná un amigo para chatear";
+    if (sub) sub.textContent = "Agregá amigos para iniciar una conversación.";
+    list.innerHTML = "<div class='muted'>Elegí un contacto para ver el chat.</div>";
+    setChatInputState(false, "Seleccioná un amigo para chatear");
+    if (inputRow) inputRow.style.display = "none";
     return;
   }
   const profile = activeChatPartner.otherProfile || {};
-  header.textContent = (profile.name || profile.email || "Chat") + " — " + userStatusLabel(activeChatPartner.otherUid);
+  title.textContent = profile.name || profile.email || "Chat";
+  subtitle.textContent = userStatusLabel(activeChatPartner.otherUid);
+  if (sub) sub.textContent = userStatusLabel(activeChatPartner.otherUid);
+  setChatInputState(true, "Escribí un mensaje...");
+  if (inputRow) inputRow.style.display = "flex";
 
   const msgs = messagesCache[activeChatId] || [];
   list.innerHTML = "";
   if (!msgs.length){
-    list.innerHTML = "<div class='muted'>Sin mensajes. ¡Enviá el primero!</div>";
+    list.innerHTML = "<div class='muted'>No hay mensajes en esta conversación.</div>";
     return;
   }
   msgs.forEach(m =>{
     const me = m.senderUid === currentUser?.uid;
     const wrap = document.createElement("div");
     wrap.className = "msg-row " + (me ? "me" : "other");
-    const date = m.createdAt?.toDate ? m.createdAt.toDate().toLocaleString("es-AR") : "";
+    const dateStr = formatDateLabel(m.createdAt);
     const bubble = document.createElement("div");
     bubble.className = "msg-bubble";
     const textEl = document.createElement("div");
@@ -3008,7 +3209,7 @@ function renderMessaging(){
     textEl.textContent = m.text || "";
     const meta = document.createElement("div");
     meta.className = "msg-meta";
-    meta.textContent = `${me ? "Yo" : "Ellx"} · ${date}`;
+    meta.textContent = `${me ? "Vos" : (profile.name || "Contacto")} · ${dateStr}`;
     bubble.appendChild(textEl);
     bubble.appendChild(meta);
     wrap.appendChild(bubble);
@@ -3042,7 +3243,11 @@ async function openChatWithFriend(friend){
   activeChatPartner = friend;
   activeChatId = friend.chatId || composeChatId(friend.uids);
   await ensureChat(friend.uids);
+  setChatInputState(true, "Escribí un mensaje...");
+  const list = document.getElementById("messagesList");
+  if (list) list.innerHTML = "<div class='muted'>Cargando mensajes...</div>";
   subscribeMessages(activeChatId);
+  openMessengerDock();
   renderMessaging();
 }
 
@@ -3064,7 +3269,8 @@ async function sendMessage(){
     });
     await updateDoc(doc(db,"chats", activeChatId), { updatedAt: serverTimestamp() });
   }catch(e){
-    notifyError("No se pudo enviar: " + (e.message || e));
+    console.error("sendMessage error", e);
+    notifyError("No se pudo enviar el mensaje. Intentá nuevamente.");
   }
 }
 
@@ -3092,6 +3298,11 @@ async function sendFriendRequest(){
       notifyWarn("Ya enviaste una solicitud pendiente a este usuario.");
       return;
     }
+    const waitingForYou = friendRequests.incoming.some(r => (r.fromUid === targetId) && (r.status === "pending"));
+    if (waitingForYou){
+      notifyWarn("Esa persona ya te envió una solicitud pendiente.");
+      return;
+    }
     const alreadyFriend = friendsList.some(f => f.otherUid === targetId);
     if (alreadyFriend){
       notifyWarn("Ya son amigos y pueden chatear.");
@@ -3110,7 +3321,8 @@ async function sendFriendRequest(){
     await loadFriendRequests();
     notifySuccess("Solicitud enviada.");
   }catch(e){
-    notifyError("No se pudo enviar la solicitud: " + (e.message || e));
+    console.error("sendFriendRequest error", e);
+    notifyError("No se pudo enviar la solicitud. Intentá nuevamente.");
   }
 }
 
@@ -3129,7 +3341,8 @@ async function acceptFriendRequest(id){
     await loadFriends();
     notifySuccess("Solicitud aceptada. Ya pueden chatear.");
   }catch(e){
-    notifyError("No se pudo aceptar: " + (e.message || e));
+    console.error("acceptFriendRequest error", e);
+    notifyError("No se pudo aceptar la solicitud. Intentá nuevamente.");
   }
 }
 
@@ -3141,7 +3354,8 @@ async function rejectFriendRequest(id){
     await loadFriendRequests();
     notifyWarn("Solicitud rechazada.");
   }catch(e){
-    notifyError("No se pudo rechazar: " + (e.message || e));
+    console.error("rejectFriendRequest error", e);
+    notifyError("No se pudo rechazar la solicitud. Intentá nuevamente.");
   }
 }
 
@@ -3159,11 +3373,43 @@ function wireFriendRequestActions(){
 }
 
 function initMessagingUI(){
+  messengerInitialCollapsed = window.innerWidth < 1100;
+  initMessengerDock();
+
   const btnSendReq = document.getElementById("btnSendFriendRequest");
   if (btnSendReq) btnSendReq.addEventListener("click", sendFriendRequest);
 
   const btnSendMsg = document.getElementById("btnSendMessage");
   if (btnSendMsg) btnSendMsg.addEventListener("click", sendMessage);
+
+  const btnFocusRequest = document.getElementById("btnFocusRequest");
+  if (btnFocusRequest){
+    btnFocusRequest.addEventListener("click", ()=>{
+      openMessengerDock();
+      const inp = document.getElementById("friendEmailInput");
+      if (inp){
+        inp.focus();
+        inp.select();
+      }
+    });
+  }
+
+  const friendEmailInput = document.getElementById("friendEmailInput");
+  if (friendEmailInput){
+    friendEmailInput.addEventListener("keyup", (e)=>{
+      if (e.key === "Enter") sendFriendRequest();
+    });
+  }
+
+  const messageInput = document.getElementById("messageInput");
+  if (messageInput){
+    messageInput.addEventListener("keyup", (e)=>{
+      if (e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  }
 
   const toggle = document.getElementById("toggleLastSeen");
   if (toggle){
@@ -3176,5 +3422,12 @@ function initMessagingUI(){
     });
   }
 
+  const dockToggle = document.getElementById("messengerToggle");
+  if (dockToggle){
+    dockToggle.addEventListener("click", toggleMessengerDock);
+  }
+
   wireFriendRequestActions();
+  setChatInputState(false, "Seleccioná un amigo para chatear");
+  renderMessaging();
 }
