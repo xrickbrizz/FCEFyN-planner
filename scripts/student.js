@@ -111,6 +111,7 @@ const navItems = [
   { id:"mensajes", label:"Mensajes", icon:"💬" }, // NUEVO: contactos + chat
 ];
 let activeSection = "inicio";
+let lastNonMessagesSection = "inicio";
 const helpButton = document.getElementById("helpButton");
 const helpModalBg = document.getElementById("helpModalBg");
 const helpModalTitle = document.getElementById("helpModalTitle");
@@ -283,11 +284,7 @@ function initSidebar(){
 }
 
 window.showTab = function(name){
-  if (name === "mensajes"){
-    openMessengerDock();
-    if (sidebarCtrl) sidebarCtrl.setActive(activeSection);
-    return;
-  }
+  if (name !== "mensajes") lastNonMessagesSection = name;
   activeSection = name;
   const tabInicio           = document.getElementById("tab-inicio");
   const tabEstudio          = document.getElementById("tab-estudio");
@@ -2888,6 +2885,8 @@ async function submitProfessorRating(){
   const cache = professorReviewsCache[selectedProfessorId];
   const existing = cache?.items?.find(r => r.userId === currentUser.uid);
   const reviewId = `${selectedProfessorId}_${currentUser.uid}`;
+  const btn = document.getElementById("btnSubmitRating");
+  if (btn) btn.disabled = true;
 
   const payload = {
     professorId: selectedProfessorId,
@@ -2903,7 +2902,8 @@ async function submitProfessorRating(){
   };
 
   try{
-    await setDoc(doc(db,"professorReviews",reviewId), payload);
+    const reviewRef = doc(db,"professorReviews",reviewId);
+    await setDoc(reviewRef, payload, { merge:true });
     await loadProfessorReviews(selectedProfessorId);
     fillRatingFormFromMyReview(selectedProfessorId);
     await recalcProfessorStats(selectedProfessorId);
@@ -2911,7 +2911,10 @@ async function submitProfessorRating(){
     renderProfessorsSection();
     notifySuccess("Valoración guardada.");
   }catch(e){
+    console.error("submitProfessorRating error", e);
     notifyError("No se pudo guardar la valoración: " + (e.message || e));
+  }finally{
+    if (btn) btn.disabled = false;
   }
 }
 
@@ -2947,6 +2950,22 @@ async function recalcProfessorStats(profId){
 }
 
 /* ---------- MENSAJES / AMISTADES (NUEVO) ---------- */
+function initMessengerDock(){
+  // La vista de mensajería se maneja con pestañas; solo aseguramos que no falle la inicialización.
+}
+
+function openMessengerDock(){
+  showTab("mensajes");
+}
+
+function toggleMessengerDock(){
+  if (activeSection === "mensajes"){
+    showTab(lastNonMessagesSection || "inicio");
+  } else {
+    showTab("mensajes");
+  }
+}
+
 function composeChatId(uids){
   return (uids || []).slice().sort().join("__");
 }
@@ -3038,6 +3057,7 @@ async function loadFriendRequests(){
   friendRequests = { incoming, outgoing };
   requestsLoading = false;
   renderFriendRequestsUI();
+  renderMessaging();
 }
 
 async function loadFriends(){
@@ -3065,44 +3085,33 @@ async function loadFriends(){
   friendsList = arr;
   friendsLoading = false;
   renderFriendsList();
+  renderMessaging();
 }
 
 function renderFriendRequestsUI(){
   const incomingBox = document.getElementById("incomingRequests");
   const outgoingBox = document.getElementById("outgoingRequests");
-  const hint = document.getElementById("requestsHint");
-  const card = document.getElementById("requestsCard");
-  if (!incomingBox || !outgoingBox || !card || !hint) return;
+  if (!incomingBox || !outgoingBox) return;
 
   incomingBox.innerHTML = "";
   outgoingBox.innerHTML = "";
 
   if (requestsLoading){
-    hint.textContent = "Cargando solicitudes...";
-    renderSkeletonLines(incomingBox, 2);
-    renderSkeletonLines(outgoingBox, 1);
+    incomingBox.innerHTML = "<div class='muted'>Cargando...</div>";
+    outgoingBox.innerHTML = "<div class='muted'>Cargando...</div>";
     return;
   }
 
-  const incoming = friendRequests.incoming.filter(r => r.status === "pending");
-  const outgoing = friendRequests.outgoing.filter(r => r.status === "pending");
-  const hasAny = incoming.length || outgoing.length;
-
-  card.style.display = "block";
-  hint.textContent = hasAny ? "Aceptá o rechazá las invitaciones." : "No tenés solicitudes pendientes.";
-
-  if (!incoming.length){
-    incomingBox.innerHTML = "<div class='muted'>No tenés solicitudes pendientes.</div>";
+  if (!friendRequests.incoming.length){
+    incomingBox.innerHTML = "<div class='muted'>Sin solicitudes pendientes.</div>";
   } else {
-    incoming.forEach(req =>{
-      const name = req.fromName || req.fromEmail || "Estudiante";
-      const email = req.fromEmail || "Correo desconocido";
+    friendRequests.incoming.forEach(req =>{
       const div = document.createElement("div");
       div.className = "request-card";
       div.innerHTML = `
         <div>
-          <div class="req-email">${name}</div>
-          <div class="req-meta">${email}</div>
+          <div class="req-email">${req.fromEmail || "Correo desconocido"}</div>
+          <div class="req-meta">Estado: ${req.status || "pendiente"}</div>
         </div>
         <div class="req-actions">
           <button class="btn-blue btn-small" data-action="accept" data-id="${req.id}">Aceptar</button>
@@ -3113,17 +3122,16 @@ function renderFriendRequestsUI(){
     });
   }
 
-  if (!outgoing.length){
-    outgoingBox.innerHTML = "<div class='muted'>No enviaste solicitudes pendientes.</div>";
+  if (!friendRequests.outgoing.length){
+    outgoingBox.innerHTML = "<div class='muted'>No enviaste solicitudes.</div>";
   } else {
-    outgoing.forEach(req =>{
-      const email = req.toEmail || "correo@mi.unc.edu.ar";
+    friendRequests.outgoing.forEach(req =>{
       const div = document.createElement("div");
-      div.className = "request-card";
+      div.className = "request-card ghost";
       div.innerHTML = `
         <div>
-          <div class="req-email">${email}</div>
-          <div class="req-meta">Pendiente de aceptación</div>
+          <div class="req-email">${req.toEmail || "Correo"}</div>
+          <div class="req-meta">Estado: ${req.status || "pendiente"}</div>
         </div>
       `;
       outgoingBox.appendChild(div);
@@ -3132,61 +3140,57 @@ function renderFriendRequestsUI(){
 }
 
 function renderFriendsList(){
-  const onlineBox = document.getElementById("friendsOnline");
-  const offlineBox = document.getElementById("friendsOffline");
-  if (!onlineBox || !offlineBox) return;
-  onlineBox.innerHTML = "";
-  offlineBox.innerHTML = "";
+  const box = document.getElementById("friendsListBox");
+  if (!box) return;
+  box.innerHTML = "";
 
   if (friendsLoading){
-    renderSkeletonLines(onlineBox, 3);
-    renderSkeletonLines(offlineBox, 3);
+    box.innerHTML = "<div class='muted'>Cargando amigos...</div>";
     return;
   }
 
   if (!friendsList.length){
-    onlineBox.innerHTML = "<div class='muted'>No tenés amigos todavía.</div>";
-    offlineBox.innerHTML = "<div class='muted'>Sumá contactos para habilitar el chat.</div>";
+    box.innerHTML = "<div class='muted'>Agregá amigos para chatear.</div>";
     return;
   }
-
-  const onlineFriends = friendsList.filter(f => userStatusMap.get(f.otherUid)?.online);
-  const offlineFriends = friendsList.filter(f => !userStatusMap.get(f.otherUid)?.online);
-
-  if (!onlineFriends.length){
-    onlineBox.innerHTML = "<div class='muted'>Nadie en línea.</div>";
-  } else {
-    onlineFriends.forEach(f => onlineBox.appendChild(renderFriendRow(f, true)));
-  }
-
-  if (!offlineFriends.length){
-    offlineBox.innerHTML = "<div class='muted'>Sin amigos desconectados.</div>";
-  } else {
-    offlineFriends.forEach(f => offlineBox.appendChild(renderFriendRow(f, false)));
-  }
+  friendsList.forEach(f =>{
+    const profile = f.otherProfile || {};
+    const name = profile.name || profile.fullName || profile.email || "Estudiante";
+    const status = userStatusLabel(f.otherUid);
+    const online = userStatusMap.get(f.otherUid)?.online;
+    const div = document.createElement("div");
+    div.className = "friend-row";
+    div.innerHTML = `
+      <div>
+        <div class="friend-name">${name}</div>
+        <div class="friend-meta">${status}</div>
+      </div>
+      <button class="btn-outline btn-small" data-chat="${f.chatId}">Chat</button>
+    `;
+    if (online) div.classList.add("friend-online");
+    div.querySelector("button").addEventListener("click", ()=> openChatWithFriend(f));
+    box.appendChild(div);
+  });
 }
 
 function renderMessaging(){
-  const title = document.getElementById("chatTitle");
-  const subtitle = document.getElementById("chatSubtitle");
+  const header = document.getElementById("chatHeader");
   const list = document.getElementById("messagesList");
   const sub = document.getElementById("chatSubheader");
   const inputRow = document.getElementById("chatInputRow");
-  if (!title || !subtitle || !list){
+  if (!header || !list){
     return;
   }
   if (!activeChatPartner){
-    title.textContent = "Mensajes";
-    subtitle.textContent = "Seleccioná un amigo para chatear";
+    header.textContent = "Seleccioná un amigo para chatear";
     if (sub) sub.textContent = "Agregá amigos para iniciar una conversación.";
-    list.innerHTML = "<div class='muted'>Elegí un contacto para ver el chat.</div>";
+    list.innerHTML = "<div class='muted'>No hay conversación activa.</div>";
     setChatInputState(false, "Seleccioná un amigo para chatear");
     if (inputRow) inputRow.style.display = "none";
     return;
   }
   const profile = activeChatPartner.otherProfile || {};
-  title.textContent = profile.name || profile.email || "Chat";
-  subtitle.textContent = userStatusLabel(activeChatPartner.otherUid);
+  header.textContent = (profile.name || profile.email || "Chat");
   if (sub) sub.textContent = userStatusLabel(activeChatPartner.otherUid);
   setChatInputState(true, "Escribí un mensaje...");
   if (inputRow) inputRow.style.display = "flex";
@@ -3194,14 +3198,14 @@ function renderMessaging(){
   const msgs = messagesCache[activeChatId] || [];
   list.innerHTML = "";
   if (!msgs.length){
-    list.innerHTML = "<div class='muted'>No hay mensajes en esta conversación.</div>";
+    list.innerHTML = "<div class='muted'>Sin mensajes. ¡Enviá el primero!</div>";
     return;
   }
   msgs.forEach(m =>{
     const me = m.senderUid === currentUser?.uid;
     const wrap = document.createElement("div");
     wrap.className = "msg-row " + (me ? "me" : "other");
-    const dateStr = formatDateLabel(m.createdAt);
+    const date = m.createdAt?.toDate ? m.createdAt.toDate().toLocaleString("es-AR") : "";
     const bubble = document.createElement("div");
     bubble.className = "msg-bubble";
     const textEl = document.createElement("div");
@@ -3209,7 +3213,7 @@ function renderMessaging(){
     textEl.textContent = m.text || "";
     const meta = document.createElement("div");
     meta.className = "msg-meta";
-    meta.textContent = `${me ? "Vos" : (profile.name || "Contacto")} · ${dateStr}`;
+    meta.textContent = `${me ? "Yo" : "Ellx"} · ${date}`;
     bubble.appendChild(textEl);
     bubble.appendChild(meta);
     wrap.appendChild(bubble);
@@ -3243,9 +3247,6 @@ async function openChatWithFriend(friend){
   activeChatPartner = friend;
   activeChatId = friend.chatId || composeChatId(friend.uids);
   await ensureChat(friend.uids);
-  setChatInputState(true, "Escribí un mensaje...");
-  const list = document.getElementById("messagesList");
-  if (list) list.innerHTML = "<div class='muted'>Cargando mensajes...</div>";
   subscribeMessages(activeChatId);
   openMessengerDock();
   renderMessaging();
@@ -3269,8 +3270,7 @@ async function sendMessage(){
     });
     await updateDoc(doc(db,"chats", activeChatId), { updatedAt: serverTimestamp() });
   }catch(e){
-    console.error("sendMessage error", e);
-    notifyError("No se pudo enviar el mensaje. Intentá nuevamente.");
+    notifyError("No se pudo enviar: " + (e.message || e));
   }
 }
 
@@ -3298,11 +3298,6 @@ async function sendFriendRequest(){
       notifyWarn("Ya enviaste una solicitud pendiente a este usuario.");
       return;
     }
-    const waitingForYou = friendRequests.incoming.some(r => (r.fromUid === targetId) && (r.status === "pending"));
-    if (waitingForYou){
-      notifyWarn("Esa persona ya te envió una solicitud pendiente.");
-      return;
-    }
     const alreadyFriend = friendsList.some(f => f.otherUid === targetId);
     if (alreadyFriend){
       notifyWarn("Ya son amigos y pueden chatear.");
@@ -3321,8 +3316,7 @@ async function sendFriendRequest(){
     await loadFriendRequests();
     notifySuccess("Solicitud enviada.");
   }catch(e){
-    console.error("sendFriendRequest error", e);
-    notifyError("No se pudo enviar la solicitud. Intentá nuevamente.");
+    notifyError("No se pudo enviar la solicitud: " + (e.message || e));
   }
 }
 
@@ -3341,8 +3335,7 @@ async function acceptFriendRequest(id){
     await loadFriends();
     notifySuccess("Solicitud aceptada. Ya pueden chatear.");
   }catch(e){
-    console.error("acceptFriendRequest error", e);
-    notifyError("No se pudo aceptar la solicitud. Intentá nuevamente.");
+    notifyError("No se pudo aceptar: " + (e.message || e));
   }
 }
 
@@ -3354,8 +3347,7 @@ async function rejectFriendRequest(id){
     await loadFriendRequests();
     notifyWarn("Solicitud rechazada.");
   }catch(e){
-    console.error("rejectFriendRequest error", e);
-    notifyError("No se pudo rechazar la solicitud. Intentá nuevamente.");
+    notifyError("No se pudo rechazar: " + (e.message || e));
   }
 }
 
@@ -3373,37 +3365,15 @@ function wireFriendRequestActions(){
 }
 
 function initMessagingUI(){
-  messengerInitialCollapsed = window.innerWidth < 1100;
-  initMessengerDock();
-
   const btnSendReq = document.getElementById("btnSendFriendRequest");
   if (btnSendReq) btnSendReq.addEventListener("click", sendFriendRequest);
 
   const btnSendMsg = document.getElementById("btnSendMessage");
   if (btnSendMsg) btnSendMsg.addEventListener("click", sendMessage);
 
-  const btnFocusRequest = document.getElementById("btnFocusRequest");
-  if (btnFocusRequest){
-    btnFocusRequest.addEventListener("click", ()=>{
-      openMessengerDock();
-      const inp = document.getElementById("friendEmailInput");
-      if (inp){
-        inp.focus();
-        inp.select();
-      }
-    });
-  }
-
-  const friendEmailInput = document.getElementById("friendEmailInput");
-  if (friendEmailInput){
-    friendEmailInput.addEventListener("keyup", (e)=>{
-      if (e.key === "Enter") sendFriendRequest();
-    });
-  }
-
-  const messageInput = document.getElementById("messageInput");
-  if (messageInput){
-    messageInput.addEventListener("keyup", (e)=>{
+  const msgInput = document.getElementById("messageInput");
+  if (msgInput){
+    msgInput.addEventListener("keydown", (e)=>{
       if (e.key === "Enter" && !e.shiftKey){
         e.preventDefault();
         sendMessage();
