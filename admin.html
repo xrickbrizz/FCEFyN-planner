@@ -373,6 +373,24 @@ function planNameFromSlug(slug){
   return plan ? plan.nombre : slug;
 }
 
+function setSubjectSelectorsAvailability(){
+  const selCareer = qs("#profSubjectCareerSelect");
+  const selSubject = qs("#profSubjectSelect");
+  const hasCareers = professorCareers.length > 0;
+
+  if (selCareer){
+    selCareer.disabled = !hasCareers;
+    if (!hasCareers) selCareer.value = "";
+  }
+  if (selSubject){
+    selSubject.disabled = !hasCareers;
+    if (!hasCareers){
+      selSubject.innerHTML = `<option value=\"\">Elegí materia…</option>`;
+      selSubject.value = "";
+    }
+  }
+}
+
 /* ---------- navegación secciones ---------- */
 function setActiveNav(section){
   const navUsers = qs("#navUsers");
@@ -861,6 +879,7 @@ function renderCareerChips(){
     cont.appendChild(chip);
   });
   setCareerSelectOptions();
+  setSubjectSelectorsAvailability();
 }
 
 function renderSubjectChips(){
@@ -885,9 +904,12 @@ function renderSubjectChips(){
 
 function renderSubjectCareerSelect(){
   const sel = qs("#profSubjectCareerSelect");
-  if (!sel) return;
+  const selSubject = qs("#profSubjectSelect");
+  setSubjectSelectorsAvailability();
+  if (!sel || !selSubject) return;
   const current = sel.value;
   sel.innerHTML = `<option value=\"\">Elegí carrera…</option>`;
+  if (!professorCareers.length) return;
   professorCareers.forEach(c =>{
     const opt = document.createElement("option");
     opt.value = c.slug;
@@ -906,6 +928,10 @@ async function updateSubjectSelectOptions(){
   const selCareer = qs("#profSubjectCareerSelect");
   const sel = qs("#profSubjectSelect");
   if (!selCareer || !sel) return;
+  if (!professorCareers.length){
+    setSubjectSelectorsAvailability();
+    return;
+  }
   const slug = selCareer.value;
   sel.innerHTML = `<option value=\"\">Elegí materia…</option>`;
   if (!slug) return;
@@ -999,6 +1025,7 @@ function closeProfessorModal(){
     const el = qs(id);
     if (el) el.value = "";
   });
+  setSubjectSelectorsAvailability();
 }
 
 async function addCareerToList(){
