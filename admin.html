@@ -138,7 +138,9 @@
     <div class="modal-grid">
       <div>
         <label>Materia</label>
-        <input id="secSubject" placeholder="Ej: Análisis Matemático 2">
+        <select id="secSubject" disabled>
+          <option value="">Elegí materia…</option>
+        </select>
       </div>
       <div>
         <label>Comisión</label>
@@ -146,7 +148,9 @@
       </div>
       <div>
         <label>Carrera (opcional)</label>
-        <input id="secDegree" placeholder="Ej: Ing. Civil">
+        <select id="secDegree">
+          <option value="">Elegí carrera…</option>
+        </select>
       </div>
       <div>
         <label>Aula</label>
@@ -373,6 +377,111 @@ function planNameFromSlug(slug){
   return plan ? plan.nombre : slug;
 }
 
+// === NUEVAS FUNCIONES PARA MODAL HORARIOS (PATCH) ===
+async function setSectionCareerOptions(selectedSlug="", selectedName=""){
+  const sel = qs("#secDegree");
+  if (!sel) return;
+  await ensurePlansIndex();
+  sel.innerHTML = `<option value=\"\">Elegí carrera…</option>`;
+  plansIndex.forEach(p =>{
+    const opt = document.createElement("option");
+    opt.value = p.slug;
+    opt.textContent = p.nombre || p.slug;
+    opt.dataset.name = p.nombre || p.slug;
+    sel.appendChild(opt);
+  });
+
+  if (selectedSlug && plansIndex.some(p => p.slug === selectedSlug)){
+    sel.value = selectedSlug;
+    return;
+  }
+  if (selectedName){
+    const match = plansIndex.find(p => normalizeStr(p.nombre||p.slug) === normalizeStr(selectedName));
+    if (match){
+      sel.value = match.slug;
+      return;
+    }
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = selectedName;
+    opt.dataset.name = selectedName;
+    opt.selected = true;
+    opt.dataset.custom = "true";
+    sel.appendChild(opt);
+  }
+}
+
+async function updateSectionSubjectOptions(selectedSubjectId="", degreeSlugOverride="", selectedSubjectName=""){
+  const sel = qs("#secSubject");
+  const selDegree = qs("#secDegree");
+  if (!sel || !selDegree) return;
+  const slug = degreeSlugOverride || selDegree.value;
+  const targetName = selectedSubjectName || selectedSubjectId;
+  sel.innerHTML = `<option value=\"\">Elegí materia…</option>`;
+
+  if (!slug){
+    sel.disabled = true;
+    if (targetName){
+      const opt = document.createElement("option");
+      opt.value = selectedSubjectId || targetName;
+      opt.textContent = targetName;
+      opt.dataset.subjectName = targetName;
+      opt.selected = true;
+      sel.appendChild(opt);
+    }
+    return;
+  }
+
+  sel.disabled = false;
+  const subjects = await getSubjectsForCareer(slug);
+  let matched = false;
+  subjects.forEach(sub =>{
+    const id = sub.id || sub.nombre;
+    if (!id) return;
+    const opt = document.createElement("option");
+    opt.value = id;
+    opt.textContent = sub.nombre || sub.id || "Materia";
+    opt.dataset.subjectName = sub.nombre || sub.id || "Materia";
+    opt.disabled = false;
+    if (
+      (selectedSubjectId && (selectedSubjectId === id || normalizeStr(selectedSubjectId) === normalizeStr(id))) ||
+      (targetName && normalizeStr(targetName) === normalizeStr(sub.nombre||sub.id))
+    ){
+      opt.selected = true;
+      matched = true;
+    }
+    sel.appendChild(opt);
+  });
+
+  if (targetName && !matched){
+    const opt = document.createElement("option");
+    opt.value = selectedSubjectId || targetName;
+    opt.textContent = targetName;
+    opt.dataset.subjectName = targetName;
+    opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+// ====================================================
+
+function setSubjectSelectorsAvailability(){
+  const selCareer = qs("#profSubjectCareerSelect");
+  const selSubject = qs("#profSubjectSelect");
+  const hasCareers = professorCareers.length > 0;
+
+  if (selCareer){
+    selCareer.disabled = !hasCareers;
+    if (!hasCareers) selCareer.value = "";
+  }
+  if (selSubject){
+    selSubject.disabled = !hasCareers;
+    if (!hasCareers){
+      selSubject.innerHTML = `<option value=\"\">Elegí materia…</option>`;
+      selSubject.value = "";
+    }
+  }
+}
+
 /* ---------- navegación secciones ---------- */
 function setActiveNav(section){
   const navUsers = qs("#navUsers");
@@ -438,11 +547,13 @@ function attachGlobalHandlers(){
   });
 
   // Botones Sección Horarios
-  qs("#btnNewSection").addEventListener("click", () => openSectionModal(null));
+  qs("#btnNewSection").addEventListener("click", () => openSectionModal(null).catch(console.error));
   qs("#btnCancelSection").addEventListener("click", closeSectionModal);
   qs("#sectionModalBg").addEventListener("click", (e)=>{
     if (e.target === qs("#sectionModalBg")) closeSectionModal();
   });
+  // Evento para actualizar materias al cambiar carrera en horarios
+  qs("#secDegree").addEventListener("change", ()=> updateSectionSubjectOptions().catch(console.error));
 
   qs("#btnAddDay").addEventListener("click", addDayToList);
   qs("#btnAddDocente").addEventListener("click", addDocenteToList);
@@ -467,7 +578,7 @@ function attachGlobalHandlers(){
       const ref = doc(db,"courseSections",id);
       const snap = await getDoc(ref);
       if (!snap.exists()) return;
-      openSectionModal(id,snap.data());
+      await openSectionModal(id,snap.data());
     } else if (e.target.classList.contains("btn-delete-section")){
       const ok = await showConfirm({
         title:"Borrar horario",
@@ -861,13 +972,16 @@ function renderCareerChips(){
     cont.appendChild(chip);
   });
   setCareerSelectOptions();
+  setSubjectSelectorsAvailability();
 }
 
 function renderSubjectChips(){
   const cont = qs("#profSubjectsChips");
   cont.innerHTML = "";
   professorSubjects.forEach((s, idx)=>{
-    const labelCareer = s.careerSlug ? planNameFromSlug(s.careerSlug) : "Sin carrera";
+    const labelCareer = s.careerSlug
+      ? (professorCareers.find(c => c.slug === s.careerSlug)?.name || planNameFromSlug(s.careerSlug))
+      : "Sin carrera";
     const chip = document.createElement("span");
     chip.className = "chip";
     chip.innerHTML = `
@@ -885,9 +999,12 @@ function renderSubjectChips(){
 
 function renderSubjectCareerSelect(){
   const sel = qs("#profSubjectCareerSelect");
-  if (!sel) return;
+  const selSubject = qs("#profSubjectSelect");
+  setSubjectSelectorsAvailability();
+  if (!sel || !selSubject) return;
   const current = sel.value;
   sel.innerHTML = `<option value=\"\">Elegí carrera…</option>`;
+  if (!professorCareers.length) return;
   professorCareers.forEach(c =>{
     const opt = document.createElement("option");
     opt.value = c.slug;
@@ -906,16 +1023,54 @@ async function updateSubjectSelectOptions(){
   const selCareer = qs("#profSubjectCareerSelect");
   const sel = qs("#profSubjectSelect");
   if (!selCareer || !sel) return;
-  const slug = selCareer.value;
+  if (!professorCareers.length){
+    setSubjectSelectorsAvailability();
+    return;
+  }
   sel.innerHTML = `<option value=\"\">Elegí materia…</option>`;
+  const selectedPairs = new Set(professorSubjects.map(s => `${s.careerSlug}|${s.id}`));
+  const hasMultipleCareers = professorCareers.length > 1;
+
+  if (hasMultipleCareers){
+    selCareer.disabled = true;
+    selCareer.value = "";
+    const subjectLists = await Promise.all(professorCareers.map(async career => {
+      const list = await getSubjectsForCareer(career.slug);
+      return list.map(sub => ({ sub, career }));
+    }));
+    const unique = new Set();
+    const flat = subjectLists.flat();
+    flat.forEach(({ sub, career }) => {
+      const id = sub.id || sub.nombre;
+      if (!id) return;
+      const key = `${career.slug}|${id}`;
+      if (unique.has(key)) return;
+      unique.add(key);
+      const opt = document.createElement("option");
+      opt.value = id;
+      opt.textContent = `${sub.nombre || sub.id || "Materia"} — ${career.name || planNameFromSlug(career.slug)}`;
+      opt.dataset.careerSlug = career.slug;
+      opt.dataset.subjectName = sub.nombre || sub.id || "Materia";
+      opt.disabled = selectedPairs.has(key);
+      sel.appendChild(opt);
+    });
+    return;
+  }
+
+  selCareer.disabled = false;
+  if (!selCareer.value && professorCareers.length === 1){
+    selCareer.value = professorCareers[0].slug;
+  }
+  const slug = selCareer.value;
   if (!slug) return;
   const subjects = await getSubjectsForCareer(slug);
-  const selectedPairs = new Set(professorSubjects.map(s => `${s.careerSlug}|${s.id}`));
   subjects.forEach(sub =>{
     const id = sub.id || sub.nombre;
     const opt = document.createElement("option");
     opt.value = id;
     opt.textContent = sub.nombre || sub.id || "Materia";
+    opt.dataset.careerSlug = slug;
+    opt.dataset.subjectName = sub.nombre || sub.id || "Materia";
     opt.disabled = selectedPairs.has(`${slug}|${id}`);
     sel.appendChild(opt);
   });
@@ -999,6 +1154,7 @@ function closeProfessorModal(){
     const el = qs(id);
     if (el) el.value = "";
   });
+  setSubjectSelectorsAvailability();
 }
 
 async function addCareerToList(){
@@ -1020,19 +1176,20 @@ async function addCareerToList(){
 async function addSubjectToList(){
   const selCareer = qs("#profSubjectCareerSelect");
   const sel = qs("#profSubjectSelect");
-  const slug = selCareer?.value || "";
-  const id = sel?.value || "";
-  if (!slug){
-    showToast({ message:"Primero elegí una carrera para listar sus materias.", type:"warning" });
-    return;
-  }
+  const option = sel?.selectedOptions?.[0] || null;
+  const slug = option?.dataset?.careerSlug || selCareer?.value || "";
+  const id = option?.value || "";
   if (!id){
     showToast({ message:"Elegí una materia del selector.", type:"warning" });
     return;
   }
+  if (!slug){
+    showToast({ message:"Elegí una materia que indique la carrera asociada.", type:"warning" });
+    return;
+  }
   const subjects = await getSubjectsForCareer(slug);
   const match = subjects.find(s => (s.id || s.nombre) === id || normalizeStr(s.nombre||s.id) === normalizeStr(id));
-  const name = match?.nombre || match?.id || id;
+  const name = option?.dataset?.subjectName || match?.nombre || match?.id || option?.textContent || id;
   const internalId = match?.id || id;
   const key = `${slug}|${internalId}`;
   const exists = professorSubjects.some(s => `${s.careerSlug}|${s.id}` === key);
@@ -1043,6 +1200,7 @@ async function addSubjectToList(){
   professorSubjects.push({ id: internalId, name, careerSlug: slug });
   renderSubjectChips();
   updateSubjectSelectOptions().catch(console.error);
+  if (sel) sel.value = "";
 }
 
 async function saveProfessor(){
@@ -1123,7 +1281,7 @@ async function deleteProfessor(){
 }
 
 /* ---------- modal horarios ---------- */
-function openSectionModal(id, data=null){
+async function openSectionModal(id, data=null){
   editingSectionId = id || null;
   daysList = [];
   docentesList = [];
@@ -1131,9 +1289,9 @@ function openSectionModal(id, data=null){
   qs("#sectionModalTitle").textContent = id ? "Editar horario" : "Nuevo horario";
   qs("#btnDeleteSection").style.display = id ? "inline-flex" : "none";
 
-  qs("#secSubject").value    = data?.subject || "";
+  await setSectionCareerOptions(data?.degreeSlug || "", data?.degree || "");
+  await updateSectionSubjectOptions(data?.subjectId || data?.subject || "", data?.degreeSlug || "", data?.subject || "");
   qs("#secCommission").value = data?.commission || "";
-  qs("#secDegree").value     = data?.degree || "";
   qs("#secRoom").value       = data?.room || "";
   qs("#secCampus").value     = data?.campus || "";
   qs("#secHeadEmail").value  = data?.headEmail || "";
@@ -1165,6 +1323,13 @@ function closeSectionModal(){
   editingSectionId = null;
   daysList = [];
   docentesList = [];
+  const selDegree = qs("#secDegree");
+  const selSubject = qs("#secSubject");
+  if (selDegree) selDegree.value = "";
+  if (selSubject){
+    selSubject.innerHTML = `<option value=\"\">Elegí materia…</option>`;
+    selSubject.disabled = true;
+  }
 }
 
 /* docentes chips */
@@ -1252,16 +1417,30 @@ function addDayToList(){
 
 /* guardar / borrar horario */
 async function saveSection(){
-  const subject    = qs("#secSubject").value.trim();
+  const selSubject = qs("#secSubject");
+  const selDegree  = qs("#secDegree");
+  const subjectId  = selSubject?.value.trim() || "";
+  const subjectName = selSubject?.selectedOptions?.[0]?.dataset?.subjectName || subjectId;
   const commission = qs("#secCommission").value.trim();
-  const degree     = qs("#secDegree").value.trim();
+  const degreeSlug = selDegree?.value || "";
+  const degreeName = selDegree?.selectedOptions?.[0]?.dataset?.name || "";
   const room       = qs("#secRoom").value.trim();
   const campus     = qs("#secCampus").value;
   const headEmail  = qs("#secHeadEmail").value.trim();
   const titular    = qs("#secTitular").value.trim();
 
-  if (!subject || !commission){
-    showToast({ message:"Completá al menos la materia y la comisión.", type:"warning" });
+  const isCustomDegree = selDegree?.selectedOptions?.[0]?.dataset?.custom === "true";
+
+  if (!degreeSlug && !isCustomDegree){
+    showToast({ message:"Elegí una carrera para listar sus materias.", type:"warning" });
+    return;
+  }
+  if (!subjectName || !subjectId){
+    showToast({ message:"Elegí una materia del listado.", type:"warning" });
+    return;
+  }
+  if (!commission){
+    showToast({ message:"Completá la comisión.", type:"warning" });
     return;
   }
   if (!daysList.length){
@@ -1270,9 +1449,11 @@ async function saveSection(){
   }
 
   const payload = {
-    subject,
+    subject: subjectName,
+    subjectId,
     commission,
-    degree: degree || "",
+    degree: degreeName || "",
+    degreeSlug: degreeSlug || "",
     room: room || "",
     campus: campus || "",
     headEmail: headEmail || "",
