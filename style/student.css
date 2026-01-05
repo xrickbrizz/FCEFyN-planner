@@ -149,6 +149,7 @@ button{
   min-width:0;
   display:flex;
   flex-direction:column;
+  margin-left: 0.9rem;
   gap:.75rem;
 }
 .main-shell{ max-width:none; margin:0; padding:0; }
