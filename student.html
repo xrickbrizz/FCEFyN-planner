@@ -4,8 +4,10 @@
   <meta charset="UTF-8" />
   <title>Panel del Estudiante</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style/theme.css">
   <link rel="stylesheet" href="style/ui-components.css">
   <link rel="stylesheet" href="style/student.css">
+  <script src="scripts/theme-toggle.js" defer></script>
 </head>
 
 <body>
@@ -15,6 +17,9 @@
       <div class="header-sub">Calendario de estudio — FCEFyN</div>
     </div>
     <div class="header-right">
+      <button class="theme-toggle" data-theme-toggle type="button">
+        <span class="ico">☀️</span><span class="label">Modo claro</span>
+      </button>
       <div class="account-box">
         <div class="account-label">Cuenta</div>
         <div id="userEmailLabel" class="account-email">-</div>
@@ -91,7 +96,7 @@
           <div class="stats-item">• Total de horas este mes: <strong>—</strong></div>
           <div class="stats-item">• Materia más estudiada: <strong>—</strong></div>
           <div class="stats-item">• Días con estudio registrado: <strong>—</strong></div>
-          <div class="stats-item" style="margin-top:.6rem; font-size:.8rem; color:#6b7280;">
+          <div class="stats-item" style="margin-top:.6rem; font-size:.8rem; color:var(--color-muted-2);">
             Más adelante estas métricas se calcularán automáticamente a partir de tus registros en Firebase.
           </div>
         </div>
@@ -179,20 +184,20 @@
         <div class="subjects-list-box">
           <strong>Materias creadas</strong>
           <div id="subjectsList" style="margin-top:.5rem;"></div>
-          <div id="subjectsEmptyMsg" style="font-size:.85rem;color:#9ca3af;display:none;margin-top:.4rem;">
+          <div id="subjectsEmptyMsg" style="font-size:.85rem;color:var(--color-muted-2);display:none;margin-top:.4rem;">
             No hay materias. Creá una materia en el formulario de la derecha.
           </div>
         </div>
         <div class="subject-form-box">
           <strong id="subjectFormTitle">Nueva materia</strong>
           <input id="subjectName" placeholder="Nombre de la materia" />
-          <label style="font-size:.8rem;color:#9ca3af;">Color</label>
-          <input id="subjectColor" type="color" value="#2563eb" />
+          <label style="font-size:.8rem;color:var(--color-muted-2);">Color</label>
+          <input id="subjectColor" type="color" value="#E6D98C" />
           <div style="margin-top:.6rem;display:flex;gap:.5rem;justify-content:flex-end;">
             <button class="btn-gray btn-small" id="btnSubjectReset">Limpiar</button>
             <button class="btn-blue btn-small" id="btnSubjectSave">Guardar</button>
           </div>
-          <p style="margin-top:.6rem;font-size:.8rem;color:#9ca3af;">
+          <p style="margin-top:.6rem;font-size:.8rem;color:var(--color-muted-2);">
             Al editar una materia se actualizará su nombre también en el calendario de estudio y en la agenda.
             Al borrar una materia podés elegir si se eliminan también sus clases y registros de estudio.
           </p>

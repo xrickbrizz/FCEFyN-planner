@@ -4,8 +4,10 @@
   <meta charset="utf-8" />
   <title>Panel de administración — FCEFyN Planner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style/theme.css">
   <link rel="stylesheet" href="style/ui-components.css">
   <link rel="stylesheet" href="style/admin.css">
+  <script src="scripts/theme-toggle.js" defer></script>
 </head>
 <body>
 <div class="layout">
@@ -37,6 +39,9 @@
     <header class="topbar">
       <div class="topbar-title" id="topbarTitle">Panel de administración — Usuarios</div>
       <div class="topbar-right">
+        <button class="theme-toggle" data-theme-toggle type="button">
+          <span class="ico">☀️</span><span class="label">Modo claro</span>
+        </button>
         <div id="adminEmail" class="topbar-email">—</div>
         <button class="btn btn-outline" id="btnLogout">Cerrar sesión</button>
       </div>

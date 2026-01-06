@@ -38,6 +38,11 @@ let sidebarCtrl = null;
 const notify = (message, type="info") => showToast({ message, type });
 const notifySuccess = (message) => showToast({ message, type:"success" });
 const notifyError = (message) => showToast({ message, type:"error" });
+const themeColor = (varName, fallback) => {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(varName);
+  return (value || "").trim() || fallback;
+};
+const defaultSubjectColor = () => themeColor("--color-accent", "#E6D98C");
 const notifyWarn = (message) => showToast({ message, type:"warning" });
 let html2canvasLib = null;
 let jsPDFLib = null;
@@ -522,7 +527,7 @@ function renderAgendaGridInto(grid, data, allowEdit){
       const block = document.createElement("div");
       block.className = "class-block";
       const color = subjectColor(item.materia);
-      block.style.background = `linear-gradient(135deg, ${color}, #0ea5e9)`;
+      block.style.background = `linear-gradient(135deg, ${color}, ${themeColor("--color-accent-2", "#CBBF74")})`;
       block.style.top = ((startM - minutesStart) * pxPerMinute) + "px";
       block.style.height = Math.max((endM - startM) * pxPerMinute, 18) + "px";
 
@@ -598,7 +603,7 @@ async function downloadAgenda(format){
     await new Promise(res => requestAnimationFrame(()=> requestAnimationFrame(res)));
     const html2canvas = await ensureHtml2canvas();
     const canvas = await html2canvas(captureEl, {
-      backgroundColor:"#0b1020",
+      backgroundColor: themeColor("--color-primary-strong", "#0F1A18"),
       scale:2,
       useCORS:true
     });
@@ -713,7 +718,7 @@ function currentUserDisplayName(){
 
 function subjectColor(name){
   const s = subjects.find(x => x.name === name);
-  return (s && s.color) ? s.color : "#2563eb";
+  return (s && s.color) ? s.color : defaultSubjectColor();
 }
 
 function ensureSubjectExistsWithColor(subjectName){
@@ -760,7 +765,7 @@ function renderSubjectsList(){
 
     const dot = document.createElement("div");
     dot.className = "subject-color-dot";
-    dot.style.background = s.color || "#2563eb";
+    dot.style.background = s.color || defaultSubjectColor();
 
     const name = document.createElement("div");
     name.className = "subject-name";
@@ -794,21 +799,21 @@ function startEditSubject(index){
   editingSubjectIndex = index;
   const s = subjects[index];
   subjectNameInput.value = s.name;
-  subjectColorInput.value = s.color || "#2563eb";
+  subjectColorInput.value = s.color || defaultSubjectColor();
   subjectFormTitle.textContent = "Editar materia";
 }
 
 btnSubjectReset.onclick = () => {
   editingSubjectIndex = -1;
   subjectNameInput.value = "";
-  subjectColorInput.value = "#2563eb";
+  subjectColorInput.value = defaultSubjectColor();
   subjectFormTitle.textContent = "Nueva materia";
 };
 
 btnSubjectSave.onclick = async () => {
   if (!currentUser) return;
   const name = subjectNameInput.value.trim();
-  const color = subjectColorInput.value || "#2563eb";
+  const color = subjectColorInput.value || defaultSubjectColor();
   if (!name){
     notifyWarn("Ingresá un nombre para la materia.");
     return;
@@ -854,7 +859,7 @@ btnSubjectSave.onclick = async () => {
 
   editingSubjectIndex = -1;
   subjectNameInput.value = "";
-  subjectColorInput.value = "#2563eb";
+  subjectColorInput.value = defaultSubjectColor();
   subjectFormTitle.textContent = "Nueva materia";
 
   renderSubjectsList();
@@ -911,7 +916,7 @@ async function deleteSubject(index){
 
   editingSubjectIndex = -1;
   subjectNameInput.value = "";
-  subjectColorInput.value = "#2563eb";
+  subjectColorInput.value = defaultSubjectColor();
   subjectFormTitle.textContent = "Nueva materia";
 
   renderSubjectsList();

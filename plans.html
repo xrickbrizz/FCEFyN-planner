@@ -4,25 +4,22 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Plan de Estudios</title>
+<link rel="stylesheet" href="style/theme.css">
 <link rel="stylesheet" href="style/ui-components.css">
+<script src="scripts/theme-toggle.js" defer></script>
 <style>
   :root{
-    --bg1:#000000; --bg2:#161616;
-    --accent:#d4af37;
-    --card:#111111;
-    --muted:#9aa6b2;
-    --glass: rgba(255,255,255,0.04);
-    --shadow: 0 10px 28px rgba(2,6,23,0.68);
-    --line: rgba(255,255,255,0.08);
+    --plan-shadow: var(--shadow-strong);
+    --plan-glass: var(--glass-faint);
+    --plan-line: rgba(var(--color-border-rgb),0.35);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
     margin:0; min-height:100%;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: radial-gradient(1200px 700px at 20% 0%, rgba(212,175,55,0.08), transparent 60%),
-                linear-gradient(135deg, var(--bg1), var(--bg2));
-    color:#e6eef6;
+    background: var(--page-gradient);
+    color:var(--color-text);
     display:flex; flex-direction:column; align-items:center;
     gap:14px;
     padding:14px;
@@ -35,16 +32,16 @@
     justify-content:space-between;
     gap:12px;
     padding:12px 14px;
-    background: rgba(255,255,255,0.02);
-    border:1px solid var(--line);
+    background: var(--glass-faint);
+    border:1px solid var(--plan-line);
     border-radius:14px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--plan-shadow);
   }
   h1{
     margin:0;
     font-size:1.2rem;
-    color:var(--accent);
-    text-shadow:0 0 10px rgba(212,175,55,0.25);
+    color:var(--color-accent);
+    text-shadow:0 0 10px rgba(var(--color-accent-rgb),0.25);
   }
   .right{
     display:flex;
@@ -53,9 +50,9 @@
     flex-wrap:wrap;
   }
   .btn{
-    background:var(--glass);
-    color:#d9e6f2;
-    border:1px solid rgba(255,255,255,0.06);
+    background:var(--plan-glass);
+    color:var(--color-text);
+    border:1px solid rgba(var(--color-border-rgb),0.35);
     padding:10px 12px;
     border-radius:12px;
     cursor:pointer;
@@ -63,11 +60,11 @@
     transition:transform .12s, background .12s, border-color .12s;
     user-select:none;
   }
-  .btn:hover{ transform:translateY(-2px); background:rgba(255,255,255,0.06); border-color:rgba(212,175,55,0.30); }
+  .btn:hover{ transform:translateY(-2px); background:rgba(var(--color-primary-rgb),0.12); border-color:rgba(var(--color-accent-rgb),0.30); }
   select{
-    background:rgba(0,0,0,0.35);
-    color:#e6eef6;
-    border:1px solid rgba(255,255,255,0.10);
+    background:rgba(var(--color-primary-rgb),0.18);
+    color:var(--color-text);
+    border:1px solid rgba(var(--color-border-rgb),0.35);
     padding:10px 12px;
     border-radius:12px;
     outline:none;
@@ -79,10 +76,10 @@
     max-width:1600px;
     padding:14px 16px;
     border-radius:14px;
-    border:1px solid rgba(212,175,55,0.22);
-    background: rgba(212,175,55,0.06);
-    box-shadow: var(--shadow);
-    color:#f3e7c3;
+    border:1px solid rgba(var(--color-accent-rgb),0.22);
+    background: rgba(var(--color-accent-rgb),0.08);
+    box-shadow: var(--plan-shadow);
+    color:var(--color-text);
     display:none;
   }
 
@@ -95,22 +92,22 @@
     gap:1rem;
   }
   .cell{
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    background: var(--glass-faint);
     border-radius:14px;
     padding:0.9rem;
     min-height:320px;
-    box-shadow: var(--shadow);
-    border:1px solid rgba(255,255,255,0.06);
+    box-shadow: var(--plan-shadow);
+    border:1px solid rgba(var(--color-border-rgb),0.35);
     display:flex;
     flex-direction:column;
   }
   .cell h2{
     margin:0 0 .6rem 0;
-    color:var(--accent);
+    color:var(--color-accent);
     font-size:1rem;
     text-align:center;
     padding-bottom:0.35rem;
-    border-bottom:2px solid rgba(212,175,55,0.18);
+    border-bottom:2px solid rgba(var(--color-accent-rgb),0.18);
   }
   .subjects{
     display:flex;
@@ -121,7 +118,7 @@
     padding-right:6px;
   }
   .subject{
-    background:rgba(255,255,255,0.02);
+    background:var(--plan-glass);
     padding:0.55rem;
     border-radius:10px;
     font-weight:700;
@@ -129,60 +126,60 @@
     text-align:center;
     cursor:pointer;
     transition: transform .12s, background .18s, border-color .12s;
-    color: #d9e6f2;
+    color: var(--color-text);
     user-select:none;
     border:1px solid transparent;
   }
-  .subject:hover{ transform:translateY(-4px); background:rgba(255,255,255,0.04); border-color:rgba(212,175,55,0.25); }
+  .subject:hover{ transform:translateY(-4px); background:rgba(var(--color-primary-rgb),0.12); border-color:rgba(var(--color-accent-rgb),0.25); }
   .subject.locked{
     cursor:not-allowed;
     opacity:0.62;
     transform:none;
-    background:rgba(255,255,255,0.015);
-    color:#8a96a1;
+    background:rgba(var(--color-primary-rgb),0.06);
+    color:var(--color-muted-2);
     border-color:transparent;
   }
-  .promocion{ background:#2e7d32 !important; color:#fff; }
-  .regular{ background:#fdd835 !important; color:#111; }
-  .libre{ background:#d32f2f !important; color:#fff; }
-  .curso{ background:#0288d1 !important; color:#fff; }
+  .promocion{ background:var(--color-ok) !important; color:var(--color-primary-strong); }
+  .regular{ background:var(--color-accent) !important; color:var(--color-primary-strong); }
+  .libre{ background:var(--color-danger) !important; color:var(--color-text-contrast); }
+  .curso{ background:var(--color-primary-soft) !important; color:var(--color-text-contrast); }
 
   .subjects::-webkit-scrollbar{ width:8px }
-  .subjects::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.12); border-radius:8px }
+  .subjects::-webkit-scrollbar-thumb{ background:rgba(var(--color-primary-rgb),0.2); border-radius:8px }
 
   .stats{ display:flex; flex-direction:column; gap:0.8rem; }
   .stat-row{ display:flex; gap:1rem; }
   .stat-card{
-    background: rgba(255,255,255,0.02);
+    background: var(--plan-glass);
     padding:0.6rem;
     border-radius:10px;
     flex:1;
     text-align:center;
-    border:1px solid rgba(255,255,255,0.06);
+    border:1px solid rgba(var(--color-border-rgb),0.35);
   }
-  .stat-card strong{ display:block; font-size:1.05rem; color:#fff; }
-  .stat-label{ color:var(--muted); font-size:0.85rem; margin-top:0.3rem; }
+  .stat-card strong{ display:block; font-size:1.05rem; color:var(--color-text); }
+  .stat-label{ color:var(--color-muted-2); font-size:0.85rem; margin-top:0.3rem; }
 
   .progress-wrap{
-    background: rgba(255,255,255,0.03);
+    background: var(--plan-glass);
     border-radius:12px;
     padding:0.5rem;
-    border:1px solid rgba(255,255,255,0.06);
+    border:1px solid rgba(var(--color-border-rgb),0.35);
   }
   .progress{
     height:18px;
-    background:rgba(0,0,0,0.25);
+    background:rgba(var(--color-primary-rgb),0.12);
     border-radius:12px;
     overflow:hidden;
   }
   .progress > .fill{
     height:100%;
     width:0%;
-    background: linear-gradient(90deg, #4caf50, #82c91e);
+    background: linear-gradient(90deg, var(--color-ok), var(--color-accent));
     border-radius:12px;
     transition: width .6s ease-in-out;
   }
-  .progress-caption{ display:flex; justify-content:space-between; font-size:0.85rem; color:var(--muted); margin-top:0.35rem; }
+  .progress-caption{ display:flex; justify-content:space-between; font-size:0.85rem; color:var(--color-muted-2); margin-top:0.35rem; }
 
   footer{
     width:100%;
@@ -190,7 +187,7 @@
     display:flex;
     justify-content:space-between;
     gap:0.8rem;
-    color:var(--muted);
+    color:var(--color-muted-2);
     font-size:0.85rem;
   }
 
@@ -212,6 +209,9 @@
 <header>
   <h1 id="title">Planes de Estudio</h1>
   <div class="right">
+    <button class="btn theme-toggle" data-theme-toggle type="button">
+      <span class="ico">☀️</span><span class="label">Modo claro</span>
+    </button>
     <button class="btn" id="btnBack" type="button">← Volver</button>
     <select id="planSelect">
       <option value="">Elegí plan…</option>
@@ -428,7 +428,7 @@ import { showConfirm } from "./ui/notifications.js";
     menu.style.display = "block";
     menu.innerHTML = `
       <div style="background:transparent; padding:0;">
-        <div style="background:var(--card); border-radius:12px; padding:8px; min-width:190px; box-shadow:var(--shadow); border:1px solid rgba(255,255,255,0.06);">
+        <div style="background:var(--plan-glass); border-radius:12px; padding:8px; min-width:190px; box-shadow:var(--plan-shadow); border:1px solid var(--plan-line);">
           <div data-estado="promocion" class="btn" style="display:block; width:100%; margin-bottom:8px; text-align:left;">Promoción</div>
           <div data-estado="regular" class="btn" style="display:block; width:100%; margin-bottom:8px; text-align:left;">Regular</div>
           <div data-estado="libre" class="btn" style="display:block; width:100%; margin-bottom:8px; text-align:left;">Libre</div>
