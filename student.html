@@ -201,8 +201,13 @@
             </div>
           </div>
           <div class="subject-form-field">
-            <label>Nombre de la materia</label>
-            <input id="subjectName" placeholder="Ej: Física II" />
+            <label>Carrera</label>
+            <select id="subjectCareer"></select>
+          </div>
+          <div class="subject-form-field">
+            <label>Materia</label>
+            <select id="subjectNameSelect"></select>
+            <div class="small-muted" id="subjectPlanHint">Seleccioná una carrera para ver sus materias.</div>
           </div>
           <div class="subject-form-field">
             <label>Color identificatorio</label>
@@ -392,6 +397,63 @@
               <input id="messageInput" placeholder="Seleccioná un amigo para chatear" disabled />
               <button class="btn-blue btn-small" id="btnSendMessage" type="button" disabled>Enviar</button>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="tab-perfil" class="tab-card" style="display:none;">
+      <div class="profile-layout">
+        <div class="profile-card">
+          <div class="profile-header">
+            <div>
+              <strong>Tu perfil</strong>
+              <div class="small-muted">Actualizá tus datos básicos y mantenelos al día.</div>
+            </div>
+            <div class="profile-email" id="profileEmail">—</div>
+          </div>
+
+          <div class="profile-grid">
+            <div class="profile-field">
+              <label>Nombre</label>
+              <input id="profileFirstName" placeholder="Nombre" />
+            </div>
+            <div class="profile-field">
+              <label>Apellido</label>
+              <input id="profileLastName" placeholder="Apellido" />
+            </div>
+            <div class="profile-field">
+              <label>Carrera</label>
+              <select id="profileCareer"></select>
+            </div>
+            <div class="profile-field">
+              <label>Año de ingreso</label>
+              <input id="profileYearIn" type="number" min="1990" max="2100" placeholder="Ej: 2024" />
+            </div>
+            <div class="profile-field profile-field-wide">
+              <label>Documento / DNI / Legajo</label>
+              <input id="profileDocument" placeholder="Opcional" />
+            </div>
+          </div>
+
+          <div class="profile-actions">
+            <button class="btn-blue" id="btnProfileSave" type="button">Guardar cambios</button>
+            <div class="profile-status" id="profileStatus"></div>
+          </div>
+        </div>
+
+        <div class="profile-card">
+          <div class="profile-header">
+            <div>
+              <strong>Seguridad</strong>
+              <div class="small-muted">Gestioná tu contraseña desde el correo institucional.</div>
+            </div>
+          </div>
+          <div class="profile-security">
+            <div class="small-muted">
+              Al confirmar, te enviaremos un correo para cambiar tu contraseña de forma segura.
+            </div>
+            <button class="btn-outline btn-small" id="btnPasswordReset" type="button">Cambiar contraseña</button>
+            <div class="profile-status" id="passwordStatus"></div>
           </div>
         </div>
       </div>

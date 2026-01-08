@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+import { getAuth, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import {
   getFirestore,
   doc,
@@ -18,6 +18,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 import { createQuickSidebar } from "../ui/sidebar.js";
 import { showToast, showConfirm } from "../ui/notifications.js";
+import { getPlansIndex, getPlanWithSubjects, findPlanByName } from "./plans-data.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA0i7hkXi5C-x3UwAEsh6FzRFqrFE5jpd8",
@@ -55,6 +56,9 @@ let editingIndex = -1;
 // ---- MATERIAS
 let subjects = [];
 let editingSubjectIndex = -1;
+let careerPlans = [];
+let careerSubjects = [];
+let plannerCareer = { slug:"", name:"" };
 
 // ---- AGENDA
 let agendaData = {};
@@ -114,6 +118,7 @@ const navItems = [
   { id:"planificador", label:"Planificador", icon:"🧭" },
   { id:"profesores", label:"Profesores", icon:"⭐" }, // NUEVO
   { id:"mensajes", label:"Mensajes", icon:"💬" }, // NUEVO: contactos + chat
+  { id:"perfil", label:"Perfil", icon:"👤" },
 ];
 let activeSection = "inicio";
 let lastNonMessagesSection = "inicio";
@@ -162,7 +167,7 @@ const helpContent = {
   materias: {
     title: "Cómo usar Materias",
     bullets: [
-      "Creá materias con nombre y color; se usan en Estudio, Agenda y Académico.",
+      "Elegí una carrera y seleccioná las materias desde la lista oficial.",
       "Al editar una materia, se actualiza en todos los registros asociados automáticamente.",
       "Si eliminás una materia, elegí si querés limpiar también sus clases y registros."
     ]
@@ -192,6 +197,15 @@ const helpContent = {
       "Aceptá o rechazá solicitudes recibidas y revisá las enviadas desde el mismo panel.",
       "Solo los amigos aceptados aparecen en la lista; elegí uno para abrir el chat.",
       "El input se habilita al elegir un contacto y podés enviar mensajes en tiempo real."
+    ]
+  },
+  perfil: {
+    title: "Cómo usar Perfil",
+    bullets: [
+      "Actualizá tu nombre, carrera y datos básicos desde el formulario.",
+      "Guardá los cambios para que queden disponibles en tu cuenta.",
+      "Si necesitás cambiar la contraseña, usá el botón de seguridad para recibir el correo.",
+      "Los cambios no afectan tus materias ni tus calendarios."
     ]
   }
 };
@@ -299,6 +313,7 @@ window.showTab = function(name){
   const tabPlanificador     = document.getElementById("tab-planificador");
   const tabProfesores       = document.getElementById("tab-profesores"); // NUEVO
   const tabMensajes         = document.getElementById("tab-mensajes"); // NUEVO
+  const tabPerfil           = document.getElementById("tab-perfil");
   const toggleTab = (el, visible)=>{ if (el) el.style.display = visible ? "block" : "none"; };
 
   toggleTab(tabInicio, name === "inicio");
@@ -309,6 +324,7 @@ window.showTab = function(name){
   toggleTab(tabPlanificador, name === "planificador");
   toggleTab(tabProfesores, name === "profesores"); // NUEVO
   toggleTab(tabMensajes, name === "mensajes"); // NUEVO
+  toggleTab(tabPerfil, name === "perfil");
 
   if (name === "agenda") renderAgenda();
   if (name === "planificador") renderPlannerAll();
@@ -320,6 +336,7 @@ window.showTab = function(name){
     renderFriendsList();
     renderMessaging();
   } // NUEVO
+  if (name === "perfil") renderProfileSection();
 
   if (sidebarCtrl) sidebarCtrl.setActive(name);
   const label = document.getElementById("currentSectionLabel");
@@ -341,6 +358,7 @@ onAuthStateChanged(auth, async user => {
   await loadPlannerData();
   await loadCourseSections();
   await loadUserProfile(); // NUEVO
+  await loadCareerPlans();
   await loadProfessorsCatalog(); // NUEVO
   await loadFriendRequests(); // NUEVO
   await loadFriends(); // NUEVO
@@ -352,6 +370,8 @@ onAuthStateChanged(auth, async user => {
 
   renderSubjectsList();
   renderSubjectsOptions();
+  await initSubjectsCareerUI();
+  renderProfileSection();
   renderAgenda();
 
   initPlanificadorUI();
@@ -405,6 +425,7 @@ async function loadPlannerData(){
     const data = snap.data();
     if (data.estudios && typeof data.estudios === "object") estudiosCache = data.estudios;
     if (Array.isArray(data.subjects)) subjects = data.subjects;
+    if (data.subjectCareer && typeof data.subjectCareer === "object") plannerCareer = data.subjectCareer;
     if (data.agenda && typeof data.agenda === "object") agendaData = data.agenda;
     if (agendaData?.domingo){
       delete agendaData.domingo;
@@ -419,6 +440,7 @@ async function loadPlannerData(){
     await setDoc(ref, {
       estudios:{},
       subjects:[],
+      subjectCareer:{},
       agenda:{},
       schedulePresets:[],
       activePresetId:"",
@@ -457,6 +479,147 @@ async function loadUserProfile(){
   }catch(_){
     userProfile = null;
   }
+}
+
+async function loadCareerPlans(){
+  try{
+    careerPlans = await getPlansIndex();
+  }catch(_){
+    careerPlans = [];
+  }
+}
+
+// ------------------------ PERFIL ------------------------
+const profileEmailEl = document.getElementById("profileEmail");
+const profileFirstNameInput = document.getElementById("profileFirstName");
+const profileLastNameInput = document.getElementById("profileLastName");
+const profileCareerSelect = document.getElementById("profileCareer");
+const profileYearInInput = document.getElementById("profileYearIn");
+const profileDocumentInput = document.getElementById("profileDocument");
+const profileStatusEl = document.getElementById("profileStatus");
+const passwordStatusEl = document.getElementById("passwordStatus");
+const btnProfileSave = document.getElementById("btnProfileSave");
+const btnPasswordReset = document.getElementById("btnPasswordReset");
+
+function renderCareerOptions(selectEl, selectedSlug){
+  if (!selectEl) return;
+  selectEl.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Seleccioná una carrera";
+  selectEl.appendChild(placeholder);
+
+  const sorted = Array.from(careerPlans || []).sort((a,b)=> normalizeStr(a.nombre) < normalizeStr(b.nombre) ? -1 : 1);
+  sorted.forEach(plan => {
+    const opt = document.createElement("option");
+    opt.value = plan.slug;
+    opt.textContent = plan.nombre;
+    selectEl.appendChild(opt);
+  });
+
+  if (selectedSlug){
+    selectEl.value = selectedSlug;
+  } else {
+    placeholder.selected = true;
+  }
+}
+
+function renderProfileSection(){
+  if (!currentUser) return;
+  if (profileEmailEl) profileEmailEl.textContent = currentUser.email || userProfile?.email || "—";
+
+  const plan = userProfile?.careerSlug
+    ? (careerPlans || []).find(p => p.slug === userProfile.careerSlug)
+    : (userProfile?.career ? findPlanByName(userProfile.career) : null);
+  const selectedSlug = plan?.slug || userProfile?.careerSlug || "";
+
+  renderCareerOptions(profileCareerSelect, selectedSlug);
+
+  if (profileFirstNameInput) profileFirstNameInput.value = userProfile?.firstName || "";
+  if (profileLastNameInput) profileLastNameInput.value = userProfile?.lastName || "";
+  if (profileYearInInput) profileYearInInput.value = userProfile?.yearIn || "";
+  if (profileDocumentInput){
+    profileDocumentInput.value = userProfile?.documento || userProfile?.dni || userProfile?.legajo || "";
+  }
+  setProfileStatus(profileStatusEl, "");
+  setProfileStatus(passwordStatusEl, "");
+}
+
+function setProfileStatus(target, message){
+  if (target) target.textContent = message || "";
+}
+
+if (btnProfileSave){
+  btnProfileSave.addEventListener("click", async ()=>{
+    if (!currentUser) return;
+    const firstName = profileFirstNameInput?.value.trim() || "";
+    const lastName = profileLastNameInput?.value.trim() || "";
+    const name = `${firstName} ${lastName}`.trim();
+    const careerSlug = profileCareerSelect?.value || "";
+    const plan = careerSlug ? (careerPlans || []).find(p => p.slug === careerSlug) : null;
+    const careerName = plan?.nombre || userProfile?.career || "";
+    const yearRaw = profileYearInInput?.value.trim() || "";
+    const yearIn = yearRaw ? parseInt(yearRaw, 10) : "";
+    const documento = profileDocumentInput?.value.trim() || "";
+
+    if (yearRaw && (!Number.isFinite(yearIn) || yearIn < 1900 || yearIn > 2100)){
+      notifyWarn("El año de ingreso debe ser un número válido.");
+      setProfileStatus(profileStatusEl, "Revisá el año de ingreso.");
+      return;
+    }
+
+    try{
+      await setDoc(doc(db, "users", currentUser.uid), {
+        firstName,
+        lastName,
+        name,
+        career: careerSlug ? careerName : "",
+        careerSlug,
+        yearIn: yearIn || "",
+        documento,
+        dni: documento,
+        legajo: documento
+      }, { merge:true });
+      userProfile = {
+        ...(userProfile || {}),
+        firstName,
+        lastName,
+        name,
+        career: careerSlug ? careerName : "",
+        careerSlug,
+        yearIn: yearIn || "",
+        documento,
+        dni: documento,
+        legajo: documento
+      };
+      notifySuccess("Perfil actualizado.");
+      setProfileStatus(profileStatusEl, "Cambios guardados correctamente.");
+    }catch(e){
+      notifyError("No se pudo guardar el perfil.");
+      setProfileStatus(profileStatusEl, "No se pudo guardar. Intentá nuevamente.");
+    }
+  });
+}
+
+if (btnPasswordReset){
+  btnPasswordReset.addEventListener("click", async ()=>{
+    if (!currentUser || !currentUser.email) return;
+    const ok = await showConfirm({
+      title:"Cambiar contraseña",
+      message:`Te enviaremos un correo a ${currentUser.email} para cambiar la contraseña.`,
+      confirmText:"Enviar correo",
+      cancelText:"Cancelar"
+    });
+    if (!ok) return;
+    try{
+      await sendPasswordResetEmail(auth, currentUser.email);
+      notifySuccess("Correo enviado para cambiar la contraseña.");
+      setProfileStatus(passwordStatusEl, "Correo enviado. Revisá tu bandeja.");
+    }catch(e){
+      notifyError("No se pudo enviar el correo.");
+      setProfileStatus(passwordStatusEl, "No se pudo enviar el correo. Intentá más tarde.");
+    }
+  });
 }
 
 function ensureAgendaStructure(){
@@ -745,11 +908,158 @@ function hslToHex(h, s, l){
 // ------------------------ MATERIAS ------------------------
 const subjectsListEl = document.getElementById("subjectsList");
 const subjectsEmptyMsg = document.getElementById("subjectsEmptyMsg");
-const subjectNameInput = document.getElementById("subjectName");
+const subjectCareerSelect = document.getElementById("subjectCareer");
+const subjectNameSelect = document.getElementById("subjectNameSelect");
 const subjectColorInput = document.getElementById("subjectColor");
 const subjectFormTitle = document.getElementById("subjectFormTitle");
+const subjectPlanHint = document.getElementById("subjectPlanHint");
 const btnSubjectSave = document.getElementById("btnSubjectSave");
 const btnSubjectReset = document.getElementById("btnSubjectReset");
+
+function resolvedCareerFromProfile(){
+  if (plannerCareer && plannerCareer.slug) return plannerCareer;
+  if (userProfile && userProfile.careerSlug){
+    return { slug: userProfile.careerSlug, name: userProfile.career || userProfile.careerSlug };
+  }
+  if (userProfile && userProfile.career){
+    const plan = findPlanByName(userProfile.career);
+    if (plan) return { slug: plan.slug, name: plan.nombre };
+  }
+  return { slug:"", name:"" };
+}
+
+function updateSubjectPlanHint(){
+  if (!subjectPlanHint) return;
+  if (!plannerCareer || !plannerCareer.slug){
+    subjectPlanHint.textContent = "Seleccioná una carrera para ver sus materias.";
+    return;
+  }
+  const count = careerSubjects.length;
+  subjectPlanHint.textContent = `Materias de ${plannerCareer.name || "la carrera"} (${count}).`;
+}
+
+function renderSubjectCareerOptions(){
+  if (!subjectCareerSelect) return;
+  subjectCareerSelect.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Seleccioná una carrera";
+  placeholder.disabled = true;
+  subjectCareerSelect.appendChild(placeholder);
+
+  const sorted = Array.from(careerPlans || []).sort((a,b)=> normalizeStr(a.nombre) < normalizeStr(b.nombre) ? -1 : 1);
+  sorted.forEach(plan => {
+    const opt = document.createElement("option");
+    opt.value = plan.slug;
+    opt.textContent = plan.nombre;
+    subjectCareerSelect.appendChild(opt);
+  });
+
+  const resolved = resolvedCareerFromProfile();
+  const target = resolved.slug || "";
+  if (target){
+    subjectCareerSelect.value = target;
+    if (!plannerCareer.slug) plannerCareer = { slug: target, name: resolved.name };
+  } else {
+    placeholder.selected = true;
+  }
+}
+
+async function setActiveCareer(slug, persist){
+  if (!slug){
+    plannerCareer = { slug:"", name:"" };
+    careerSubjects = [];
+    renderSubjectNameOptions();
+    updateSubjectPlanHint();
+    return;
+  }
+  const plan = (careerPlans || []).find(p => p.slug === slug);
+  plannerCareer = { slug, name: plan?.nombre || slug };
+  try{
+    const data = await getPlanWithSubjects(slug);
+    careerSubjects = Array.isArray(data.subjects) ? data.subjects : [];
+  }catch(_){
+    careerSubjects = [];
+    notifyWarn("No se pudieron cargar las materias de la carrera.");
+  }
+  renderSubjectNameOptions();
+  updateSubjectPlanHint();
+  if (persist && currentUser){
+    await setDoc(doc(db, "planner", currentUser.uid), { subjectCareer: plannerCareer }, { merge:true });
+  }
+}
+
+function renderSubjectNameOptions(selectedName=""){
+  if (!subjectNameSelect) return;
+  subjectNameSelect.innerHTML = "";
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = plannerCareer?.slug ? "Seleccioná una materia" : "Seleccioná una carrera primero";
+  placeholder.disabled = true;
+  subjectNameSelect.appendChild(placeholder);
+
+  const planSubjects = Array.isArray(careerSubjects) ? careerSubjects.map(s => ({
+    name: s.nombre || s.name || s.id || "Materia",
+    semester: s.semestre || s.semester || 0
+  })) : [];
+
+  if (plannerCareer?.slug && planSubjects.length){
+    const group = document.createElement("optgroup");
+    group.label = `Materias de ${plannerCareer.name || "la carrera"}`;
+    planSubjects.sort((a,b)=>{
+      if (a.semester !== b.semester) return (a.semester || 0) - (b.semester || 0);
+      return normalizeStr(a.name) < normalizeStr(b.name) ? -1 : 1;
+    }).forEach(item => {
+      const opt = document.createElement("option");
+      opt.value = item.name;
+      opt.textContent = item.semester ? `S${item.semester} · ${item.name}` : item.name;
+      group.appendChild(opt);
+    });
+    subjectNameSelect.appendChild(group);
+  }
+
+  const existing = subjects
+    .map(s => s.name)
+    .filter(name => name)
+    .filter(name => !planSubjects.some(ps => normalizeStr(ps.name) === normalizeStr(name)));
+
+  if (existing.length){
+    const group = document.createElement("optgroup");
+    group.label = "Materias existentes";
+    existing.sort((a,b)=> normalizeStr(a) < normalizeStr(b) ? -1 : 1).forEach(name => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      group.appendChild(opt);
+    });
+    subjectNameSelect.appendChild(group);
+  }
+
+  if (selectedName){
+    subjectNameSelect.value = selectedName;
+  } else {
+    placeholder.selected = true;
+  }
+}
+
+async function initSubjectsCareerUI(){
+  renderSubjectCareerOptions();
+  const slug = subjectCareerSelect?.value || "";
+  if (slug){
+    await setActiveCareer(slug, false);
+  } else {
+    renderSubjectNameOptions();
+    updateSubjectPlanHint();
+  }
+}
+
+if (subjectCareerSelect){
+  subjectCareerSelect.addEventListener("change", async (e)=>{
+    const slug = e.target.value;
+    await setActiveCareer(slug, true);
+  });
+}
 
 function renderSubjectsList(){
   subjectsListEl.innerHTML = "";
@@ -798,24 +1108,24 @@ function renderSubjectsList(){
 function startEditSubject(index){
   editingSubjectIndex = index;
   const s = subjects[index];
-  subjectNameInput.value = s.name;
+  renderSubjectNameOptions(s.name);
   subjectColorInput.value = s.color || defaultSubjectColor();
   subjectFormTitle.textContent = "Editar materia";
 }
 
 btnSubjectReset.onclick = () => {
   editingSubjectIndex = -1;
-  subjectNameInput.value = "";
+  renderSubjectNameOptions();
   subjectColorInput.value = defaultSubjectColor();
   subjectFormTitle.textContent = "Nueva materia";
 };
 
 btnSubjectSave.onclick = async () => {
   if (!currentUser) return;
-  const name = subjectNameInput.value.trim();
+  const name = (subjectNameSelect?.value || "").trim();
   const color = subjectColorInput.value || defaultSubjectColor();
   if (!name){
-    notifyWarn("Ingresá un nombre para la materia.");
+    notifyWarn("Seleccioná una materia.");
     return;
   }
 
@@ -826,6 +1136,10 @@ btnSubjectSave.onclick = async () => {
     }
     subjects.push({ name, color });
   } else {
+    if (subjects.some((s, i) => i !== editingSubjectIndex && s.name.toLowerCase() === name.toLowerCase())){
+      notifyWarn("Ya existe una materia con ese nombre.");
+      return;
+    }
     const oldName = subjects[editingSubjectIndex].name;
     subjects[editingSubjectIndex] = { name, color };
 
@@ -852,17 +1166,19 @@ btnSubjectSave.onclick = async () => {
   const snap = await getDoc(ref);
   let data = snap.exists() ? snap.data() : {};
   data.subjects = subjects;
+  if (plannerCareer && plannerCareer.slug) data.subjectCareer = plannerCareer;
   data.estudios = estudiosCache;
   data.agenda = agendaData;
   data.academico = academicoCache;
   await setDoc(ref, data);
 
   editingSubjectIndex = -1;
-  subjectNameInput.value = "";
+  renderSubjectNameOptions();
   subjectColorInput.value = defaultSubjectColor();
   subjectFormTitle.textContent = "Nueva materia";
 
   renderSubjectsList();
+  renderSubjectNameOptions();
   renderSubjectsOptions();
   paintStudyEvents();
   renderAgenda();
@@ -909,17 +1225,19 @@ async function deleteSubject(index){
   const snap = await getDoc(ref);
   let data = snap.exists() ? snap.data() : {};
   data.subjects = subjects;
+  if (plannerCareer && plannerCareer.slug) data.subjectCareer = plannerCareer;
   data.estudios = estudiosCache;
   data.agenda = agendaData;
   data.academico = academicoCache;
   await setDoc(ref, data);
 
   editingSubjectIndex = -1;
-  subjectNameInput.value = "";
+  renderSubjectNameOptions();
   subjectColorInput.value = defaultSubjectColor();
   subjectFormTitle.textContent = "Nueva materia";
 
   renderSubjectsList();
+  renderSubjectNameOptions();
   renderSubjectsOptions();
   paintStudyEvents();
   renderAgenda();
