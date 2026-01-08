@@ -82,8 +82,8 @@ button{
   box-shadow:0 10px 24px var(--shadow-color-soft);
 }
 .btn-outline:hover{ border-color:rgba(var(--color-accent-rgb),.85); }
-.btn-danger{ background:var(--color-danger); color:var(--color-text-contrast); box-shadow:0 8px 20px rgba(var(--color-danger-rgb),.35); }
-.btn-small{ padding:.24rem .68rem; font-size:.8rem; border-radius:10px; }
+.btn-danger{ background:var(--color-danger); color:var(--color-text-contrast);}
+.btn-small{ padding:.24rem .68rem; font-size:.8rem; border-radius:10px;box-shadow: none; }
 
 .section-label{
   display:inline-flex;
@@ -375,6 +375,7 @@ button{
       color:var(--color-text);
       box-shadow:inset 0 1px 0 var(--glass-soft);
       font-size:.95rem;
+      box-sizing: border-box;
     }
     .modal textarea{ min-height:90px; resize:vertical; }
     .pwd-wrap{ position:relative; }

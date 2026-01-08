@@ -1,3 +1,8 @@
+/*
+ Color verdeFacultad
+rgb(43, 105, 96)
+*/
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600&display=swap');
 :root{
   --shadow: var(--shadow-strong);
