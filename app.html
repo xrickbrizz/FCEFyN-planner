@@ -11,10 +11,10 @@
 <body>
   <header>
     <div class="brand">
-      <div class="logo"></div>
+      <img class="logo" src="assets/fcefyn-logo.svg" alt="Logo FCEFyN" />
       <div class="brand-txt">
         <div class="brand-title">FCEFyN Planner</div>
-        <div class="brand-sub">Ingresá para usar Agenda, Estudio, Académico y Presets</div>
+        <div class="brand-sub">Organizá tu cursado, horarios y estudio en un solo lugar</div>
       </div>
     </div>
 
@@ -22,7 +22,7 @@
       <a class="btn btn-outline" href="plans_index.html" title="Abrir Plan de Estudios">
         Plan de estudios
       </a>
-      <div class="pill" id="pillFirebase"><span class="dot warn" id="dotFirebase"></span><span id="firebaseLabel">Firebase Auth + Firestore</span></div>
+      <div class="pill" id="pillFirebase"><span class="dot warn" id="dotFirebase"></span><span id="firebaseLabel">Estado del servicio</span></div>
       <div class="pill" id="pillClock">—</div>
     </div>
   </header>
@@ -31,10 +31,10 @@
     <div class="hero-grid">
       <section class="card card-hero">
         <div class="eyebrow">Planner académico — FCEFyN</div>
-        <h1 class="hero-title">Una puerta de entrada profesional a tu cuatri.</h1>
+        <h1 class="hero-title">Tu espacio para planificar el cuatrimestre.</h1>
         <p class="hero-sub">
-          Armá horarios por comisión, guardá presets, registrá estudio y mantené parciales/TPs/tareas sin estrés.
-          Todo en un entorno oscuro, moderno y listo para tus materias.
+          Armá horarios por comisión, registrá tu estudio y llevá el seguimiento de parciales, TPs y tareas
+          con una vista clara de todo lo que necesitas para tus materias.
         </p>
 
         <div class="highlight-row">
@@ -45,8 +45,8 @@
           </div>
           <div class="chips-row">
             <span class="chip">Modo oscuro</span>
-            <span class="chip">Firebase Auth + Firestore</span>
-            <span class="chip">Roles Admin / Estudiante</span>
+            <span class="chip">Tus materias al día</span>
+            <span class="chip">Planificación simple</span>
           </div>
         </div>
 
@@ -83,9 +83,9 @@
 
         <div class="metric-row">
           <div class="metric-card">
-            <div class="metric-label">Ingreso rápido</div>
-            <div class="metric-value">Dashboard directo</div>
-            <div class="metric-sub">Redirección automática según rol.</div>
+            <div class="metric-label">Acceso directo</div>
+            <div class="metric-value">Tu semana en orden</div>
+            <div class="metric-sub">Entrá y empezá a organizar tu cursado.</div>
           </div>
           <div class="metric-card">
             <div class="metric-label">Carreras</div>
@@ -94,23 +94,22 @@
           </div>
           <div class="metric-card">
             <div class="metric-label">Experiencia</div>
-            <div class="metric-value">UI pulida</div>
-            <div class="metric-sub">Espaciados, tipografía y feedback moderno.</div>
+            <div class="metric-value">Diseño claro</div>
+            <div class="metric-sub">Información simple para enfocarte en estudiar.</div>
           </div>
         </div>
 
         <div class="footer-note">
-          <div><strong>Registro</strong>: usá tu correo <strong>@mi.unc.edu.ar</strong>. Admin va directo al panel.</div>
-          <div>Proyecto: fcefyn-planner</div>
+          <div><strong>Registro</strong>: usá tu correo <strong>@mi.unc.edu.ar</strong> para crear tu cuenta.</div>
         </div>
       </section>
 
       <section class="card card-auth">
         <div class="auth-top">
           <div>
-            <div class="eyebrow">Acceso seguro</div>
+            <div class="eyebrow">Bienvenido/a</div>
             <h2 class="auth-title">Ingresá o creá tu cuenta</h2>
-            <p class="auth-sub">Un sólo acceso para estudiante o administrador.</p>
+            <p class="auth-sub">Accedé para planificar tu cursado en segundos.</p>
           </div>
 
           <div class="segmented">
@@ -120,8 +119,8 @@
         </div>
 
         <div class="auth-hint-row">
-          <div class="auth-pill">Redirección automática a tu panel</div>
-          <div class="auth-pill ghost" id="authHint">Entrás al panel correcto según tu rol</div>
+          <div class="auth-pill">Todo listo para empezar</div>
+          <div class="auth-pill ghost" id="authHint">Organizá horarios, estudio y parciales desde el inicio</div>
         </div>
 
         <div id="authForm" class="auth-form">
