@@ -461,7 +461,7 @@
       clearMsg();
       const emailOrDoc = (document.getElementById("inpEmail").value || "").trim();
       if (!emailOrDoc){
-        setMsg("Escribí tu correo o documento para enviarte el enlace de recuperación.", true);
+        setMsg("Ingresá tu correo o documento para enviarte el enlace de recuperación.", true);
         return;
       }
       let targetEmail = emailOrDoc;
@@ -470,12 +470,17 @@
       }
       if (targetEmail) targetEmail = targetEmail.toLowerCase();
       if (!targetEmail){
-        setMsg("No encontramos una cuenta con esos datos. Probá con tu correo institucional.", true);
+        setMsg("No encontramos una cuenta con esos datos. Probá con tu correo institucional o verificá el documento.", true);
         return;
       }
       try{
         await sendPasswordResetEmail(auth, targetEmail);
-        setMsg("Listo: te envié un mail para recuperar la contraseña (revisá spam).", false);
+        setMsg(
+          "Te enviamos un correo de recuperación a <strong>" + targetEmail + "</strong>." +
+          "<br>Recibís este mensaje porque se solicitó restablecer la contraseña de tu cuenta." +
+          "<br>Si no fuiste vos, podés ignorarlo con tranquilidad." +
+          "<br>Tip: revisá la carpeta de spam o promociones."
+        , false);
       }catch(e){
         setMsg("Error: " + ((e && e.message) ? e.message : String(e)), true);
       }
