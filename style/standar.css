@@ -16,9 +16,7 @@ body{
   margin:0;
   color:var(--color-text);
   font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background:
-    var(--hero-sheen),
-    linear-gradient(180deg, rgba(var(--color-primary-rgb),0.92), var(--color-surface));
+  background:var(--page-gradient);
 }
 
 header{
@@ -27,8 +25,8 @@ header{
   justify-content:space-between;
   align-items:center;
   gap:1rem;
-  background:linear-gradient(120deg, rgba(var(--color-primary-rgb),0.92), rgba(var(--color-primary-rgb),0.88));
-  border-bottom:1px solid rgba(var(--color-border-rgb),.65);
+  background:linear-gradient(120deg, rgba(255,255,255,0.95), rgba(var(--color-primary-rgb),0.55));
+  border-bottom:1px solid rgba(var(--color-border-rgb),.75);
   box-shadow:0 10px 30px var(--shadow-soft);
   backdrop-filter: blur(10px);
 }

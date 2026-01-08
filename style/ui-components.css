@@ -17,7 +17,7 @@
 /* ---------- Quick sidebar ---------- */
 .quick-sidebar{
   max-width: 236px;
-  background: linear-gradient(180deg, rgba(var(--color-primary-rgb),.94), rgba(var(--color-primary-rgb),.96));
+  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(var(--color-primary-rgb),0.5));
   border: 1px solid var(--ui-border);
   border-radius: 16px;
   padding: 0.9rem;
@@ -76,7 +76,7 @@
   gap:.6rem;
   padding:.6rem .75rem;
   border-radius:12px;
-  background:var(--glass-faint);
+  background:var(--glass-strong);
   border:1px solid transparent;
   cursor:pointer;
   transition:all .14s ease;
@@ -96,7 +96,7 @@
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  background:var(--glass-soft);
+  background:rgba(var(--color-primary-rgb),0.45);
   color:var(--ui-text);
   font-size:.95rem;
 }
@@ -148,7 +148,7 @@
   padding:.55rem .85rem;
   border-radius:12px;
   border:1px solid var(--ui-border);
-  background:var(--glass-faint);
+  background:var(--glass-strong);
   color:var(--ui-text);
   font-weight:700;
   letter-spacing:.1px;
