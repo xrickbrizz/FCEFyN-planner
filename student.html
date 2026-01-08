@@ -182,22 +182,40 @@
     <div id="tab-materias" class="tab-card" style="display:none;">
       <div class="subjects-layout">
         <div class="subjects-list-box">
-          <strong>Materias creadas</strong>
-          <div id="subjectsList" style="margin-top:.5rem;"></div>
-          <div id="subjectsEmptyMsg" style="font-size:.85rem;color:var(--color-muted-2);display:none;margin-top:.4rem;">
-            No hay materias. Creá una materia en el formulario de la derecha.
+          <div class="subjects-list-header">
+            <div>
+              <strong>Materias creadas</strong>
+              <div class="small-muted">Organizá tus materias con color para identificarlas rápido.</div>
+            </div>
+          </div>
+          <div id="subjectsList" class="subjects-list"></div>
+          <div id="subjectsEmptyMsg" class="subjects-empty-msg" style="display:none;">
+            Todavía no tenés materias. Creá tu primera materia desde el formulario.
           </div>
         </div>
         <div class="subject-form-box">
-          <strong id="subjectFormTitle">Nueva materia</strong>
-          <input id="subjectName" placeholder="Nombre de la materia" />
-          <label style="font-size:.8rem;color:var(--color-muted-2);">Color</label>
-          <input id="subjectColor" type="color" value="#E6D98C" />
-          <div style="margin-top:.6rem;display:flex;gap:.5rem;justify-content:flex-end;">
+          <div class="subject-form-header">
+            <div>
+              <strong id="subjectFormTitle">Nueva materia</strong>
+              <div class="small-muted">Completá los datos y guardá los cambios.</div>
+            </div>
+          </div>
+          <div class="subject-form-field">
+            <label>Nombre de la materia</label>
+            <input id="subjectName" placeholder="Ej: Física II" />
+          </div>
+          <div class="subject-form-field">
+            <label>Color identificatorio</label>
+            <div class="subject-color-row">
+              <input id="subjectColor" type="color" value="#E6D98C" />
+              <span class="small-muted">Se usará en Agenda, Estudio y Académico.</span>
+            </div>
+          </div>
+          <div class="subject-form-actions">
             <button class="btn-gray btn-small" id="btnSubjectReset">Limpiar</button>
             <button class="btn-blue btn-small" id="btnSubjectSave">Guardar</button>
           </div>
-          <p style="margin-top:.6rem;font-size:.8rem;color:var(--color-muted-2);">
+          <p class="subject-form-note">
             Al editar una materia se actualizará su nombre también en el calendario de estudio y en la agenda.
             Al borrar una materia podés elegir si se eliminan también sus clases y registros de estudio.
           </p>
