@@ -3,8 +3,6 @@
 rgb(43, 105, 96)
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600&display=swap');
-
 /* =========================================================
    Base
    ========================================================= */
@@ -17,16 +15,6 @@ rgb(43, 105, 96)
   --surface-strong: rgba(var(--color-primary-rgb),0.35);
   --surface-muted: rgba(var(--color-primary-rgb),0.18);
 }
-*{box-sizing:border-box;}
-
-body{
-  margin:0;
-  font-family: var(--font-base);
-  background:var(--page-gradient);
-  color:var(--color-text);
-  min-height:100vh;
-}
-
 /* =========================================================
    Layout
    ========================================================= */
