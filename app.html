@@ -10,8 +10,8 @@
 </head>
 <body>
   <header>
-    <div class="brand">
-      <img class="logo" src="assets/fcefyn-logo.svg" alt="Logo FCEFyN" />
+      <div class="brand">
+      <img class="logo" src="assets/fcefyn-logo.svg" alt="Logo FCEFyN" id="logoFcefyn" style="cursor: pointer"/>
       <div class="brand-txt">
         <div class="brand-title">FCEFyN Planner</div>
         <div class="brand-sub">Organizá tu cursado, horarios y estudio en un solo lugar</div>
@@ -188,6 +188,8 @@
       </section>
     </div>
   </div>
+    <footer>
+  </footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
@@ -502,6 +504,17 @@
     // default mode
     loadCareerOptions();
     setMode("login");
+    function linkLogo(){
+      const aulaVirtual = 'https://fcefyn.aulavirtual.unc.edu.ar' ;
+      window.location.href = aulaVirtual
+    }
+    document.addEventListener('DOMContentLoaded', ()=>{
+    const logo =document.getElementById("logoFcefyn");
+    if(logo){
+      logo.addEventListener('click',linkLogo)
+    }
+    })
+  
   </script>
 </body>
 </html>
