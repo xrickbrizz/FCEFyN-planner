@@ -1,4 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600&display=swap');
+
+/* =========================================================
+   Base
+   ========================================================= */
 :root{
   --hero-sheen: radial-gradient(1200px 700px at 18% 0%, rgba(var(--color-accent-rgb),0.18), transparent 55%), radial-gradient(900px 600px at 85% 15%, rgba(var(--color-accent-rgb),0.12), transparent 55%);
   --card-layer: linear-gradient(180deg, rgba(var(--color-primary-rgb),0.12), rgba(var(--color-surface-rgb),0.9));
@@ -15,10 +19,13 @@ html,body{height:100%}
 body{
   margin:0;
   color:var(--color-text);
-  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family: var(--font-base);
   background:var(--page-gradient);
 }
 
+/* =========================================================
+   Layout
+   ========================================================= */
 header{
   padding:1rem 1.25rem;
   display:flex;
@@ -51,14 +58,14 @@ footer{
   width: 30%;
   flex:0 0 auto;
   filter: drop-shadow(0 10px 18px rgba(var(--color-primary-rgb),.18));
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-base);
 }
 .logo:hover {
   transform: scale(1.05); /* El logo crece apenas un poquito al pasar el mouse */
   filter: brightness(1.1);
 }
 .brand-txt{ display:flex; flex-direction:column; gap:.12rem; min-width:0; }
-.brand-title{ font-family:"Space Grotesk","Inter",system-ui; font-weight:800; letter-spacing:.3px; font-size:1.12rem; }
+.brand-title{ font-family:var(--font-display); font-weight:800; letter-spacing:.3px; font-size:1.12rem; }
 .brand-sub{ color:var(--color-muted-2); font-size:.86rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 .hdr-right{
@@ -73,7 +80,7 @@ footer{
   align-items:center;
   gap:.45rem;
   padding:.42rem .7rem;
-  border-radius:999px;
+  border-radius:var(--radius-pill);
   background:var(--pill-bg);
   border:1px solid var(--pill-border);
   color:var(--text-subtle);
@@ -89,13 +96,13 @@ footer{
 .dot.warn{ background:var(--color-warn); box-shadow:0 0 0 3px rgba(var(--color-accent-rgb),.18); }
 .btn{
   border:none;
-  border-radius:12px;
+  border-radius:var(--radius-md);
   padding:.58rem 1rem;
   cursor:pointer;
   font-weight:700;
   font-size:.92rem;
   user-select:none;
-  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease, border-color .12s ease;
+  transition: transform var(--transition-fast), filter var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
   text-decoration:none;
   display:inline-flex;
   align-items:center;
@@ -134,7 +141,7 @@ footer{
 .card{
   background: var(--card-gradient);
   border:1px solid rgba(var(--color-border-rgb),.3);
-  border-radius:18px;
+  border-radius:var(--radius-2xl);
   box-shadow: var(--shadow-strong);
   padding:1.2rem;
   overflow:hidden;
@@ -211,7 +218,7 @@ footer{
 }
 .chip{
   padding:.35rem .7rem;
-  border-radius:999px;
+  border-radius:var(--radius-pill);
   background:var(--chip-bg);
   border:1px solid var(--chip-border);
   color:var(--color-text);
@@ -228,7 +235,7 @@ footer{
 .feat{
   background:rgba(var(--color-surface-rgb),0.9);
   border:1px solid rgba(var(--color-border-rgb),.85);
-  border-radius:14px;
+  border-radius:var(--radius-lg);
   padding:.75rem .8rem;
   display:flex;
   gap:.7rem;
@@ -236,7 +243,7 @@ footer{
   box-shadow:0 12px 34px var(--shadow-soft);
 }
 .feat-ico{
-  width:34px;height:34px;border-radius:12px;
+  width:34px;height:34px;border-radius:var(--radius-md);
   background:linear-gradient(135deg, rgba(var(--color-accent-rgb),.45), rgba(var(--color-primary-rgb),.4));
   border:1px solid rgba(var(--color-accent-rgb),.35);
   display:flex;align-items:center;justify-content:center;
@@ -255,7 +262,7 @@ footer{
 .metric-card{
   background:rgba(var(--color-surface-rgb),0.92);
   border:1px solid rgba(var(--color-border-rgb),.32);
-  border-radius:14px;
+  border-radius:var(--radius-lg);
   padding:.7rem .75rem;
   box-shadow:0 12px 30px var(--shadow-soft);
 }
@@ -289,7 +296,7 @@ footer{
       display:inline-flex;
       gap:.35rem;
       padding:.35rem;
-      border-radius:999px;
+      border-radius:var(--radius-pill);
       background:rgba(var(--color-primary-rgb),.08);
       border:1px solid rgba(var(--color-border-rgb),.85);
     }
@@ -298,7 +305,7 @@ footer{
       background:transparent;
       color:var(--color-text);
       padding:.42rem .75rem;
-      border-radius:999px;
+      border-radius:var(--radius-pill);
       cursor:pointer;
       font-weight:800;
       font-size:.85rem;
@@ -322,7 +329,7 @@ footer{
     }
     .auth-pill{
       padding:.38rem .65rem;
-      border-radius:999px;
+      border-radius:var(--radius-pill);
       border:1px solid rgba(var(--color-border-rgb),.8);
       background:var(--glass-faint);
       color:var(--color-text);
@@ -350,7 +357,7 @@ footer{
     input, select{
       width:100%;
       padding:.62rem .7rem;
-      border-radius:12px;
+      border-radius:var(--radius-md);
       border:1px solid rgba(var(--color-border-rgb),.9);
       background:rgba(var(--color-surface-rgb),.9);
       color:var(--color-text);
@@ -404,7 +411,7 @@ footer{
       border:1px solid rgba(var(--color-border-rgb),.9);
       background:var(--glass-soft);
       color:var(--color-text);
-      border-radius:999px;
+      border-radius:var(--radius-pill);
       padding:.18rem .55rem;
       cursor:pointer;
       font-weight:800;
@@ -415,7 +422,7 @@ footer{
     .notice{
       margin-top:.4rem;
       padding:.7rem .8rem;
-      border-radius:14px;
+      border-radius:var(--radius-lg);
       border:1px dashed rgba(var(--color-border-rgb),.85);
       background:rgba(var(--color-surface-rgb),.8);
       color:var(--color-text);

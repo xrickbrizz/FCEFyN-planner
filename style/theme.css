@@ -1,4 +1,25 @@
 :root{
+  --font-base: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 18px;
+  --radius-pill: 999px;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+
+  --transition-fast: 0.12s ease;
+  --transition-base: 0.2s ease;
+
   --color-primary: #e5efee;
   --color-primary-strong: #2a4a4f;
   --color-primary-soft: #d2e1de;
@@ -31,6 +52,9 @@
   --shadow-strong: 0 18px 50px rgba(31,46,49,0.16);
   --shadow-soft: 0 12px 32px rgba(31,46,49,0.12);
   --shadow-inset: inset 0 1px 0 rgba(255,255,255,0.65);
+  --shadow-color-strong: rgba(var(--color-text-rgb),0.18);
+  --shadow-color-soft: rgba(var(--color-text-rgb),0.12);
+  --shadow-color-deep: rgba(var(--color-text-rgb),0.24);
 
   --glass-strong: rgba(255,255,255,0.75);
   --glass-soft: rgba(255,255,255,0.5);
@@ -71,7 +95,8 @@
   --warn: var(--color-warn);
 }
 
-body.dark-mode{
+body.dark-mode,
+body[data-theme="dark"]{
   --color-primary: #0F1819;
   --color-primary-strong: #0A1213;
   --color-primary-soft: #1A2A2A;
@@ -104,6 +129,9 @@ body.dark-mode{
   --shadow-strong: 0 18px 55px rgba(0,0,0,0.55);
   --shadow-soft: 0 12px 32px rgba(0,0,0,0.4);
   --shadow-inset: inset 0 1px 0 rgba(255,255,255,0.08);
+  --shadow-color-strong: rgba(0,0,0,0.5);
+  --shadow-color-soft: rgba(0,0,0,0.35);
+  --shadow-color-deep: rgba(0,0,0,0.6);
 
   --glass-strong: rgba(255,255,255,0.08);
   --glass-soft: rgba(255,255,255,0.05);
@@ -120,7 +148,8 @@ body.dark-mode{
   color-scheme: dark;
 }
 
-body.light-mode{
+body.light-mode,
+body[data-theme="light"]{
   color-scheme: light;
 }
 
@@ -135,13 +164,13 @@ body{
   align-items:center;
   gap:.4rem;
   padding:.5rem .8rem;
-  border-radius:12px;
+  border-radius:var(--radius-md);
   border:1px solid var(--color-border);
   background: linear-gradient(145deg, rgba(var(--color-primary-rgb),0.08), rgba(var(--color-accent-rgb),0.18));
   color:var(--color-text);
   font-weight:700;
   cursor:pointer;
-  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+  transition: transform var(--transition-fast), filter var(--transition-fast), box-shadow var(--transition-fast);
   box-shadow: var(--shadow-soft);
 }
 .theme-toggle:hover{ transform:translateY(-1px); filter:brightness(1.04); }

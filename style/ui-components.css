@@ -1,3 +1,6 @@
+/* =========================================================
+   Base
+   ========================================================= */
 :root{
   --ui-surface: var(--color-surface-2);
   --ui-surface-2: var(--color-surface-3);
@@ -14,12 +17,15 @@
   --ui-glass: var(--glass-faint);
 }
 
+/* =========================================================
+   Layout
+   ========================================================= */
 /* ---------- Quick sidebar ---------- */
 .quick-sidebar{
   max-width: 236px;
   background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(var(--color-primary-rgb),0.5));
   border: 1px solid var(--ui-border);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   padding: 0.9rem;
   box-shadow: var(--ui-shadow);
   position: sticky;
@@ -42,7 +48,7 @@
 .quick-sidebar.collapsed .qs-item{
   justify-content:center;
   padding: .55rem .6rem;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 .quick-sidebar.collapsed .qs-item .qs-ico{
   margin:0;
@@ -75,7 +81,7 @@
   justify-content:space-between;
   gap:.6rem;
   padding:.6rem .75rem;
-  border-radius:12px;
+  border-radius:var(--radius-md);
   background:var(--glass-strong);
   border:1px solid transparent;
   cursor:pointer;
@@ -92,7 +98,7 @@
 }
 .quick-sidebar .qs-ico{
   width:26px; height:26px;
-  border-radius:10px;
+  border-radius:var(--radius-sm);
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -103,7 +109,7 @@
 .quick-sidebar .qs-pill{
   font-size:.72rem;
   padding:.2rem .5rem;
-  border-radius:999px;
+  border-radius:var(--radius-pill);
   background:var(--glass-strong);
   color:var(--ui-muted);
 }
@@ -146,7 +152,7 @@
   display:inline-flex;
   align-self:flex-start;
   padding:.55rem .85rem;
-  border-radius:12px;
+  border-radius:var(--radius-md);
   border:1px solid var(--ui-border);
   background:var(--glass-strong);
   color:var(--ui-text);
@@ -223,7 +229,7 @@
   background: var(--ui-surface);
   border:1px solid var(--ui-border);
   border-left:3px solid var(--ui-accent);
-  border-radius:14px;
+  border-radius:var(--radius-lg);
   padding:.85rem .95rem;
   box-shadow: var(--ui-shadow);
   display:flex;
@@ -237,7 +243,7 @@
 .toast-card.error{ border-left-color: var(--ui-danger); }
 .toast-card.warning{ border-left-color: var(--ui-warn); }
 .toast-card .toast-ico{
-  width:32px; height:32px; border-radius:12px;
+  width:32px; height:32px; border-radius:var(--radius-md);
   display:flex; align-items:center; justify-content:center;
   background:var(--glass-soft);
   font-weight:800;
@@ -264,7 +270,7 @@
 }
 .toast-btn{
   padding:.45rem .75rem;
-  border-radius:10px;
+  border-radius:var(--radius-sm);
   border:1px solid var(--ui-border);
   background:var(--ui-glass);
   color:var(--ui-text);
@@ -286,7 +292,7 @@
   border:none;
   background:var(--glass-soft);
   color:var(--ui-muted);
-  border-radius:8px;
+  border-radius:var(--radius-xs);
   width:26px; height:26px;
   cursor:pointer;
   font-weight:800;
@@ -308,7 +314,7 @@
   max-width:100%;
   background:linear-gradient(180deg, rgba(var(--color-primary-rgb),.98), rgba(var(--color-primary-rgb),.98));
   border:1px solid var(--ui-border-strong);
-  border-radius:16px;
+  border-radius:var(--radius-xl);
   box-shadow:0 18px 50px var(--shadow-color-deep);
   padding:1rem 1.1rem 1.15rem;
 }
@@ -335,7 +341,7 @@
 .dialog-input input{
   width:100%;
   padding:.6rem .75rem;
-  border-radius:12px;
+  border-radius:var(--radius-md);
   border:1px solid var(--ui-border-strong);
   background:var(--glass-faint);
   color:var(--ui-text);
@@ -354,7 +360,7 @@
 }
 .dialog-btn{
   padding:.55rem .9rem;
-  border-radius:12px;
+  border-radius:var(--radius-md);
   border:1px solid var(--ui-border);
   background:var(--ui-glass);
   color:var(--ui-text);
