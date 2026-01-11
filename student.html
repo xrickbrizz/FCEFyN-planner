@@ -211,8 +211,26 @@
           <div class="subject-form-field">
             <label>Color identificatorio</label>
             <div class="subject-color-row">
-              <input id="subjectColor" type="color" value="#E6D98C" />
+              <div class="subject-color-palette" id="subjectColorPalette">
+                <button class="subject-color-swatch" type="button" data-color="#E6D98C" aria-label="Color dorado suave"></button>
+                <button class="subject-color-swatch" type="button" data-color="#F2A65A" aria-label="Color ámbar"></button>
+                <button class="subject-color-swatch" type="button" data-color="#EF6F6C" aria-label="Color coral"></button>
+                <button class="subject-color-swatch" type="button" data-color="#E377C2" aria-label="Color magenta"></button>
+                <button class="subject-color-swatch" type="button" data-color="#8A7FF0" aria-label="Color violeta"></button>
+                <button class="subject-color-swatch" type="button" data-color="#4C7DFF" aria-label="Color azul"></button>
+                <button class="subject-color-swatch" type="button" data-color="#2EC4B6" aria-label="Color turquesa"></button>
+                <button class="subject-color-swatch" type="button" data-color="#34C759" aria-label="Color verde"></button>
+                <button class="subject-color-swatch" type="button" data-color="#A0AEC0" aria-label="Color gris"></button>
+                <button class="subject-color-swatch subject-color-swatch--custom" type="button" id="subjectColorCustomBtn" aria-label="Elegir un color personalizado">
+                  <span class="subject-color-swatch__custom" id="subjectColorCustomPreview" aria-hidden="true"></span>
+                </button>
+              </div>
+              <input id="subjectColor" type="color" value="#E6D98C" class="subject-color-input" aria-label="Selector de color personalizado" />
               <span class="small-muted">Se usará en Agenda, Estudio y Académico.</span>
+            </div>
+            <div class="subject-color-manual">
+              <input id="subjectColorText" type="text" class="subject-color-text" placeholder="#AABBCC o rgb(34, 123, 200)" autocomplete="off" />
+              <small class="subject-color-hint" id="subjectColorHint">Podés pegar un color manualmente si lo preferís.</small>
             </div>
           </div>
           <div class="subject-form-actions">

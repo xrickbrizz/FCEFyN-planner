@@ -371,6 +371,8 @@ onAuthStateChanged(auth, async user => {
   renderSubjectsList();
   renderSubjectsOptions();
   await initSubjectsCareerUI();
+  initSubjectColorPalette();
+  updateSubjectColorUI(subjectColorInput?.value || defaultSubjectColor());
   renderProfileSection();
   renderAgenda();
 
@@ -911,10 +913,103 @@ const subjectsEmptyMsg = document.getElementById("subjectsEmptyMsg");
 const subjectCareerSelect = document.getElementById("subjectCareer");
 const subjectNameSelect = document.getElementById("subjectNameSelect");
 const subjectColorInput = document.getElementById("subjectColor");
+const subjectColorPalette = document.getElementById("subjectColorPalette");
+const subjectColorCustomBtn = document.getElementById("subjectColorCustomBtn");
+const subjectColorCustomPreview = document.getElementById("subjectColorCustomPreview");
+const subjectColorText = document.getElementById("subjectColorText");
+const subjectColorHint = document.getElementById("subjectColorHint");
 const subjectFormTitle = document.getElementById("subjectFormTitle");
 const subjectPlanHint = document.getElementById("subjectPlanHint");
 const btnSubjectSave = document.getElementById("btnSubjectSave");
 const btnSubjectReset = document.getElementById("btnSubjectReset");
+const subjectColorCanvas = document.createElement("canvas");
+const subjectColorCtx = subjectColorCanvas.getContext("2d");
+
+function cssColorToHex(color){
+  if (!subjectColorCtx) return "";
+  subjectColorCtx.fillStyle = "#000";
+  subjectColorCtx.fillStyle = color;
+  const computed = subjectColorCtx.fillStyle;
+  if (computed.startsWith("#")) return computed.toUpperCase();
+  const match = computed.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+  if (!match) return "";
+  const toHex = (val) => Number.parseInt(val, 10).toString(16).padStart(2, "0");
+  return ("#" + toHex(match[1]) + toHex(match[2]) + toHex(match[3])).toUpperCase();
+}
+
+function isValidCssColor(value){
+  if (!value) return false;
+  if (window.CSS && CSS.supports) return CSS.supports("color", value);
+  return /^#([0-9a-f]{3}){1,2}$/i.test(value);
+}
+
+function updateSubjectColorUI(color){
+  if (!subjectColorInput) return;
+  const hex = cssColorToHex(color);
+  if (!hex) return;
+  subjectColorInput.value = hex;
+  if (subjectColorText) subjectColorText.value = hex;
+  if (subjectColorHint) subjectColorHint.textContent = "Podés pegar un color manualmente si lo preferís.";
+
+  const swatches = subjectColorPalette ? Array.from(subjectColorPalette.querySelectorAll(".subject-color-swatch")) : [];
+  swatches.forEach(swatch => swatch.classList.remove("is-selected"));
+  let matched = null;
+  if (subjectColorPalette){
+    matched = subjectColorPalette.querySelector(`[data-color="${hex}"]`);
+  }
+  if (matched){
+    matched.classList.add("is-selected");
+  } else if (subjectColorCustomBtn){
+    subjectColorCustomBtn.classList.add("is-selected");
+  }
+  if (subjectColorCustomPreview){
+    subjectColorCustomPreview.style.background = hex;
+  }
+  if (subjectColorText){
+    subjectColorText.classList.remove("is-invalid");
+    subjectColorText.classList.add("is-valid");
+  }
+}
+
+function initSubjectColorPalette(){
+  if (!subjectColorPalette) return;
+  const swatches = Array.from(subjectColorPalette.querySelectorAll("[data-color]"));
+  swatches.forEach(swatch => {
+    const color = swatch.getAttribute("data-color");
+    swatch.style.setProperty("--swatch-color", color);
+    swatch.style.background = color;
+    swatch.addEventListener("click", () => updateSubjectColorUI(color));
+  });
+
+  if (subjectColorCustomBtn && subjectColorInput){
+    subjectColorCustomBtn.addEventListener("click", () => subjectColorInput.click());
+  }
+
+  if (subjectColorInput){
+    subjectColorInput.addEventListener("input", (e) => updateSubjectColorUI(e.target.value));
+  }
+
+  if (subjectColorText){
+    subjectColorText.addEventListener("input", (e) => {
+      const value = e.target.value.trim();
+      if (!value){
+        subjectColorText.classList.remove("is-valid", "is-invalid");
+        if (subjectColorHint) subjectColorHint.textContent = "Podés pegar un color manualmente si lo preferís.";
+        return;
+      }
+      if (isValidCssColor(value)){
+        const hex = cssColorToHex(value);
+        if (hex){
+          updateSubjectColorUI(hex);
+          return;
+        }
+      }
+      subjectColorText.classList.add("is-invalid");
+      subjectColorText.classList.remove("is-valid");
+      if (subjectColorHint) subjectColorHint.textContent = "Ese color no parece válido. Probá con #AABBCC o rgb(34, 123, 200).";
+    });
+  }
+}
 
 function resolvedCareerFromProfile(){
   if (plannerCareer && plannerCareer.slug) return plannerCareer;
@@ -934,8 +1029,7 @@ function updateSubjectPlanHint(){
     subjectPlanHint.textContent = "Seleccioná una carrera para ver sus materias.";
     return;
   }
-  const count = careerSubjects.length;
-  subjectPlanHint.textContent = `Materias de ${plannerCareer.name || "la carrera"} (${count}).`;
+  subjectPlanHint.textContent = "Materias disponibles para seleccionar.";
 }
 
 function renderSubjectCareerOptions(){
@@ -1109,14 +1203,14 @@ function startEditSubject(index){
   editingSubjectIndex = index;
   const s = subjects[index];
   renderSubjectNameOptions(s.name);
-  subjectColorInput.value = s.color || defaultSubjectColor();
+  updateSubjectColorUI(s.color || defaultSubjectColor());
   subjectFormTitle.textContent = "Editar materia";
 }
 
 btnSubjectReset.onclick = () => {
   editingSubjectIndex = -1;
   renderSubjectNameOptions();
-  subjectColorInput.value = defaultSubjectColor();
+  updateSubjectColorUI(defaultSubjectColor());
   subjectFormTitle.textContent = "Nueva materia";
 };
 
@@ -1174,7 +1268,7 @@ btnSubjectSave.onclick = async () => {
 
   editingSubjectIndex = -1;
   renderSubjectNameOptions();
-  subjectColorInput.value = defaultSubjectColor();
+  updateSubjectColorUI(defaultSubjectColor());
   subjectFormTitle.textContent = "Nueva materia";
 
   renderSubjectsList();
@@ -1233,7 +1327,7 @@ async function deleteSubject(index){
 
   editingSubjectIndex = -1;
   renderSubjectNameOptions();
-  subjectColorInput.value = defaultSubjectColor();
+  updateSubjectColorUI(defaultSubjectColor());
   subjectFormTitle.textContent = "Nueva materia";
 
   renderSubjectsList();
