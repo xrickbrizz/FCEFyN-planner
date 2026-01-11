@@ -3,7 +3,9 @@
 rgb(43, 105, 96)
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600&display=swap');
+/* =========================================================
+   Base
+   ========================================================= */
 :root{
   --shadow: var(--shadow-strong);
   --text-soft: rgba(var(--color-text-rgb),0.7);
@@ -13,16 +15,9 @@ rgb(43, 105, 96)
   --surface-strong: rgba(var(--color-primary-rgb),0.35);
   --surface-muted: rgba(var(--color-primary-rgb),0.18);
 }
-*{box-sizing:border-box;}
-
-body{
-  margin:0;
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:var(--page-gradient);
-  color:var(--color-text);
-  min-height:100vh;
-}
-
+/* =========================================================
+   Layout
+   ========================================================= */
     .layout{
       display:flex;
       min-height:100vh;
@@ -41,7 +36,7 @@ body{
       top:1.1rem;
       height:calc(100vh - 2.2rem);
       box-shadow:0 18px 38px var(--shadow-soft);
-      border-radius:16px;
+      border-radius:var(--radius-xl);
       backdrop-filter: blur(10px);
     }
     .sidebar-title{
@@ -49,7 +44,7 @@ body{
       margin-bottom:1rem;
       font-size:1.08rem;
       letter-spacing:.25px;
-      font-family:"Space Grotesk","Inter",system-ui;
+      font-family:var(--font-display);
     }
     .sidebar-sub{
       font-size:.8rem;
@@ -69,7 +64,7 @@ body{
       justify-content:space-between;
       align-items:center;
       padding:.6rem .65rem;
-      border-radius:12px;
+      border-radius:var(--radius-md);
       cursor:pointer;
       color:var(--color-text);
       font-size:.94rem;
@@ -90,7 +85,7 @@ body{
     }
     .nav-badge{
       background:rgba(var(--color-primary-rgb),.14);
-      border-radius:999px;
+      border-radius:var(--radius-pill);
       padding:.1rem .55rem;
       font-size:.8rem;
       color:var(--text-muted);
@@ -106,7 +101,7 @@ body{
       min-width:0;
       background:var(--panel-bg);
       border:1px solid rgba(var(--color-border-rgb),.35);
-      border-radius:16px;
+      border-radius:var(--radius-xl);
       box-shadow:0 20px 50px var(--shadow-strong);
       overflow:hidden;
     }
@@ -136,7 +131,7 @@ body{
     }
     .topbar-email{
       padding:.32rem .8rem;
-      border-radius:12px;
+      border-radius:var(--radius-md);
       border:1px solid rgba(var(--color-border-rgb),.8);
       background:var(--surface-plain);
       color:var(--text-muted);
@@ -150,11 +145,11 @@ body{
     /* BUTTONS */
     .btn{
       border:none;
-      border-radius:12px;
+      border-radius:var(--radius-md);
       padding:.48rem .95rem;
       font-size:.92rem;
       cursor:pointer;
-      transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+      transition: transform var(--transition-fast), filter var(--transition-fast), box-shadow var(--transition-fast);
       letter-spacing:.05rem;
     }
     .btn:hover{ transform: translateY(-1px); filter: brightness(1.04); }
@@ -183,7 +178,7 @@ body{
     }
     .card{
       background: var(--card-gradient);
-      border-radius:16px;
+      border-radius:var(--radius-xl);
       padding:1.05rem;
       border:1px solid rgba(var(--color-border-rgb),.26);
       box-shadow: var(--shadow);
@@ -236,7 +231,7 @@ body{
 
     .table-wrap{
       overflow-x:auto;
-      border-radius:12px;
+      border-radius:var(--radius-md);
       border:1px solid rgba(var(--color-border-rgb),.75);
       background:var(--surface-plain);
     }
@@ -275,7 +270,7 @@ body{
     .user-card{
       background:linear-gradient(180deg, rgba(255,255,255,0.95), rgba(var(--color-primary-rgb),0.4));
       border:1px solid rgba(var(--color-border-rgb),.85);
-      border-radius:14px;
+      border-radius:var(--radius-lg);
       padding:1rem;
       box-shadow:0 12px 28px var(--shadow-soft);
       min-width:0;
@@ -322,7 +317,7 @@ body{
       align-items:center;
       gap:.35rem;
       padding:.2rem .55rem;
-      border-radius:999px;
+      border-radius:var(--radius-pill);
       border:1px solid rgba(var(--color-border-rgb),.9);
       background:var(--surface-plain);
       color:var(--color-text);
@@ -345,7 +340,7 @@ body{
     .user-field{
       background:var(--surface-muted);
       border:1px solid rgba(var(--color-border-rgb),.85);
-      border-radius:12px;
+      border-radius:var(--radius-md);
       padding:.6rem .7rem;
       min-width:0;
     }
@@ -374,7 +369,7 @@ body{
     select{
       width:100%;
       padding:.45rem .55rem;
-      border-radius:10px;
+      border-radius:var(--radius-sm);
       border:1px solid rgba(var(--color-border-rgb),.85);
       background:var(--surface-plain);
       color:var(--color-text);
@@ -399,7 +394,7 @@ body{
       max-height:95vh;
       overflow-y:auto;
       background:var(--surface-plain);
-      border-radius:14px;
+      border-radius:var(--radius-lg);
       border:1px solid rgba(var(--color-border-rgb),.85);
       box-shadow:0 20px 60px var(--shadow-strong);
       padding:1rem 1.2rem 1.2rem;
@@ -424,7 +419,7 @@ body{
     input,textarea{
       width:100%;
       padding:.45rem .55rem;
-      border-radius:10px;
+      border-radius:var(--radius-sm);
       border:1px solid rgba(var(--color-border-rgb),.85);
       background:var(--surface-plain);
       color:var(--color-text);
@@ -458,7 +453,7 @@ body{
       align-items:center;
       gap:.4rem;
       padding:.22rem .55rem;
-      border-radius:999px;
+      border-radius:var(--radius-pill);
       background:var(--surface-plain);
       border:1px solid rgba(var(--color-border-rgb),.9);
       font-size:.8rem;

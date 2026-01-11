@@ -20,6 +20,8 @@
   function applyTheme(mode){
     const useDark = mode === "dark";
     body.classList.toggle("dark-mode", useDark);
+    body.classList.toggle("light-mode", !useDark);
+    body.dataset.theme = useDark ? "dark" : "light";
     localStorage.setItem(STORAGE_KEY, useDark ? "dark" : "light");
     updateToggleButtons(useDark);
   }
