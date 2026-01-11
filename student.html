@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="styles/global.css">
   <link rel="stylesheet" href="styles/study.css">
   <script src="scripts/theme-toggle.js" defer></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js" defer></script>
+  <script src="scripts/user-panel.js" defer></script>
 </head>
 
 <body>
@@ -19,6 +21,7 @@
       <button class="theme-toggle" data-theme-toggle type="button">
         <span class="ico">☀️</span><span class="label">Modo claro</span>
       </button>
+      <div id="vue-user-panel"></div>
       <div class="account-box">
         <div class="account-label">Cuenta</div>
         <div id="userEmailLabel" class="account-email">-</div>
